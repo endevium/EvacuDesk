@@ -5,13 +5,10 @@ const app = express();
 
 connectDB();
 
-// middleware
 app.use(express.json());
 
-// test only
-app.get("/", (req, res) => res.send("API is running"));
-
-// routing
+// main starting routes
 app.use("/user", require("./routes/userRoute"));
+// app.use("/request", require("./routes/requestRoute"));
 
 module.exports = app;

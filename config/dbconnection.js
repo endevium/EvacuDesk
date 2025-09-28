@@ -4,10 +4,9 @@ const mongoose = require("mongoose");
 const connectDB = async () => {
   try {
     await mongoose.connect("mongodb://localhost:27017/evacudesk_db");
-    // test
-    console.log("db connected");
+    console.log("Connection started");
   } catch (err) {
-    console.error("db connection failed", err);
+    console.error("Connection failed", err);
     process.exit(1);
   }
 };

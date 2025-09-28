@@ -1,2 +1,2 @@
--current password already in use validation if patching account password
--check current pass with salt in hash format 
+-AUTH TOKEN!
+-Access Control!

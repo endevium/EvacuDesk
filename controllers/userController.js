@@ -1,7 +1,7 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 
-// user signup
+//user signup
 exports.signupUser = async (req, res) => {
   try {
     const user = await User.create({
@@ -11,14 +11,14 @@ exports.signupUser = async (req, res) => {
     res.status(201).json({ message: "User created successfully" });
   } catch (err) {
     if (err.code === 11000 && err.keyPattern && err.keyPattern.email) {
-      return res.status(400).json({ error: "The email already exists. Use a different email." });
+      return res.status(400).json({ error: "The email already exists. Use a different email" });
     }
     if (err.name === "ValidationError") {
-      return res.status(400).json({ message: "Missing required fields" });
+      return res.status(400).json({ error: "Missing required fields" });
     }
     res.status(400).json({ error: err.message });
   }
-};
+}; 
 
 // user login
 exports.loginUser = async (req, res) => {
@@ -59,6 +59,12 @@ exports.getUserById = async (req, res) => {
 // update user
 exports.updateUser = async (req, res) => {
   try {
+    // prevent password update 
+    if (req.body.password) {
+      delete req.body.password;
+      return res.status(400).json({ error: "Invalid request" });
+    }
+    // proceed
     const user = await User.findByIdAndUpdate(
       req.params.id,
       { $set: req.body },
@@ -67,11 +73,41 @@ exports.updateUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    res.json(user);
+    res.json({ message: "User updated successfully" });
   } catch (err) {
     if (err.name === "ValidationError") {
-      return res.status(400).json({ message: "Missing required fields" });
+      return res.status(400).json({ error: "Missing required fields" });
     }
+    res.status(400).json({ error: err.message });
+  }
+};  
+
+// update password
+exports.updatePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    // validations
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "Fill all the required fields" });
+    }
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }    
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Current password is incorrect" });
+    }
+    if (currentPassword === newPassword) {
+      return res.status(400).json({ error: "The password is already in use" });
+    }
+
+    // update password
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+    res.json({ message: "Password updated successfully" });
+  } catch (err) {
     res.status(400).json({ error: err.message });
   }
 };

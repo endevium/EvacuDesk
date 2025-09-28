@@ -1,2 +1,12 @@
+(Note)
+verify schema and db entities..
+
+
 -AUTH TOKEN!
 -Access Control!
+-check validation and error handling
+-dami pa pero d konaalam
+
+
+
+

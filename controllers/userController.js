@@ -1,8 +1,8 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 
-// create user
-exports.createUser = async (req, res) => {
+// user signup
+exports.signupUser = async (req, res) => {
   try {
     const user = await User.create({
       ...req.body,
@@ -17,6 +17,21 @@ exports.createUser = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
     res.status(400).json({ error: err.message });
+  }
+};
+
+// user login
+exports.loginUser = async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const isMatch = await bcrypt.compare(req.body.password, user.password);
+    if (!isMatch) return res.status(401).json({ message: "Password or email is incorrect" });
+    
+    res.json({ message: "Login successful" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 

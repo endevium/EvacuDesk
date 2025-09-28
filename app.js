@@ -3,16 +3,15 @@ const connectDB = require("./config/dbconnection");
 
 const app = express();
 
-// Connect to database
 connectDB();
 
-// Middleware
+// middleware
 app.use(express.json());
 
-// Test route
+// test only
 app.get("/", (req, res) => res.send("API is running"));
 
-// Routes
+// routing
 app.use("/user", require("./routes/userRoute"));
 
 module.exports = app;

@@ -12,6 +12,7 @@ router.get("/", StaffController.getStaffs);
 router.get("/:id", StaffController.getStaffById);
 router.patch("/:id", StaffController.updateStaff);
 router.patch("/password/:id", StaffController.updatePassword);
+router.patch("/status/:id", StaffController.updateStaffStatus);
 router.delete("/:id", StaffController.deleteStaffById);
 
 module.exports = router;

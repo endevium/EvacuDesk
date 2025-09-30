@@ -79,9 +79,9 @@ exports.getStaffById = async (req, res) => {
 // update staff
 exports.updateStaff = async (req, res) => {
   try {
-    // prevent password update 
-    if (req.body.password) {
+    if (req.body.password || req.body.status) {
       delete req.body.password;
+      delete req.body.status;
       return res.status(400).json({ error: "Invalid request" });
     }
     // proceed
@@ -126,6 +126,23 @@ exports.updatePassword = async (req, res) => {
     staff.password = await bcrypt.hash(newPassword, salt);
     await staff.save();
     res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+// update status 
+exports.updateStaffStatus = async (req, res) => {
+  try {
+    const staff = await Staff.findByIdAndUpdate(
+      req.params.id,
+      { status: req.body.status },
+      { new: true, runValidators: true }
+    );
+    if (!staff) {
+      return res.status(404).json({ error: "Staff not found" });
+    }
+    res.json({ message: "Staff updated successfully" });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

@@ -63,7 +63,9 @@ exports.getEvacuees = async (req, res) => {
 // get evacuee by id
 exports.getEvacueeById = async (req, res) => {
   try {
-    const evacuee = await Evacuee.findById(req.params.id);
+    const evacuee = await Evacuee.findById(req.params.id)
+      .populate("assigned_to"); 
+
     if (!evacuee) return res.status(404).json({ error: "Evacuee not found" });
     res.json(evacuee);
   } catch (err) {
@@ -122,6 +124,24 @@ exports.updatePassword = async (req, res) => {
     await evacuee.save();
 
     res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+};
+
+// update evacuee assignment to evacuation center
+exports.updateEvacueeAssignment = async (req, res) => {
+  try {
+    const { assigned_to } = req.body;
+    const evacuee = await Evacuee.findByIdAndUpdate(
+      req.params.id,
+      { assigned_to },
+      { new: true, runValidators: true }
+    );
+    if (!evacuee) {
+      return res.status(404).json({ error: "Evacuee not found" });
+    }
+    res.json({ message: "Evacuee assigned successfully" });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

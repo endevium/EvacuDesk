@@ -9,6 +9,7 @@ router.get("/", EvacueeController.getEvacuees);
 router.get("/:id", EvacueeController.getEvacueeById);
 router.patch("/:id", EvacueeController.updateEvacuee);
 router.patch("/password/:id", EvacueeController.updatePassword);
+router.patch("/assign-center/:id", EvacueeController.updateEvacueeAssignment);
 router.delete("/:id", EvacueeController.deleteEvacueeById);
 
 module.exports = router;

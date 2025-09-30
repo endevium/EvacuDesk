@@ -14,7 +14,8 @@ const evacueeSchema = new mongoose.Schema({
     sex: { type: String, enum: ['male', 'female', 'other'], required: true },
     medical_needs: { type: String, required: true },
     id_picture: { type: String, required: true },
-    role: { type: String, enum: ['evacuee', 'staff', 'admin'], default: 'evacuee' }
+    role: { type: String, enum: ['evacuee', 'staff', 'admin'], default: 'evacuee' },
+    assigned_to: { type: mongoose.Schema.Types.ObjectId, ref: "EvacuationCenter", default: null }
 }, { timestamps: true });
 
 module.exports = mongoose.model("Evacuee", evacueeSchema);

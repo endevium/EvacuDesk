@@ -1,0 +1,216 @@
+.contact {
+    font-family: Inter;
+    height: 195vh;
+}
+
+.contact-body {
+    display: flex;
+    flex-direction: column;
+    background-image: url('../assets/contact-image.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    margin-top: 30px;
+    height: 50vh;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+}
+
+.contact-body h2 {
+    font-size: 32px;
+}
+
+.contact-body p {
+    font-size: 18px;
+    color: white;
+}
+
+.contact-cards {
+    display: flex;
+    flex-direction: column;
+    margin-top: -7.5vh;
+}
+
+.contact-cards .contact-card-root {
+    display: flex;
+    flex-direction: row;
+    align-self: center;
+    gap: 5vw;
+}
+
+.contact-cards .contact-card-root .contact-card {
+    display: flex;
+    flex-direction: column;
+    background-color: #F8F7FB;
+    border: 0.5px #224539 solid;
+    width: 250px;
+    height: 250px;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+}
+
+.contact-card:hover {
+    transform: scale(1.05);
+}
+
+.contact-cards .contact-card-root .contact-card-text {
+    text-align: center;
+}
+
+.contact-cards .contact-card-root .contact-card-image {
+    align-self: center;
+    padding: 10px 10px 10px 10px;
+    margin-top: 10px;
+}
+
+.contact-cards .contact-card-root .contact-card-image img {
+    height: 50px;
+    width: 50px;
+}
+
+.contact-form-body {
+    display: flex;
+    flex-direction: column;
+    height: 85vh;
+    padding-top: 75px;
+    width: 100%;
+}
+
+.contact-form-body .contact-form {
+    display: flex;
+    flex-direction: column;
+    width: 450px;
+    justify-content: center;
+    align-self: center;
+    gap: 10px;
+    border: 2px #224539 solid;
+    border-radius: 15px;
+    padding: 30px 60px 50px 60px;
+}
+
+.contact-form-body .contact-form h2 {
+    color:#224539;
+    font-size: 24px;
+}
+
+.contact-form input {
+    font-family: Inter;
+    height: 40px;
+    font-size: 16px;
+    transition: transform 0.3s ease;
+}
+
+.contact-form input:hover {
+    transform: scale(1.05);
+}
+
+.contact-form textarea {
+    font-family: Inter;
+    height: 100px;
+    font-size: 16px;
+    max-width: 99%;
+    max-height: 150px;
+    transition: transform 0.3s ease;
+}
+
+.contact-form textarea:hover {
+    transform: scale(1.05)
+}
+
+.contact-form button {
+    margin-top: 10px;
+    background-color: #224539;
+    border: 0;
+    border-radius: 15px;
+    height: 50px;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.contact-form button:hover {
+    transform: scale(1.05)
+}
+
+
+.response-body {
+    border: 0.2px rgb(104, 104, 104) solid;
+    width: 400px;
+    display: flex;
+    flex-direction: row;
+    padding: 10px;
+    position: fixed;
+    background-color: #F8F7FB;
+    border-radius: 10px;
+    right: 20px;
+    top: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    animation: slideIn 0.4s ease forwards;
+}
+  
+.response-body.exit {
+    animation: slideOut 0.4s ease forwards;
+}
+  
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+.response-body img {
+    width: 45px;
+    height: 45px;
+    padding-left: 10px;
+    align-self: center;
+}
+
+.response-body p {
+    font-size: 18px;
+    color:#224539;
+    padding-left: 15px;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+  
+.spinner {
+    width: 60px;
+    height: 60px;
+    border: 6px solid #ddd;
+    border-top: 6px solid #224539;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+  
+@keyframes spin {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

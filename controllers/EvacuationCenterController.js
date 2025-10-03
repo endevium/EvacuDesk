@@ -1,8 +1,8 @@
 const EvacuationCenter = require("../models/EvacuationCenterModel");
 const fs = require("fs");
 const path = require("path");
-
-// create a new evacuation center
+  
+// create evacuation center
 exports.createEvacuationCenter = async (req, res) => {
   try {
     // validations
@@ -23,7 +23,6 @@ exports.createEvacuationCenter = async (req, res) => {
       ...req.body,
       image: uploadPath.replace(/\\/g, "/") 
     });
-
     res.status(201).json({ message: "Evacuation center created successfully" });
   } catch (err) {
     res.status(400).json({ error: err.message });

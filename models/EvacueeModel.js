@@ -12,7 +12,9 @@ const evacueeSchema = new mongoose.Schema({
     country: { type: String, default: "Philippines" },
     phone_number: { type: String },
     sex: { type: String, enum: ['male', 'female', 'other'], required: true },
-    medical_needs: { type: String, required: true },
+    // medical_needs: { type: String },
+    // may medical needs naba agad sila pagka create ng account?
+    // evacuee credentials lng ata to d na need medical needs
     id_picture: { type: String, required: true },
     role: { type: String, enum: ['evacuee', 'staff', 'admin'], default: 'evacuee' },
     assigned_to: { type: mongoose.Schema.Types.ObjectId, ref: "EvacuationCenter", default: null }

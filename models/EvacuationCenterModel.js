@@ -3,7 +3,12 @@ const mongoose = require("mongoose");
 const evacuationCenterSchema = new mongoose.Schema({
   name: { type: String, required: true },
   image: { type: String }, 
-  address: { type: String, required: true },
+  country: { type: String, default: "Philippines" },
+  region: { type: String, required: true },
+  province: { type: String, required: true },
+  city: { type: String, required: true },
+  barangay: { type: String, required: true },
+  street: { type: String },
   capacity: { type: Number, required: true },
   taken_slots: { type: Number, default: 0 },
   staff_name: { type: String, required: true },

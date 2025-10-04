@@ -12,8 +12,8 @@ exports.createEvacuationCenter = async (req, res) => {
     if (!req.body.name || !req.body.address || !req.body.capacity || !req.body.staff_name || !req.body.staff_contact_number) {
       return res.status(400).json({ error: "Missing required fields" });
     }
-    const existingCenter = await EvacuationCenter.findOne({ name: req.body.name });
-    if (existingCenter) {
+    const ExistingCenterName = await EvacuationCenter.findOne({ name: req.body.name });
+    if (ExistingCenterName) {
       return res.status(400).json({ error: "There is already an evacuation center with that name" });
     }
     // proceed

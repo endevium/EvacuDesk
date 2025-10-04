@@ -9,7 +9,7 @@ const familyMemberSchema = new Schema({
   sex: { type: String, enum: ["male", "female", "other"], required: true }
 });
 
-// evacuee registration
+// evacuee registration with family members 
 const evacueeRegistrationSchema = new Schema(
   {
     evacuee_id: { type: Schema.Types.ObjectId, ref: "Evacuee", required: true },

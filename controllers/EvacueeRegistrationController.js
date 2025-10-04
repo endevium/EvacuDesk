@@ -25,7 +25,7 @@ exports.getRegistrations = async (req, res) => {
   try {
     const registrations = await EvacueeRegistration.find()
       .populate("evacuee_id", "first_name last_name")
-      .populate("evacuation_center_id", "name address");
+      .populate("evacuation_center_id", "name");
     res.status(200).json(registrations);
   } catch (err) {
     res.status(500).json({ error: err.message });

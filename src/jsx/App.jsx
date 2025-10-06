@@ -22,6 +22,9 @@ import Footer from './Footer'
 import About from './About'
 import News from './News'
 import Contact from './Contact'
+import AdminLogin from './AdminLogin'
+import Login from './Login'
+import Register from './Register'
 
 function App() {
   return (
@@ -32,6 +35,9 @@ function App() {
           <Route path='/about' element={<About />} />
           <Route path='/news' element={<News />}/>
           <Route path='/contact' element={<Contact />}/>
+          <Route path='/login' element={<Login />}/>
+          <Route path='/adl' element={<AdminLogin />}/>
+          <Route path='/register' element={<Register />}/>
         </Routes>
       </Router>
     </>

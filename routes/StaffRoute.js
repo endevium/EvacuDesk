@@ -7,6 +7,7 @@ router.post("/signup", upload.fields([
     { name: "id_picture", maxCount: 1 },
     { name: "authorization_letter", maxCount: 1 }
 ]), StaffController.signupStaff);
+
 router.post("/login", StaffController.loginStaff);
 router.get("/", StaffController.getStaffs);
 router.get("/:id", StaffController.getStaffById);

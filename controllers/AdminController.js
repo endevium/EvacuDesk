@@ -46,25 +46,29 @@ exports.loginAdmin = async (req, res) => {
 exports.updatePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
-    // validations
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({ error: "Fill all the required fields" });
+      return res.status(400).json({ error: "Missing required fields" });
     }
+
     const admin = await Admin.findById(req.params.id);
     if (!admin) {
       return res.status(404).json({ error: "Admin not found" });
     }
+
     const isMatch = await bcrypt.compare(currentPassword, admin.password);
     if (!isMatch) {
       return res.status(400).json({ error: "Current password is incorrect" });
     }
+
     if (currentPassword === newPassword) {
       return res.status(400).json({ error: "You are already using this password. Use a different password" });
     }
-    // update password
+
     const salt = await bcrypt.genSalt(10);
     admin.password = await bcrypt.hash(newPassword, salt);
+
     await admin.save();
+
     res.json({ message: "Password updated successfully" });
   } catch (err) {
     res.status(400).json({ error: err.message });

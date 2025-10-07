@@ -6,20 +6,22 @@ const path = require("path");
 // evacuee signup
 exports.signupEvacuee = async (req, res) => {
   try {
-    // validations
+
     if (!req.file) {
       return res.status(400).json({ error: "A valid ID picture is required" });
     }
+
     if (!req.body.first_name || !req.body.last_name || !req.body.email_address || !req.body.password || !req.body.street_number ||
-      !req.body.barangay || !req.body.city || !req.body.province || !req.body.sex || !req.body.medical_needs
+      !req.body.barangay || !req.body.city || !req.body.province || !req.body.sex || !req.body.disabilities || !req.body.birthdate
     ) {
       return res.status(400).json({ error: "Missing required fields" });
     }
+
     const existingEvacuee = await Evacuee.findOne({ email_address: req.body.email_address });
     if (existingEvacuee) {
       return res.status(400).json({ error: "The email already exists. Use a different email" });
     }
-    // proceed
+
     const uploadPath = path.join("uploads", Date.now() + "-" + req.file.originalname);
     fs.writeFileSync(uploadPath, req.file.buffer);
     
@@ -53,7 +55,8 @@ exports.loginEvacuee = async (req, res) => {
 // get all evacuees
 exports.getEvacuees = async (req, res) => {
   try {
-    const evacuees = await Evacuee.find();
+    const evacuees = await Evacuee.find().select("-password");
+      
     res.json(evacuees);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -64,9 +67,12 @@ exports.getEvacuees = async (req, res) => {
 exports.getEvacueeById = async (req, res) => {
   try {
     const evacuee = await Evacuee.findById(req.params.id)
-      .populate("assigned_to"); 
+      .select("-password")  
+      .populate("assigned_to", "name address"); 
 
     if (!evacuee) return res.status(404).json({ error: "Evacuee not found" });
+      delete evacuee.password;
+
     res.json(evacuee);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -76,8 +82,9 @@ exports.getEvacueeById = async (req, res) => {
 // update evacuee profile
 exports.updateEvacuee = async (req, res) => {
   try {
-    if (req.body.password) {
+    if (req.body.password || req.body.role) {
       delete req.body.password;
+      delete req.body.role;
       return res.status(400).json({ error: "Invalid request" });
     }
 
@@ -86,9 +93,11 @@ exports.updateEvacuee = async (req, res) => {
       { $set: req.body },
       { new: true, runValidators: true }
     );
+    
     if (!evacuee) {
       return res.status(404).json({ error: "Evacuee not found" });
     }
+
     res.json({ message: "Evacuee updated successfully" });
   } catch (err) {
     if (err.name === "ValidationError") {
@@ -101,24 +110,26 @@ exports.updateEvacuee = async (req, res) => {
 // update password
 exports.updatePassword = async (req, res) => {
   try {
-    // validations
+
     const { currentPassword, newPassword } = req.body;
     if (!currentPassword || !newPassword) {
       return res.status(400).json({ error: "Fill all the required fields" });
     }
+
     const evacuee = await Evacuee.findById(req.params.id);
     if (!evacuee) {
       return res.status(404).json({ error: "Evacuee not found" });
     }
+
     const isMatch = await bcrypt.compare(currentPassword, evacuee.password);
     if (!isMatch) {
       return res.status(400).json({ error: "Current password is incorrect" });
     }
+
     if (currentPassword === newPassword) {
       return res.status(400).json({ error: "You are already using this password. Use a different password" });
     }
 
-    // proceed
     const salt = await bcrypt.genSalt(10);
     evacuee.password = await bcrypt.hash(newPassword, salt);
     await evacuee.save();
@@ -129,29 +140,12 @@ exports.updatePassword = async (req, res) => {
   }
 };
 
-// update evacuee assignment to evacuation center
-exports.updateEvacueeAssignment = async (req, res) => {
-  try {
-    const { assigned_to } = req.body;
-    const evacuee = await Evacuee.findByIdAndUpdate(
-      req.params.id,
-      { assigned_to },
-      { new: true, runValidators: true }
-    );
-    if (!evacuee) {
-      return res.status(404).json({ error: "Evacuee not found" });
-    }
-    res.json({ message: "Evacuee assigned successfully" });
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-};
-
 // delete evacuee
 exports.deleteEvacueeById = async (req, res) => {
   try {
     const evacuee = await Evacuee.findByIdAndDelete(req.params.id);
     if (!evacuee) return res.status(404).json({ error: "Evacuee not found" });
+
     res.json({ message: "Evacuee deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });

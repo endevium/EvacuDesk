@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const evacueeSchema = new mongoose.Schema({
+const EvacueeSchema = new mongoose.Schema({
     first_name: { type: String, required: true },
     last_name: { type: String, required: true },
     email_address: { type: String, required: true, unique: true },
@@ -12,11 +12,11 @@ const evacueeSchema = new mongoose.Schema({
     country: { type: String, default: "Philippines" },
     phone_number: { type: String },
     sex: { type: String, enum: ['male', 'female', 'other'], required: true },
-    // medical_needs: { type: String },
-    // may medical needs naba agad sila pagka create ng account?
+    birthdate: { type: Date, required: true },
+    disabilities: { type: String },
     id_picture: { type: String, required: true },
     role: { type: String, enum: ['evacuee', 'staff', 'admin'], default: 'evacuee' },
     assigned_to: { type: mongoose.Schema.Types.ObjectId, ref: "EvacuationCenter", default: null }
 }, { timestamps: true });
 
-module.exports = mongoose.model("Evacuee", evacueeSchema);
+module.exports = mongoose.model("Evacuee", EvacueeSchema);

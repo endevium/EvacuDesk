@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 
-const evacuationCenterSchema = new mongoose.Schema({
+const EvacuationCenterSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  image: { type: String }, 
+  image: { type: String, required: true }, 
   country: { type: String, default: "Philippines" },
   region: { type: String, required: true },
   province: { type: String, required: true },
@@ -16,4 +16,4 @@ const evacuationCenterSchema = new mongoose.Schema({
   status: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" } 
 }, { timestamps: true }); 
 
-module.exports = mongoose.model("EvacuationCenter", evacuationCenterSchema, "evacuation_centers");
+module.exports = mongoose.model("EvacuationCenter", EvacuationCenterSchema, "evacuation_centers");

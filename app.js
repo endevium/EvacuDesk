@@ -12,8 +12,8 @@ app.use("/evacuee", require("./routes/EvacueeRoute"));
 app.use("/admin", require("./routes/AdminRoute")); 
 app.use("/staff", require("./routes/StaffRoute"));
 app.use("/evacuation-center", require("./routes/EvacuationCenterRoute"));
-app.use("/evacuation-center-occupants", require("./routes/EvacuationCenterOccupantsRoute"));
-app.use("/evacuee-registration", require("./routes/EvacueeRegistrationRoute"));
+app.use("/evacuation-center-occupant", require("./routes/EvacuationCenterOccupantsRoute"));
+app.use("/evacuation-registration", require("./routes/EvacuationRegistrationRoute"));
 app.use("/evacuee-request", require("./routes/EvacueeRequestRoute"));
 
 module.exports = app;

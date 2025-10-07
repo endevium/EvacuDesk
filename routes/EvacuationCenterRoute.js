@@ -5,6 +5,7 @@ const upload = require("../middlewares/uploads");
 
 router.post("/", upload.single("image"), EvacuationCenterController.createEvacuationCenter);
 router.get("/", EvacuationCenterController.getEvacuationCenters);
+router.get("/pending", EvacuationCenterController.getPendingEvacuationCenters);
 router.get("/:id", EvacuationCenterController.getEvacuationCenterById);
 router.patch("/:id", upload.single("image"), EvacuationCenterController.updateEvacuationCenter);
 router.patch("/status/:id", EvacuationCenterController.updateEvacuationCenterStatus);

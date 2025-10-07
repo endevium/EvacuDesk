@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const staffSchema = new mongoose.Schema({
+const StaffSchema = new mongoose.Schema({
     first_name: { type: String, required: true },
     last_name: { type: String, required: true },
     email_address: { type: String, required: true, unique: true },
@@ -15,4 +15,4 @@ const staffSchema = new mongoose.Schema({
     role: { type: String, enum: ['evacuee', 'staff'], default: 'staff' }
 }, { timestamps: true });
 
-module.exports = mongoose.model("Staff", staffSchema);
+module.exports = mongoose.model("Staff", StaffSchema);

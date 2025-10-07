@@ -5,9 +5,11 @@ const mongoose = require('mongoose');
 exports.createRequest = async (req, res) => {
   try {
     const { evacuee_id, evacuation_center_id, request_type, description, quantity } = req.body;
+
     if (!evacuee_id || !evacuation_center_id || !request_type || !quantity) {
-      return res.status(400).json({ error: 'Fill all the required fields' });
+      return res.status(400).json({ error: 'Missing required fields' });
     }
+
     if (
       !mongoose.Types.ObjectId.isValid(evacuee_id) ||
       !mongoose.Types.ObjectId.isValid(evacuation_center_id)
@@ -15,9 +17,24 @@ exports.createRequest = async (req, res) => {
       return res.status(400).json({ error: 'Invalid Evacuee ID or Evacuation Center ID' });
     }
 
-    const request = await EvacueeRequest.create({
-      evacuee_id, evacuation_center_id,request_type, description, quantity,
+    const existingRequest = await EvacueeRequest.findOne({
+          evacuee_id,
+          evacuation_center_id,
+          status: 'pending'
+        });
+
+    if (existingRequest) {
+      return res.status(400).json({ error: 'You still have a pending request' });
+    }
+
+    await EvacueeRequest.create({
+      evacuee_id, 
+      evacuation_center_id,
+      request_type, 
+      description, 
+      quantity,
     });
+
     res.status(201).json({ message: 'Request created successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -30,6 +47,7 @@ exports.getAllRequests = async (req, res) => {
     const requests = await EvacueeRequest.find()
       .populate('evacuee_id', 'first_name last_name')
       .populate('evacuation_center_id', 'name address');
+      
     res.json(requests);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -43,6 +61,7 @@ exports.getRequestsByCenterId = async (req, res) => {
     const requests = await EvacueeRequest.find({ evacuation_center_id: centerId })
       .populate('evacuee_id', 'first_name last_name')
       .populate('evacuation_center_id', 'name address');
+
     res.json(requests);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -56,6 +75,7 @@ exports.getRequestById = async (req, res) => {
       .populate('evacuee_id', 'first_name last_name')
       .populate('evacuation_center_id', 'name');
     if (!request) return res.status(404).json({ error: 'Request not found' });
+
     res.json(request);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -74,7 +94,8 @@ exports.updateRequestStatus = async (req, res) => {
       { status },
       { new: true, runValidators: true }
     );
-    if (!request) return res.status(404).json({ error: 'Request not found' });
+    if (!request) return res.status(404).json({ error: 'Request not found' }); 
+
     res.json({ message: 'Request status updated successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -86,6 +107,7 @@ exports.deleteRequest = async (req, res) => {
   try {
     const request = await EvacueeRequest.findByIdAndDelete(req.params.id);
     if (!request) return res.status(404).json({ error: 'Request not found' });
+
     res.json({ message: 'Request deleted successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });

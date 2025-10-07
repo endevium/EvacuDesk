@@ -2,37 +2,49 @@ const EvacuationCenter = require("../models/EvacuationCenterModel");
 const fs = require("fs");
 const path = require("path");
   
-// create evacuation center
+// register evacuation center
 exports.createEvacuationCenter = async (req, res) => {
   try {
-    // validations
     if (!req.file) {
-      return res.status(400).json({ error: "A valid image is required" });
+      return res.status(400).json({ error: "An image is required" });
     }
-    if (!req.body.name || !req.body.address || !req.body.capacity || !req.body.staff_name || !req.body.staff_contact_number) {
+
+    if (!req.body.name || !req.body.region || !req.body.province || !req.body.city || !req.body.barangay || !req.body.street || !req.body.capacity || !req.body.staff_name || !req.body.staff_contact_number) {
       return res.status(400).json({ error: "Missing required fields" });
     }
+
     const ExistingCenterName = await EvacuationCenter.findOne({ name: req.body.name });
     if (ExistingCenterName) {
       return res.status(400).json({ error: "There is already an evacuation center with that name" });
     }
-    // proceed
+
     const uploadPath = path.join("uploads", Date.now() + "-" + req.file.originalname);
     fs.writeFileSync(uploadPath, req.file.buffer);
     const center = await EvacuationCenter.create({
       ...req.body,
       image: uploadPath.replace(/\\/g, "/") 
     });
-    res.status(201).json({ message: "Evacuation center created successfully" });
+
+    res.status(201).json({ message: "Evacuation center registered successfully" });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 };
 
-// get all evacuation centers
+// get all authorized evacuation centers
 exports.getEvacuationCenters = async (req, res) => {
   try {
-    const centers = await EvacuationCenter.find();
+    const centers = await EvacuationCenter.find({ status: "approved" });
+    res.json(centers);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// get all pending evacuation centers
+exports.getPendingEvacuationCenters = async (req, res) => {
+  try {
+    const centers = await EvacuationCenter.find({ status: "pending" });
     res.json(centers);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -53,12 +65,10 @@ exports.getEvacuationCenterById = async (req, res) => {
 // update evacuation center
 exports.updateEvacuationCenter = async (req, res) => {
   try {
-    // validation
     if (req.body.status) {
       delete req.body.status;
       return res.status(400).json({ error: "Invalid request" });
     }
-    // proceed
     if (req.file) {
       const imagePath = path.join("uploads", Date.now() + "-" + req.file.originalname);
       fs.writeFileSync(imagePath, req.file.buffer);
@@ -79,12 +89,16 @@ exports.updateEvacuationCenter = async (req, res) => {
 // update evacuation center status 
 exports.updateEvacuationCenterStatus = async (req, res) => {
   try {
-    const center = await EvacuationCenter.findByIdAndUpdate(
-      req.params.id,
-      { $set: { status: req.body.status } },
-      { new: true, runValidators: true }
-    );
+    const center = await EvacuationCenter.findById(req.params.id);
     if (!center) return res.status(404).json({ error: "Evacuation center not found" });
+
+    if (center.status === "rejected") {
+      return res.status(400).json({ error: "Cannot update a rejected evacuation center" });
+    }
+
+    center.status = req.body.status;
+    await center.save();
+
     res.json({ message: "Evacuation center status updated successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -96,6 +110,7 @@ exports.deleteEvacuationCenterById = async (req, res) => {
   try {
     const center = await EvacuationCenter.findByIdAndDelete(req.params.id);
     if (!center) return res.status(404).json({ error: "Evacuation center not found" });
+
     res.json({ message: "Evacuation center deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -2,14 +2,10 @@ TODO
 
 -kung ano lang kelangan gamitin sa response yun lang iresponseeee (iverify ano kelangan sa frontend)
 -tokennnnnn
--error handling icheck, hanapin mga bugs
--pag na approve yung evac center registration idagdag na sa collection ng evac center
-- kung sino nag create ng evacuation center siya malalagay dun sa staff_name attribute ng evacuation_center
--pag naapprove yung evacuee to evac center registration i-add na sa evac center occupants collection
--pag na add na sa evac center occupants collection madadagdag na sa taken_slot ng evac center automatic
--no need to put family mem numbers, auto count base sa the objects ng fam members array
--if evacuee request/evacuee registratio/ and staff registration has been rejected, you cannot update status anymore?
+-if the evacuee has already left the evacuation center, decrease the taken slot base on the evacuee and his/ her fam mem quantity
 -EVACUEE OCCUPANTS!
+-on delete cascade for evacuee
+-date validation
 
 
 
@@ -19,7 +15,6 @@ TODO
 
 LIST OF BUGS
 
--evacuee registration duplication/unli register (no limit)
 -evacuee request duplication/unli request (no limit)
 -occupants can have multiple evac center
 -

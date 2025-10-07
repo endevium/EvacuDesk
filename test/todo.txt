@@ -2,11 +2,8 @@ TODO
 
 -kung ano lang kelangan gamitin sa response yun lang iresponseeee (iverify ano kelangan sa frontend)
 -tokennnnnn
--if the evacuee has already left the evacuation center, decrease the taken slot base on the evacuee and his/ her fam mem quantity
--EVACUEE OCCUPANTS!
 -on delete cascade for evacuee
 -date validation
-
 
 
 

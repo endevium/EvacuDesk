@@ -12,7 +12,7 @@ const StaffSchema = new mongoose.Schema({
     id_picture: { type: String, required: true }, 
     authorization_letter: { type: String, required: true }, 
     status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
-    role: { type: String, enum: ['evacuee', 'staff'], default: 'staff' }
+    role: { type: String, enum: ['staff'], default: 'staff' }
 }, { timestamps: true });
 
 module.exports = mongoose.model("Staff", StaffSchema);

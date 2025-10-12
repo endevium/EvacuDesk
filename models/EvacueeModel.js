@@ -15,8 +15,7 @@ const EvacueeSchema = new mongoose.Schema({
     birthdate: { type: Date, required: true },
     disabilities: { type: String },
     id_picture: { type: String, required: true },
-    role: { type: String, enum: ['evacuee', 'staff', 'admin'], default: 'evacuee' },
-    assigned_to: { type: mongoose.Schema.Types.ObjectId, ref: "EvacuationCenter", default: null }
+    role: { type: String, enum: ['evacuee'], default: 'evacuee' },
 }, { timestamps: true });
 
 module.exports = mongoose.model("Evacuee", EvacueeSchema);

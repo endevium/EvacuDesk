@@ -146,6 +146,10 @@ exports.deleteEvacueeById = async (req, res) => {
     const evacuee = await Evacuee.findByIdAndDelete(req.params.id);
     if (!evacuee) return res.status(404).json({ error: "Evacuee not found" });
 
+    if (evacuee.id_picture && fs.existsSync(evacuee.id_picture)) {
+      fs.unlinkSync(evacuee.id_picture);
+    }
+
     res.json({ message: "Evacuee deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });

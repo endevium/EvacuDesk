@@ -111,6 +111,10 @@ exports.deleteEvacuationCenterById = async (req, res) => {
     const center = await EvacuationCenter.findByIdAndDelete(req.params.id);
     if (!center) return res.status(404).json({ error: "Evacuation center not found" });
 
+    if (center.image && fs.existsSync(center.image)) {
+      fs.unlinkSync(center.image);
+    }
+
     res.json({ message: "Evacuation center deleted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });

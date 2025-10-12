@@ -28,7 +28,7 @@ exports.signupStaff = async (req, res) => {
     const authLetterPath = path.join("uploads", Date.now() + "-" + req.files.authorization_letter[0].originalname);
     fs.writeFileSync(authLetterPath, req.files.authorization_letter[0].buffer);
 
-    const staff = await Staff.create({
+    await Staff.create({
       ...req.body,
       password: await bcrypt.hash(req.body.password, 10),
       id_picture: idPicturePath.replace(/\\/g, "/"),
@@ -165,6 +165,10 @@ exports.deleteStaffById = async (req, res) => {
   try {
     const staff = await Staff.findByIdAndDelete(req.params.id);
     if (!staff) return res.status(404).json({ error: "Staff not found" });
+
+    if (staff.image && fs.existsSync(staff.image)) {
+      fs.unlinkSync(staff.image);
+    }
 
     res.json({ message: "Staff deleted successfully" });
   } catch (err) {

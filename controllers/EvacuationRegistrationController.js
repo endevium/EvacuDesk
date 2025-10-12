@@ -67,6 +67,54 @@ exports.getRegistrations = async (req, res) => {
   }
 };
 
+// get pending registrations of evacuee id
+exports.getPendingRegistrationsByEvacueeId = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid Evacuee ID" });
+    }
+
+    const registrations = await EvacuationRegistration.find({
+      evacuee_id: id,
+      status: "pending",
+    });
+
+    if (registrations.length === 0) {
+      return res.status(404).json({ message: "No pending registrations found" });
+    }
+
+    res.status(200).json(registrations);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// get approved registrations of evacuee id
+exports.getApprovedRegistrationsByEvacueeId = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid Evacuee ID" });
+    }
+
+    const registrations = await EvacuationRegistration.find({
+      evacuee_id: id,
+      status: "approved",
+    });
+
+    if (registrations.length === 0) {
+      return res.status(404).json({ message: "No approved registrations found" });
+    }
+
+    res.status(200).json(registrations);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 // get registrations by evacuation center id
 exports.getRegistrationByCenterId = async (req, res) => {
   try {

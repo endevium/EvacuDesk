@@ -68,6 +68,21 @@ exports.getRequestsByCenterId = async (req, res) => {
   }
 };
 
+// get requests by evacuee ID and center ID
+exports.getRequestsByEvacueeAndCenter = async (req, res) => {
+  try {
+    const { evacueeId, centerId } = req.params;
+    const requests = await EvacueeRequest.find({
+      evacuee_id: evacueeId,
+      evacuation_center_id: centerId
+    })
+
+    res.json(requests);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 // get request by ID
 exports.getRequestById = async (req, res) => {
   try {
@@ -82,7 +97,7 @@ exports.getRequestById = async (req, res) => {
   }
 };
 
-// update request status
+// update request status by ID
 exports.updateRequestStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -102,7 +117,7 @@ exports.updateRequestStatus = async (req, res) => {
   }
 };
 
-// delete request
+// delete request by ID
 exports.deleteRequest = async (req, res) => {
   try {
     const request = await EvacueeRequest.findByIdAndDelete(req.params.id);

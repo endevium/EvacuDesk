@@ -164,7 +164,6 @@ exports.updateRegistrationStatus = async (req, res) => {
     }
 
     const registration = await EvacuationRegistration.findById(id);
-
     if (!registration) {
       return res.status(404).json({ error: "Registration not found" });
     }
@@ -172,6 +171,17 @@ exports.updateRegistrationStatus = async (req, res) => {
     if (registration.status === "approved" || registration.status === "rejected") {
       return res.status(400).json({
         error: `Cannot update registration. It has already been ${registration.status}.`,
+      });
+    }
+
+    const occupant = await EvacuationCenterOccupant.findOne({
+      evacuee_id: registration.evacuee_id,
+      evacuation_center_id: registration.evacuation_center_id,
+    });
+
+    if (occupant && occupant.status === "active") {
+      return res.status(400).json({
+        error: "Evacuee is already an active occupant in this evacuation center",
       });
     }
 
@@ -183,11 +193,7 @@ exports.updateRegistrationStatus = async (req, res) => {
         evacuee_id: registration.evacuee_id,
         evacuation_center_id: registration.evacuation_center_id
       });
-
-      if (occupant && occupant.status === "active") {
-        return res.status(400).json({ error: "Evacuee is already an active occupant in this evacuation center" });
-      }
-
+      
       if (!occupant) {
         await EvacuationCenterOccupant.create({
           evacuee_id: registration.evacuee_id,
@@ -198,7 +204,7 @@ exports.updateRegistrationStatus = async (req, res) => {
           status: "active",
         });
 
-        const familyCount = (registration.family_members?.length || 0) + 1
+        const familyCount = (registration.family_members?.length || 0) 
 
         await EvacuationCenter.findByIdAndUpdate(
           registration.evacuation_center_id,

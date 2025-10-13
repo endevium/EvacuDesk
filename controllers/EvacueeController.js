@@ -67,8 +67,7 @@ exports.getEvacuees = async (req, res) => {
 exports.getEvacueeById = async (req, res) => {
   try {
     const evacuee = await Evacuee.findById(req.params.id)
-      .select("-password")  
-      .populate("assigned_to", "name address"); 
+      .select("-password");
 
     if (!evacuee) return res.status(404).json({ error: "Evacuee not found" });
       delete evacuee.password;

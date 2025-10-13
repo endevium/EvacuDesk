@@ -1,4 +1,6 @@
 const EvacueeRequest = require('../models/EvacueeRequestModel');
+const EvacuationCenter = require('../models/EvacuationCenterModel');
+const Evacuee = require('../models/EvacueeModel');
 const mongoose = require('mongoose');
 
 // create evacuee request
@@ -47,6 +49,10 @@ exports.getAllRequests = async (req, res) => {
     const requests = await EvacueeRequest.find()
       .populate('evacuee_id', 'first_name last_name')
       .populate('evacuation_center_id', 'name address');
+
+    if (requests.length === 0) {
+      return res.status(404).json({ message: "No evacuee requests found" });
+    }
       
     res.json(requests);
   } catch (err) {
@@ -58,6 +64,12 @@ exports.getAllRequests = async (req, res) => {
 exports.getRequestsByCenterId = async (req, res) => {
   try {
     const { centerId } = req.params;
+
+    const centerExists = await EvacuationCenter.findById(centerId);
+    if (!centerExists) {
+      return res.status(404).json({ error: "Evacuation center not found" });
+    }
+
     const requests = await EvacueeRequest.find({ evacuation_center_id: centerId })
       .populate('evacuee_id', 'first_name last_name')
       .populate('evacuation_center_id', 'name address');
@@ -72,10 +84,25 @@ exports.getRequestsByCenterId = async (req, res) => {
 exports.getRequestsByEvacueeAndCenter = async (req, res) => {
   try {
     const { evacueeId, centerId } = req.params;
+
+    const evacueeExists = await Evacuee.findById(evacueeId);
+    if (!evacueeExists) {
+      return res.status(404).json({ error: 'Evacuee not found' });
+    }
+
+    const centerExists = await EvacuationCenter.findById(centerId);
+    if (!centerExists) {
+      return res.status(404).json({ error: 'Evacuation center not found' });
+    }
+
     const requests = await EvacueeRequest.find({
       evacuee_id: evacueeId,
       evacuation_center_id: centerId
-    })
+    });
+
+    if (requests.length === 0) {
+      return res.status(404).json({ message: 'You do not have any requests in this center' });
+    }
 
     res.json(requests);
   } catch (err) {

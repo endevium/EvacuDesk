@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const StaffController = require("../controllers/StaffController");
 const upload = require("../middlewares/uploads");
+const { Admin } = require("../middlewares/authGroup");
 
 router.post("/signup", upload.fields([
     { name: "id_picture", maxCount: 1 },

@@ -20,7 +20,7 @@ const EvacuationCenterOccupants = require("../models/EvacuationCenterOccupantsMo
 //       evacuation_center_id, evacuee_id, number_of_family_members, family_members, ...req.body
 //     });
 
-//     res.status(201).json({ message: "The occupant was added successfully in the evacuation center" });
+//     res.status(201).json({ message: "The occupant was added successfully" });
 //   } catch (err) {
 //     res.status(500).json({ error: err.message });
 //   }

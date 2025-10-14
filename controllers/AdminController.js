@@ -1,4 +1,6 @@
 const Admin = require("../models/AdminModel");
+const UserToken = require("../models/UserTokenModel");
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
 // admin login
@@ -9,8 +11,20 @@ exports.loginAdmin = async (req, res) => {
 
     const isMatch = await bcrypt.compare(req.body.password, admin.password);
     if (!isMatch) return res.status(401).json({ message: "Password or username is incorrect" });
+
+    const token = jwt.sign(
+      { id: admin._id, role: "admin" },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || "1d" }
+    );
+
+    await UserToken.create({
+      user_id: admin._id,
+      role: "admin",
+      token
+    });
     
-    res.json({ message: "Login successful" });
+    res.json({ message: "Login successful", token });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

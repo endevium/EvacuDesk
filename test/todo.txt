@@ -1,9 +1,9 @@
 TODO
 
 -kung ano lang kelangan gamitin sa response yun lang iresponseeee (iverify ano kelangan sa frontend)
--tokennnnnn
--on delete cascade for evacuee
+-on delete cascade 
 -date validation
+-
 
 
 

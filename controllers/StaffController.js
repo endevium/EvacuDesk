@@ -1,4 +1,6 @@
 const Staff = require("../models/StaffModel");
+const UserToken = require("../models/UserTokenModel");
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const fs = require("fs");
 const path = require("path");
@@ -50,7 +52,19 @@ exports.loginStaff = async (req, res) => {
     const isMatch = await bcrypt.compare(req.body.password, staff.password);
     if (!isMatch) return res.status(401).json({ message: "Password or email is incorrect" });
 
-    res.json({ message: "Login successful" });
+    const token = jwt.sign(
+      { id: staff._id, role: staff.role },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || "1d" }
+    );
+
+    await UserToken.create({
+      user_id: staff._id,
+      role: staff.role,
+      token
+    });
+
+    res.json({ message: "Login successful", token });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

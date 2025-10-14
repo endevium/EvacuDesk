@@ -1,4 +1,6 @@
 const Evacuee = require("../models/EvacueeModel");
+const UserToken = require("../models/UserTokenModel");
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const fs = require("fs");
 const path = require("path");
@@ -46,7 +48,19 @@ exports.loginEvacuee = async (req, res) => {
     const isMatch = await bcrypt.compare(req.body.password, evacuee.password);
     if (!isMatch) return res.status(401).json({ message: "Password or email is incorrect" });
     
-    res.json({ message: "Login successful" });
+    const token = jwt.sign(
+      { id: evacuee._id, role: evacuee.role },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN || "1d" }
+    );
+
+    await UserToken.create({
+      user_id: evacuee._id,
+      role: evacuee.role,
+      token
+    });
+
+    res.json({ message: "Login successful", token});
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

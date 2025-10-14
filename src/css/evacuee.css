@@ -1,0 +1,934 @@
+.evacuee {
+    display: flex;
+    flex-direction: row;
+}
+
+.evacuee .evacuee-body-root {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.evacuee .evacuee-body {
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+}
+
+.evacuee .evacuee-body .page-label {
+    display: flex;
+    flex-direction: row;
+    font-family: Inter;
+}
+
+.evacuee .evacuee-body .page-label .page-icon {
+    display: flex;
+    flex-direction: column;
+    background-color: #45AD7F;
+    border-radius: 15px;
+    width: 50px;
+    height: 50px;
+    justify-content: center;
+    align-items: center;
+    margin-right: 10px;
+}
+
+.evacuee .evacuee-body .page-label .page-icon img {
+    width: 25px;
+    height: 45px;
+    object-fit: contain;
+    object-position: center;
+}
+
+.evacuee .evacuee-body .page-label .page-label-text p {
+    font-size: 18px;
+    font-weight: 600;
+    color: #224539;
+}
+
+.evacuee .evacuee-body .page-content {
+    background-color: #f7f7f7;
+    width: 97.5%;
+    height: 532px;
+    border-radius: 20px;
+    margin-top: 15px;
+    padding: 5px;
+    padding-left: 15px;
+}
+
+.evacuee .evacuee-body .page-content h2 {
+    color: #45AD7F;
+}
+
+.evacuee .evacuee-body .page-content .dashboard-mini-root {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 50px;
+}
+
+.dashboard-mini-root .dashboard-mini-card {
+    width: 300px;
+    height: 80px;
+    padding: 10px;
+    background-color: white;
+    border-radius: 10px;
+    font-family: Inter;
+}
+
+.dashboard-mini-root .dashboard-mini-card .dashboard-mini-icon {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+
+.dashboard-mini-root .dashboard-mini-card .dashboard-mini-icon img {
+    margin-left: auto;
+    margin-right: 10px;
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    object-position: center;
+}
+
+.dashboard-mini-root .dashboard-mini-card p {
+    color: #224539;
+    margin: 0;
+}
+
+.evacuee .evacuee-body .page-content .charts {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 10px;
+}
+
+.charts .line-graph {
+    width: 50%;
+}
+
+.charts .pie-chart {
+    width: 50%;
+}
+
+.charts .graph-root {
+    background-color: white;
+    width: 500px;
+    height: 300px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+}
+
+
+
+/* EVACUATION CENTER */
+
+.evacuee .evacuee-body .page-content-none {
+    width: 97.5%;
+    height: 545px;
+    border-radius: 20px;
+    overflow-y: scroll;
+    padding: 5px;
+}
+
+.evacuee .evacuee-body .page-content-none h2 {
+    color: #45AD7F;
+}
+
+.no-current-evac {
+    font-size: 15px;
+    font-family: Inter, sans-serif;
+    color: #555;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.evacuee .evacuee-body .page-content-none .evacuation-centers-root {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.evacuation-center-card {
+    background-color: white;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 3px 7px;
+    height: 42vh;
+    max-height: 42vh;
+    padding: 1rem;
+    border-radius: 10px;
+    width: 14vw;
+}
+
+.evacuation-center-card h2 {
+    font-size: 17px;
+    margin-bottom: 10px;
+    color: #45AD7F;
+}
+
+.evacuation-center-card p {
+    font-size: 12.5px;
+    font-family: Inter;
+    margin-top: 0px;
+    margin-bottom: 5px;
+}
+
+.evacuation-center-card .evacuation-center-image {
+    width: 99%;
+    height: 48%;
+
+}
+
+.evacuation-center-card .evacuation-center-image img {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+}
+
+.evacuation-center-card button {
+    border: 0;
+    font-size: 14px;
+    width: 100%;
+    height: 42px;
+    background-color: #224539;
+    border-radius: 5px;
+    justify-self: end;
+    cursor: pointer;
+}
+
+
+
+.evacuation-center-info {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.evacuation-center-info .evacuation-center-info-body {
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255);
+    width: 950px;
+    height: 600px;
+    border: 1px #c0c0c0 solid;
+    border-radius: 25px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px;
+    padding: 1rem;
+}
+
+.evacuation-center-info .evacuation-center-info-body .close-container {
+    height: 35px;
+    padding-bottom: 10px;
+}
+
+.evacuation-center-info .evacuation-center-info-body .close-container button {
+    border: 0;
+    background-color: white;
+    cursor: pointer;
+}
+
+.evacuation-center-info .evacuation-center-info-body .close-container img {
+    height: 35px;
+    width: 35px;
+}
+
+.evacuation-center-info .evacuation-center-info-body .info {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    padding-left: 5px;
+}
+
+.evacuation-center-info .evacuation-center-info-body h2 {
+    color:#224539;
+}
+
+.evacuation-center-info .evacuation-center-info-body .info .evac-img {
+    width: 50%;
+    height: 240px;
+
+}
+
+.evacuation-center-info .evacuation-center-info-body .info .evac-img img {
+    width: 100%;
+    height: 240px;
+}
+
+.evacuation-center-info .evacuation-center-info-body .info .evac-text {
+    width: 45%;
+    display: flex;
+    flex-direction: column;
+    font-family: Inter;
+    padding-left: 10px;
+}
+
+.evacuation-center-info .evacuation-center-info-body .info .evac-text h2 {
+    color:#45AD7F;
+    font-size: 25px;
+    margin-top: 0;
+}
+
+.evacuation-center-info .evacuation-center-info-body .info .evac-text p {
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+
+.evacuation-center-info .evacuation-center-info-body .family-members-section {
+    width: 100%;
+    padding-left: 5px;
+}
+
+.evacuation-center-info .evacuation-center-info-body .family-members-section .add-button {
+    width: 98.4%;
+    height: 6vh;
+    background-color: white;
+    color: black;
+    font-size: 14px;
+    border: 1px #ccc solid;
+    margin-top: -1px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.evacuation-center-info .evacuation-center-info-body .family-members-section .family-members-table-root {
+    max-height: 140px;
+    overflow-y: scroll;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.evacuation-center-info .evacuation-center-info-body .family-members-section table {
+    width: 100%;
+    table-layout: fixed;
+    font-family: Inter;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+.evacuation-center-info .evacuation-center-info-body .family-members-section th,
+.evacuation-center-info .evacuation-center-info-body .family-members-section td {
+    text-align: left;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    word-wrap: break-word;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.evacuation-center-info .evacuation-center-info-body .family-members-section th {
+    font-size: 15px;
+    background-color:#c4e6d6;
+}
+
+.evacuation-center-info .evacuation-center-info-body .family-members-section td {
+    font-size: 13.5px;
+}
+
+.evacuation-center-info .evacuation-center-info-body .buttons {
+    width: 100%;
+    height: 50px;
+    gap: 20px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: end;
+    margin-top: auto;
+    margin-bottom: 5px;
+}
+
+.evacuation-center-info .evacuation-center-info-body .buttons button {
+    width: 175px;
+    height: 45px;
+    border: 0;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.evacuation-center-info .evacuation-center-info-body .buttons .cancel-button {
+    background-color: white;
+    border: 1px #224539 solid;
+    color:#224539;
+}
+
+.evacuation-center-info .evacuation-center-info-body .buttons .register-button {
+    background-color:#224539;
+}
+
+.evacuation-center-info .evacuation-center-info-body .buttons .leave-button {
+    background-color:#d41e1e;
+}
+
+.add-family {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2001;
+}
+
+.add-family h2 {
+    color:#224539;
+    font-size: 21px;
+    margin-top: 0;
+    text-align: center;
+}
+
+.add-family .add-family-body {
+    background: rgba(255, 255, 255);
+    width: 400px;
+    height: 500px;
+    border: 1px #c0c0c0 solid;
+    border-radius: 25px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px;
+    padding: 1rem;
+}
+
+.add-family .add-family-body .close-container {
+    height: 35px;
+    padding-bottom: 10px;
+}
+
+.add-family .add-family-body .close-container button {
+    border: 0;
+    background-color: white;
+    cursor: pointer;
+}
+
+.add-family .add-family-body .close-container img {
+    height: 35px;
+    width: 35px;
+}
+
+.add-family .add-family-body .family-members {
+    width: 100%;
+}
+
+.add-family .add-family-body .family-members .names {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    margin-left: 10px;
+    font-family: Inter;
+}
+
+.add-family .add-family-body .family-members label {
+    width: 25vw;
+    text-align: left;
+    font-size: 14px;
+    font-family: Inter;
+}
+
+.add-family .add-family-body .family-members .names input {
+    width: 12vw;
+    height: 32px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    border: 0.5px #acacac solid;
+}
+
+.add-family .add-family-body .family-members .input-fields {
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+}
+
+.add-family .add-family-body .family-members select {
+    width: 96.5%;
+    height: 35px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    border: 0.5px #acacac solid;
+    font-family: Inter;
+}
+
+.add-family .add-family-body .family-members .input-fields input[type="date"], input[type="text"], input[type="number"] {
+    width: 95%;
+    height: 32px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    border: 0.5px #acacac solid;
+}
+
+.add-family .add-family-body .buttons {
+    width: 100%;
+    height: 65px;
+    gap: 15px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: end;
+}
+
+.add-family .add-family-body .buttons button {
+    width: 115px;
+    height: 37px;
+    border: 0;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.add-family .add-family-body .buttons .cancel-button {
+    background-color: white;
+    border: 1px #224539 solid;
+    color:#224539;
+}
+
+.add-family .add-family-body .buttons .register-button {
+    background-color:#224539;
+}
+
+.evacuation-center-info,
+.add-family {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.evacuation-center-info-body,
+.add-family-body {
+  background: white;
+  width: 500px;
+  max-width: 90%;
+  border-radius: 10px;
+  overflow: hidden;
+  transform: translateY(30px);
+  opacity: 0;
+  animation: slideIn 0.4s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+}
+
+
+
+/* EVACUEE REQUEST */
+.page-content-request {
+    width: 97.5%;
+    height: 535px;
+    border-radius: 20px;
+    padding: 5px;
+}
+
+.page-content-request .evacuee-request-table {
+    width: 100%;
+    height: 100%;
+    overflow-y: scroll;
+    margin-top: 10px;
+}
+
+.page-content-request .evacuee-request-table table {
+    width: 100%;
+    table-layout: fixed;
+    font-family: Inter;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+.page-content-request .evacuee-request-table th, td {
+    text-align: left;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    word-wrap: break-word;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.page-content-request .evacuee-request-table th {
+    font-size: 15px;
+    background-color:#c4e6d6;
+    text-align: center;
+}
+
+.page-content-request .evacuee-request-table td {
+    font-size: 13.5px;
+}
+
+.evacuee .evacuee-body .page-label .request-button {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    background-color: #224539;
+    border: 0;
+    font-size: 15px;
+    margin-left: auto;
+    padding-right: 1.2%;
+    border-radius: 15px;
+    width: 175px;
+    height: 50px;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.evacuee .evacuee-body .page-label .request-button img {
+    width: 30px;
+    height: 30px;
+    margin-left: 0;
+    padding-left: 0;
+}
+
+.request {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2001;
+}
+
+.request .request-body {
+    background: rgba(255, 255, 255);
+    width: 375px;
+    height: 450px;
+    border: 1px #c0c0c0 solid;
+    border-radius: 25px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px;
+    padding: 1rem;
+    font-family: Inter;
+    display: flex;
+    flex-direction: column;
+}
+
+.request .request-body .close-container {
+    height: 35px;
+    padding-bottom: 5px;
+}
+
+.request .request-body .close-container button {
+    border: 0;
+    background-color: white;
+    cursor: pointer;
+}
+
+.request .request-body .close-container img {
+    height: 35px;
+    width: 35px;
+}
+
+.request .request-body .create-request h2 {
+    color:#224539;
+    margin-top: 0;
+    text-align: center;
+    font-size: 20px;
+}
+
+.request .request-body select {
+    width: 98.5%;
+    height: 35px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    border: 0.5px #acacac solid;
+    font-family: Inter;
+}
+
+.request .request-body label {
+    width: 25vw;
+    text-align: left;
+    font-size: 14px;
+    font-family: Inter;
+}
+
+.request .request-body .input-fields input[type="date"], input[type="text"], input[type="number"] {
+    width: 97%;
+    height: 32px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    border: 0.5px #acacac solid;
+}
+
+.request .request-body .input-fields textarea {
+    width: 97%;
+    max-width: 97%;
+    height: 110px;
+    max-height: 110px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    border: 0.5px #acacac solid;
+}
+
+.request .request-body .buttons {
+    width: 100%;
+    height: 65px;
+    gap: 15px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: end;
+}
+
+.request .request-body .buttons button {
+    width: 100px;
+    height: 37px;
+    border: 0;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.request .request-body .buttons .reset-btn {
+    background-color: white;
+    border: 1px #224539 solid;
+    color:#224539;
+}
+
+.request .request-body .buttons .submit-btn {
+    background-color:#224539;
+}
+
+.evacuee-error {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2001;
+}
+
+.evacuee-error .error-body {
+    background: rgba(255, 255, 255);
+    width: 375px;
+    height: 375px;
+    border: 1px #ffbebe solid;
+    border-radius: 25px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px;
+    padding: 1rem;
+    font-family: Inter;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    animation: popIn 0.2s ease-out;
+}
+
+.evacuee-error .error-body .error-image {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+}
+
+.evacuee-error .error-body .error-image img {
+    margin-top: 0;
+    padding-top: 0;
+    width: 100px;
+    height: 100px;
+}
+
+.evacuee-error .error-body h2 {
+    color: rgb(228, 21, 21);
+    font-size: 30px;
+    text-align: center;
+    margin: 0;
+}
+
+.evacuee-error .error-body p {
+    font-size: 15px;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.evacuee-error .error-body .buttons {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    padding-top: 35px;
+}
+
+.evacuee-error .error-body button {
+    background-color: rgb(228, 21, 21);
+    border: 0;
+    border-radius: 10px;
+    width: 160px;
+    height: 45px;
+    cursor: pointer;
+}
+
+@keyframes fadeSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.response-body {
+    border: 0.2px rgb(104, 104, 104) solid;
+    width: 400px;
+    display: flex;
+    flex-direction: row;
+    padding: 10px;
+    position: fixed;
+    background-color: #F8F7FB;
+    border-radius: 10px;
+    right: 20px;
+    top: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    animation: slideIn 0.4s ease forwards;
+    z-index: 3000;
+}
+  
+.response-body.exit {
+    animation: slideOut 0.4s ease forwards;
+}
+  
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+.response-body img {
+    width: 45px;
+    height: 45px;
+    padding-left: 10px;
+    align-self: center;
+}
+
+.response-body p {
+    font-size: 18px;
+    color:#224539;
+    padding-left: 15px;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+  
+.spinner {
+    width: 60px;
+    height: 60px;
+    border: 6px solid #ddd;
+    border-top: 6px solid #224539;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+  
+@keyframes spin {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+

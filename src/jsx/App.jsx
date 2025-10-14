@@ -25,6 +25,7 @@ import Contact from './Contact'
 import AdminLogin from './AdminLogin'
 import Login from './Login'
 import Register from './Register'
+import Evacuee from './Evacuee'
 
 function App() {
   return (
@@ -38,6 +39,8 @@ function App() {
           <Route path='/login' element={<Login />}/>
           <Route path='/adl' element={<AdminLogin />}/>
           <Route path='/register' element={<Register />}/>
+
+          <Route path='/evacuee' element={<Evacuee />}/>
         </Routes>
       </Router>
     </>

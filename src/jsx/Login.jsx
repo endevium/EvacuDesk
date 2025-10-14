@@ -13,6 +13,7 @@ function Login() {
     const [responseMessage, setResponseMessage] = useState("");
     const [responseType, setResponseType] = useState("");
     const [exitAnim, setExitAnim] = useState(false);
+    const navigate = useNavigate()
 
     const loadingTimeout = useRef(null);
     const showTimeout = useRef(null);
@@ -74,6 +75,8 @@ function Login() {
                 return data;
             })
             .then((data) => {
+                localStorage.setItem("evacueeId", data.id);
+
                 setLoading(false);
                 setResponseMessage("Login successful!");
                 setResponseType("success");
@@ -85,7 +88,12 @@ function Login() {
                         setShowResponse(false);
                         setExitAnim(false);
                     }, 400);
-                }, 3000);
+                }, 5000);
+
+                setTimeout(() => {
+                    navigate("/evacuee");
+                }, 2000);
+
             })
             .catch((error) => {
                 setLoading(false); 
@@ -142,6 +150,8 @@ function Login() {
                 }, 3000);
             })
             .catch((error) => {
+                localStorage.setItem("staffId", data.id);
+
                 setLoading(false); 
                 setResponseMessage(error.message || "An error occurred");
                 setResponseType("error");

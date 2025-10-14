@@ -35,16 +35,6 @@ function Header() {
           </li>
           <li>
             <Link
-              to="/news"
-              className={
-                location.pathname === "/news" ? "news-link-active" : "news-link"
-              }
-            >
-              NEWS
-            </Link>
-          </li>
-          <li>
-            <Link
               to="/contact"
               className={
                 location.pathname === "/contact"

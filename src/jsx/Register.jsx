@@ -29,7 +29,7 @@ function Register() {
         barangay: "",
         city: "",
         province: "",
-        medical_needs: "",
+        disabilities: "",
         id_picture: null
     });
 
@@ -663,6 +663,9 @@ function EvacueeRegisterFour({
         }
 
         formDataToSend.append("country", "Philippines");
+        formDataToSend.forEach((value, key) => {
+            console.log(key, value);
+          });
     
         fetch("http://localhost:3000/evacuee/signup", {
             method: "POST",
@@ -677,6 +680,8 @@ function EvacueeRegisterFour({
                 return data;
             })
             .then((data) => {
+                localStorage.setItem("evacueeId", data.id);
+
                 setLoading(false);
                 setResponseMessage("Registration successful!");
                 setResponseType("success");
@@ -728,16 +733,16 @@ function EvacueeRegisterFour({
                 <br/>
 
                 <form onSubmit={handleEvacueeRegister}>
-                    <label htmlFor='medical_needs'>Medical Needs</label>
+                    <label htmlFor='disabilities'>Medical Needs</label>
                     <select
-                        id="medical_needs"
-                        value={formData.medical_needs}
+                        id="disabilities"
+                        value={formData.disabilities}
                         onChange={handleChange}
                         required
                     >
                         <option value="">Select Option</option>
-                        <option value="arthritis">Arthritis</option>
-                        <option value="injuries">Injuries</option>
+                        <option value="Arthritis">Arthritis</option>
+                        <option value="Injuries">Injuries</option>
                     </select>
 
                     <label htmlFor='id_picture'>ID Picture</label>
@@ -755,7 +760,7 @@ function EvacueeRegisterFour({
                     />
 
                     <br/>
-                    <button type="submit">Login</button>
+                    <button type="submit">Register</button>
                 </form>
 
             </div>
@@ -1023,6 +1028,7 @@ function StaffRegisterThree({
         }
 
         formDataToSend.append("country", "Philippines");
+        console.log(formDataToSend);
     
         fetch("http://localhost:3000/staff/signup", {
             method: "POST",
@@ -1037,6 +1043,8 @@ function StaffRegisterThree({
                 return data;
             })
             .then((data) => {
+                localStorage.setItem("staffId", data.id);
+
                 setLoading(false);
                 setResponseMessage("Registration successful!");
                 setResponseType("success");

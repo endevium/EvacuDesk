@@ -26,6 +26,7 @@ import AdminLogin from './AdminLogin'
 import Login from './Login'
 import Register from './Register'
 import Evacuee from './Evacuee'
+import Staff from './Staff'
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
           <Route path='/register' element={<Register />}/>
 
           <Route path='/evacuee' element={<Evacuee />}/>
+          <Route path='/staff' element={<Staff />}/>
         </Routes>
       </Router>
     </>

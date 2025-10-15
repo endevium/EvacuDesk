@@ -21,8 +21,8 @@ function StaffSideNav() {
 
   const menuItems = [
     { id: 'home', label: 'Home', activeIcon: homeActive, icon: home },
-    { id: 'evacuation-center', label: 'Centers', activeIcon: evacuationCenterActive, icon: evacuationCenter },
-    { id: 'request', label: 'Request', activeIcon: requestActive, icon: request },
+    { id: 'evacuation-center', label: 'Manage Centers', activeIcon: evacuationCenterActive, icon: evacuationCenter },
+    { id: 'request', label: 'Manage Request', activeIcon: requestActive, icon: request },
     { id: 'announcements', label: 'Announcements', activeIcon: announcementsActive, icon: announcements },
     { id: 'notifications', label: 'Notifications', activeIcon: notificationsActive, icon: notifications },
     { id: 'settings', label: 'Settings', activeIcon: settingsActive, icon: settings },

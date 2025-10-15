@@ -35,6 +35,7 @@ function Evacuee() {
         const fetchCurrent = async () => {
             try {
                 const evacueeId = localStorage.getItem("evacueeId");
+                const token = localStorage.getItem("evacueeToken");
                 if (!evacueeId) {
                     console.warn("Evacuee ID not found.");
                     setCurrentEvacuation([]);
@@ -293,10 +294,19 @@ function EvacuationCenterList({
     
         try {
             const evacueeId = localStorage.getItem("evacueeId");
-            if (!evacueeId) throw new Error("Evacuee ID not found");
-    
-            const res = await fetch(`http://localhost:3000/evacuee/${evacueeId}`); 
-            const data = await res.json();
+            const token = localStorage.getItem("evacueeToken");
+            if (!evacueeId) {
+                throw new Error("Evacuee ID not found. Please log in again.");
+            }
+
+            const response = await fetch(`http://localhost:3000/evacuee/${evacueeId}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+            });
+            const data = await response.json();
     
             const defaultMembers = Array.isArray(data) ? data : [data];
 
@@ -458,6 +468,7 @@ function EvacuationCenterList({
         setLoading(true);
         try {
             const evacueeId = localStorage.getItem("evacueeId");
+            const token = localStorage.getItem("evacueeToken");
             if (!evacueeId) {
                 throw new Error("Evacuee ID not found. Please log in again.");
             }
@@ -477,7 +488,10 @@ function EvacuationCenterList({
 
             const response = await fetch("http://localhost:3000/evacuation-registration/", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                 },
                 body: JSON.stringify(payload),
             });
 
@@ -1013,6 +1027,7 @@ function EvacueeRequest({ currentEvac, setActiveMenu }) {
 
         const today = new Date().toISOString().split('T')[0];
         const evacueeId = localStorage.getItem("evacueeId");
+        const token = localStorage.getItem("evacueeToken");
 
         if (!evacueeId) {
             setResponseMessage("Evacuee ID not found. Please log in again.");
@@ -1037,7 +1052,10 @@ function EvacueeRequest({ currentEvac, setActiveMenu }) {
         try {
             const response = await fetch(`http://localhost:3000/evacuee-request/`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                 },
                 body: JSON.stringify(payload)
             });
 
@@ -1086,6 +1104,49 @@ function EvacueeRequest({ currentEvac, setActiveMenu }) {
             setEvacuationCenter(centerId);
         }
     }, [currentEvac]);
+
+    useEffect(() => {
+        const fetchRequests = async () => {
+            if (!evacuationCenter) return;
+    
+            const evacueeId = localStorage.getItem("evacueeId");
+            const token = localStorage.getItem("evacueeToken");
+    
+            if (!evacueeId || !token) return;
+    
+            try {
+                const response = await fetch(
+                    `http://localhost:3000/evacuee-request/evacuee/${evacueeId}/center/${evacuationCenter}`,
+                    {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`,
+                        },
+                    }
+                );
+    
+                const data = await response.json();
+    
+                if (!response.ok) {
+                    throw new Error(data.error || "Failed to fetch requests");
+                }
+    
+                setRequests(data);
+            } catch (error) {
+                console.error("Error fetching evacuee requests:", error);
+            }
+        };
+    
+        fetchRequests();
+
+        const interval = setInterval(() => {
+            fetchRequests();
+        }, 5000);
+    
+        return () => clearInterval(interval);
+    }, [evacuationCenter]);
+    
 
     return (
         evacuationCenter ? (
@@ -1149,7 +1210,7 @@ function EvacueeRequest({ currentEvac, setActiveMenu }) {
                           <td>{req.request_type}</td>
                           <td>{req.quantity}</td>
                           <td>{req.description}</td>
-                          <td>{req.date}</td>
+                          <td>{req.date || new Date(req.createdAt).toLocaleDateString()}</td>
                           <td>{req.status}</td>
                         </tr>
                       ))
@@ -1246,6 +1307,7 @@ function EvacueeAnnouncements({
     setActiveMenu
 }) {
     const [evacuationCenter, setEvacuationCenter] = useState("");
+    const [showAnnouncement, setShowAnnouncement] = useState(false);
 
     // GET EVACUATION CENTER ID from currentEvac
     useEffect(() => {
@@ -1259,6 +1321,9 @@ function EvacueeAnnouncements({
         setActiveMenu('evacuation-center');
     };
 
+    const handleShowAnnouncement = () => setShowAnnouncement(true);
+    const handleCloseAnnouncement = () => setShowAnnouncement(false);
+
     return(
         evacuationCenter ? (
             <>
@@ -1270,6 +1335,60 @@ function EvacueeAnnouncements({
                         <p>Announcements</p>
                     </div>
                 </div>
+
+                <div className='page-content-announcements'>
+                    <div className='evacuee-announcements'>
+                        <div className='announcement-card'>
+                            <div className='announcement-image'>
+                            <img src={evacCenter}/>
+                            </div>
+                            <div className='announcement-text'>
+                                <h2>Bulletin Title</h2>
+                                <p>Author</p>
+                                <p>Date</p>
+                                <p>Description</p>
+                                <div className='announcement-button'>
+                                    <button onClick={handleShowAnnouncement}>View</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className='announcement-card'>
+                            <div className='announcement-image'>
+                                <img src={evacCenter}/>
+                            </div>
+                            <div className='announcement-text'>
+                                <h2>Bulletin Title</h2>
+                                <p>Author</p>
+                                <p>Date</p>
+                                <p>Description</p>
+                                <div className='announcement-button'>
+                                    <button onClick={handleShowAnnouncement}>View</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {showAnnouncement && (
+                    <div className='announcement-info'>
+                        <div className='announcement-info-body'>
+                            <div className="close-container" onClick={handleCloseAnnouncement}>
+                                <img src={close} alt="close" />
+                            </div>
+                            <div className='announcement-image'>
+                                <img src={evacCenter}/>
+                            </div>
+                            <div className='announcement-text'>
+                                <h2>Bulletin Title</h2>
+                                <p>Author</p>
+                                <p>Date</p>
+                                <br/>
+                                <p>Description</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </>
         ) : (
             <div className="evacuee-error">
@@ -1295,10 +1414,25 @@ function EvacueeNotifications() {
         <>
             <div className="page-label">
                 <div className="page-icon">
-                    <img src={announcementsActive} alt="icon" />
+                    <img src={notificationsActive} alt="icon" />
                 </div>
                 <div className="page-label-text">
                     <p>Notifications</p>
+                </div>
+            </div>
+
+            <div className='page-content-notifications'>
+                <div className='notification-buttons'>
+                    <button>All</button>
+                    <button>Unread</button>
+                </div>
+                <div className='notifications-root'>
+                    <div className='notification-card'>
+                        <div className='notification-text'>
+                            <h2>Notification Title</h2>
+                            <p>Notification Body</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </>

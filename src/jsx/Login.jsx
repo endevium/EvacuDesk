@@ -76,6 +76,10 @@ function Login() {
             })
             .then((data) => {
                 localStorage.setItem("evacueeId", data.id);
+                localStorage.setItem("evacueeToken", data.token);
+
+                const token = localStorage.getItem("evacueeToken");
+                console.log(token);
 
                 setLoading(false);
                 setResponseMessage("Login successful!");
@@ -151,6 +155,7 @@ function Login() {
             })
             .catch((error) => {
                 localStorage.setItem("staffId", data.id);
+                localStorage.setItem("staffToken", data.token);
 
                 setLoading(false); 
                 setResponseMessage(error.message || "An error occurred");

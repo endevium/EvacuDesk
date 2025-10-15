@@ -630,6 +630,8 @@ function EvacueeRegisterFour({
     showTimeout,
     exitTimeout
 }) {
+    const navigate = useNavigate();
+
     const [loading, setLoading] = useState(false); 
     const clearAllTimeouts = () => {
         if (showTimeout.current) {
@@ -692,6 +694,7 @@ function EvacueeRegisterFour({
                     exitTimeout.current = setTimeout(() => {
                         setShowResponse(false);
                         setExitAnim(false);
+                        navigate("/login");
                     }, 400);
                 }, 3000);
             })
@@ -995,6 +998,8 @@ function StaffRegisterThree({
     showTimeout,
     exitTimeout
 }) {
+    const navigate = useNavigate();
+
     const [loading, setLoading] = useState(false); 
     const clearAllTimeouts = () => {
         if (showTimeout.current) {
@@ -1046,7 +1051,7 @@ function StaffRegisterThree({
                 localStorage.setItem("staffId", data.id);
 
                 setLoading(false);
-                setResponseMessage("Registration successful!");
+                setResponseMessage("Your account is now under review. Please wait until your account has been reviewed.");
                 setResponseType("success");
                 setShowResponse(true);
     
@@ -1055,8 +1060,10 @@ function StaffRegisterThree({
                     exitTimeout.current = setTimeout(() => {
                         setShowResponse(false);
                         setExitAnim(false);
+                        navigate("/login");
                     }, 400);
                 }, 3000);
+
             })
             .catch((error) => {
                 setLoading(false);

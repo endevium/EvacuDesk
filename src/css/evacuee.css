@@ -833,22 +833,6 @@
   }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .response-body {
     border: 0.2px rgb(104, 104, 104) solid;
     width: 400px;
@@ -932,3 +916,218 @@
     100% { transform: rotate(360deg); }
 }
 
+
+
+
+
+
+
+
+
+/* EVACUEE ANNOUNCEMENTS */
+.page-content-announcements {
+    width: 97.5%;
+    height: 535px;
+    border-radius: 20px;
+    padding: 5px;
+    margin-top: 10px;
+}
+
+.page-content-announcements .evacuee-announcements {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    overflow-y: scroll;
+}
+
+.evacuee-announcements .announcement-card {
+    width: 90%;
+    height: 19vh;
+    border: 1px #45AD7F solid;
+    border-radius: 25px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px;
+    display: flex;
+    flex-direction: row;
+    padding: 20px;
+    font-family: Inter;
+}
+
+.evacuee-announcements .announcement-card .announcement-image {
+    width: 15vw;
+    height: 18.5vh;
+}
+
+.evacuee-announcements .announcement-card .announcement-image img {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+}
+
+.evacuee-announcements .announcement-card .announcement-text {
+    width: 100%;
+    margin-left: 15px;
+}
+.evacuee-announcements .announcement-card h2 {
+    color: #224539;
+    margin: 0;
+    font-size: 17px;
+}
+
+.evacuee-announcements .announcement-card p {
+    margin-bottom: 5px;
+    margin-top: 5px;
+    font-size: 14px;
+}
+
+.evacuee-announcements .announcement-card .announcement-button {
+    width: 99%;
+    height: 55px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+}
+
+.evacuee-announcements .announcement-card .announcement-button button {
+    width: 100px;
+    height: 35px;
+    background-color: #224539;
+    border-radius: 10px;
+    border: 0;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+
+.announcement-info {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2001;
+}
+
+.announcement-info .announcement-info-body {
+    background: rgba(255, 255, 255);
+    width: 900px;
+    height: 600px;
+    border: 1px #c0c0c0 solid;
+    border-radius: 25px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px;
+    padding: 1rem;
+    font-family: Inter;
+    display: flex;
+    flex-direction: column;
+}
+
+.announcement-info .announcement-info-body .close-container {
+    height: 35px;
+    padding-bottom: 5px;
+    cursor: pointer;
+}
+
+.announcement-info .announcement-info-body .close-container img {
+    height: 40px;
+    width: 40px;
+}
+
+.announcement-info .announcement-info-body .announcement-image {
+    width: 100%;
+    height: 45%;
+    margin-top: 10px;
+}
+
+
+.announcement-info .announcement-info-body .announcement-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.announcement-info .announcement-info-body .announcement-text {
+    font-family: Inter;
+}
+
+.announcement-info .announcement-info-body .announcement-text h2 {
+    color: #224539;
+    margin-bottom: 5px;
+    font-size: 22px;
+}
+
+.announcement-info .announcement-info-body .announcement-text p {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+
+
+.page-content-notifications {
+    width: 97.5%;
+    height: 485px;
+    border-radius: 20px;
+    padding: 5px;
+    margin-top: 10px;
+}
+
+.page-content-notifications .notification-buttons {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+}
+
+.page-content-notifications .notification-buttons button {
+    width: 100px;
+    height: 35px;
+    border: 0;
+    border-radius: 15px;
+    color:#555;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.page-content-notifications .notifications-root {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: scroll;
+    margin-top: 25px;
+}
+
+.page-content-notifications .notifications-root .notification-card {
+    width: 98%;
+    height: 10vh;
+    border: 1px #ccc solid;
+    border-radius: 25px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px;
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+    font-family: Inter;
+}
+
+.page-content-notifications .notifications-root .notification-card .notification-text {
+    margin-left: 15px;
+}
+
+.page-content-notifications .notifications-root .notification-card h2 {
+    font-size: 17px;
+    margin-bottom: 0;
+    color:#224539;
+}
+
+.page-content-notifications .notifications-root .notification-card p {
+    font-size: 15px;
+    margin-top: 7.5px;
+}

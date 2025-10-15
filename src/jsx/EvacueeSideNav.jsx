@@ -15,8 +15,11 @@ import settings from '../assets/settings.png'
 import logout from '../assets/logout.png'
 
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 function EvacueeSideNav({ activeMenu, setActiveMenu }) {
+    const navigate = useNavigate();
+
     const menuItems = [
         { id: 'home', label: 'Home', activeIcon: homeActive, icon: home },
         { id: 'evacuation-center', label: 'Evacuation Center', activeIcon: evacuationCenterActive, icon: evacuationCenter },
@@ -25,6 +28,13 @@ function EvacueeSideNav({ activeMenu, setActiveMenu }) {
         { id: 'notifications', label: 'Notifications', activeIcon: notificationsActive, icon: notifications },
         { id: 'settings', label: 'Settings', activeIcon: settingsActive, icon: settings },
     ];
+
+    const handleLogout = () => {
+        localStorage.removeItem("evacueeToken");
+        localStorage.removeItem("evacueeId");
+
+        navigate("/login");
+    };
 
     return (
         <div className='evac-side-nav'>
@@ -50,7 +60,7 @@ function EvacueeSideNav({ activeMenu, setActiveMenu }) {
                 ))}
             </div>
 
-            <div className='logout-root'>
+            <div className='logout-root' onClick={handleLogout}>
                 <div className='logout-item'>
                 <img src={logout} alt='logout' />
                 <p>Log Out</p>

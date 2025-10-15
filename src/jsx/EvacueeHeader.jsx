@@ -10,11 +10,18 @@ function EvacueeHeader() {
         const fetchEvacueeData = async () => {
             try {
                 const evacueeId = localStorage.getItem("evacueeId");
+                const token = localStorage.getItem("evacueeToken");
                 if (!evacueeId) {
                     throw new Error("Evacuee ID not found. Please log in again.");
                 }
 
-                const response = await fetch(`http://localhost:3000/evacuee/${evacueeId}`);
+                const response = await fetch(`http://localhost:3000/evacuee/${evacueeId}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    },
+                });
                 const data = await response.json();
                 setFirstName(data.first_name);
                 setLastName(data.last_name);

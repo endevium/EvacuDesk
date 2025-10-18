@@ -7,7 +7,7 @@ const EvacueeRequestSchema = new Schema({
   request_type: { type: String, required: true },
   description: { type: String },
   quantity: { type: Number, required: true },
-  status: { type: String, enum: ['pending', 'fulfilled', 'rejected'], default: 'pending' }
+  status: { type: String, enum: ['Pending', 'Fulfilled', 'Rejected'], default: 'Pending' }
 }, { timestamps: true });
 
 module.exports = mongoose.model('EvacueeRequest', EvacueeRequestSchema, 'evacuee_requests');

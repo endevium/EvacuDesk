@@ -6,17 +6,15 @@ const EvacuationCenter = require("../models/EvacuationCenterModel");
 // create new registration
 exports.registerEvacuee = async (req, res) => {
   try {
-    const { evacuee_id, evacuation_center_id, family_members } = req.body;
+    const { evacuee_id, evacuation_center_id, number_of_family_members } = req.body;
 
-    if (!evacuee_id || !evacuation_center_id) {
+    if (!evacuee_id || !evacuation_center_id || !number_of_family_members) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    if (
-      !mongoose.Types.ObjectId.isValid(evacuee_id) ||
-      !mongoose.Types.ObjectId.isValid(evacuation_center_id)
-    ) {
-      return res.status(400).json({ error: "Invalid Evacuee ID or Evacuation Center ID" });
+    const evacuee = await Evacuee.findById(evacuee_id);
+    if (!evacuee) {
+      return res.status(404).json({ error: "Evacuee not found" });
     }
 
     const center = await EvacuationCenter.findById(evacuation_center_id);
@@ -24,31 +22,24 @@ exports.registerEvacuee = async (req, res) => {
       return res.status(404).json({ error: "Evacuation center not found" });
     }
 
-    if (center.status !== "approved") {
-      return res.status(400).json({ error: `Invalid request` });
-    }
-
-    // pag ba may pending registration yung evacuee sa ibang evac center ok lang?
-    const existingRegistration = await EvacuationRegistration.findOne({
+    const existing = await EvacuationRegistration.findOne({
       evacuee_id,
       evacuation_center_id,
+      status: { $in: ["Pending", "Approved"] }
     });
-    
-    if (existingRegistration) {
-      return res.status(400).json({ error: "You are already registered in this evacuation center" });
+
+    if (existing) {
+      return res.status(400).json({ error: "You already have a pending registration in this evacuation center" });
     }
 
-    const number_of_family_members = Array.isArray(family_members)
-      ? family_members.length
-      : 0;
-    
-    await EvacuationRegistration.create({ 
+    await EvacuationRegistration.create({
       evacuee_id,
       evacuation_center_id,
       number_of_family_members,
-      family_members });
+      status: "Pending"
+    });
 
-    res.status(201).json({ message: "Evacuee registered successfully" });
+    res.status(201).json({ message: "Registration submitted successfully. Awaiting approval." });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -134,7 +125,7 @@ exports.getRegistrationByCenterId = async (req, res) => {
   }
 };
 
-// get registration by id (kelangan paba to?)
+// get registration by id 
 exports.getRegistrationById = async (req, res) => {
   try {
     const { id } = req.params;  
@@ -160,7 +151,7 @@ exports.updateRegistrationStatus = async (req, res) => {
     const { status } = req.body;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid Registration ID" });
+      return res.status(400).json({ error: "Invalid registration ID" });
     }
 
     const registration = await EvacuationRegistration.findById(id);
@@ -168,53 +159,40 @@ exports.updateRegistrationStatus = async (req, res) => {
       return res.status(404).json({ error: "Registration not found" });
     }
 
-    if (registration.status === "approved" || registration.status === "rejected") {
+    if (["Approved", "Rejected"].includes(registration.status)) {
       return res.status(400).json({
         error: `Cannot update registration. It has already been ${registration.status}.`,
-      });
-    }
-
-    const occupant = await EvacuationCenterOccupant.findOne({
-      evacuee_id: registration.evacuee_id,
-      evacuation_center_id: registration.evacuation_center_id,
-    });
-
-    if (occupant && occupant.status === "active") {
-      return res.status(400).json({
-        error: "Evacuee is already an active occupant in this evacuation center",
       });
     }
 
     registration.status = status;
     await registration.save();
 
-    if (status === "approved") {
-      const occupant = await EvacuationCenterOccupant.findOne({
+    if (status === "Approved") {
+      const occupantExists = await EvacuationCenterOccupant.findOne({
         evacuee_id: registration.evacuee_id,
-        evacuation_center_id: registration.evacuation_center_id
+        evacuation_center_id: registration.evacuation_center_id,
       });
-      
-      if (!occupant) {
+
+      if (!occupantExists) {
         await EvacuationCenterOccupant.create({
           evacuee_id: registration.evacuee_id,
           evacuation_center_id: registration.evacuation_center_id,
-          number_of_family_members: registration.number_of_family_members || 0,
-          family_members: registration.family_members || [],
+          number_of_family_members: registration.number_of_family_members,
           date_joined: new Date(),
           status: "active",
         });
 
-        const familyCount = (registration.family_members?.length || 0) 
-
         await EvacuationCenter.findByIdAndUpdate(
           registration.evacuation_center_id,
-          { $inc: { taken_slots: familyCount } }
+          { $inc: { taken_slots: registration.number_of_family_members } } 
         );
       }
     }
 
-    res.status(200).json({ message: "Registration status updated successfully" });
+    res.status(200).json({ message: `Registration status updated to ${status} successfully` });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
+

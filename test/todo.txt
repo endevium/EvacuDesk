@@ -3,18 +3,22 @@ TODO
 -kung ano lang kelangan gamitin sa response yun lang iresponseeee (iverify ano kelangan sa frontend)
 -on delete cascade 
 -date validation
--
+-stress testing
 
 
+SECURITY
 
-
+-rate limit
+-canary token
+-encrypt endpoints
+-arcjet implementation
 
 
 LIST OF BUGS
 
--evacuee request duplication/unli request (no limit)
--occupants can have multiple evac center
 -
+
+
 
 
 

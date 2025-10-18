@@ -13,14 +13,14 @@ exports.loginAdmin = async (req, res) => {
     if (!isMatch) return res.status(401).json({ message: "Password or username is incorrect" });
 
     const token = jwt.sign(
-      { id: admin._id, role: "admin" },
+      { id: admin._id, role: "Admin" },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || "1d" }
     );
 
     await UserToken.create({
       user_id: admin._id,
-      role: "admin",
+      role: "Admin",
       token
     });
     

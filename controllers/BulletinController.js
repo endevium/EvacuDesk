@@ -5,26 +5,27 @@ const path = require("path");
 // create bulletin
 exports.createBulletin = async (req, res) => {
   try {
-    const { is_public, title, body, evacuation_center_name, staff_name } = req.body;
+    const { title, body, evacuation_center_name } = req.body;
+
+    if (!title || !body || !evacuation_center_name) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
 
     if (!req.file) {
       return res.status(400).json({ error: "An image is required for the bulletin" });
     }
 
-    if (!req.body) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
+    const uploadDir = path.join(__dirname, "..", "uploads");
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
-    const uploadPath = path.join("uploads", Date.now() + "-" + req.file.originalname);
+    const uploadPath = path.join(uploadDir, Date.now() + "-" + req.file.originalname);
     fs.writeFileSync(uploadPath, req.file.buffer);
 
     await Bulletin.create({
-      is_public,
       title,
       body,
       image: uploadPath.replace(/\\/g, "/"),
-      evacuation_center_name,
-      staff_name
+      evacuation_center_name
     });
 
     res.status(201).json({ message: "Bulletin news created successfully" });
@@ -33,27 +34,34 @@ exports.createBulletin = async (req, res) => {
   }
 };
 
-// get all public bulletins news
-exports.getPublicBulletins = async (req, res) => {
+// get all bulletins
+exports.getAllBulletins = async (req, res) => {
   try {
-    const bulletins = await Bulletin.find({ is_public: true }).sort({ createdAt: -1 });
-    res.status(200).json(bulletins);
+    const bulletins = await Bulletin.find().sort({ createdAt: -1 });
+    res.json(bulletins);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
+// get bulletins by center name 
+exports.getBulletinsByCenter = async (req, res) => {
+  try {
+    const centerName = req.query.center_name;
 
-// // get bulletins by evacuation center name
-// exports.getBulletinsByEvacuationCenter = async (req, res) => {
-//   try {
-//     const { evacuation_center_name } = req.params;
-//     const bulletins = await BulletinBoard.find({ evacuation_center_name });
-//     res.json(bulletins);
-//   } catch (err) {
-//     res.status(500).json({ error: err.message });
-//   }
-// };
+    if (!centerName) {
+      return res.status(400).json({ error: "Center name is required as a query parameter" });
+    }
+
+    const bulletins = await Bulletin.find({
+      evacuation_center_name: { $regex: centerName, $options: "i" }
+    }).sort({ createdAt: -1 });
+
+    res.json(bulletins);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 // get bulletin by id
 exports.getBulletinById = async (req, res) => {
@@ -72,22 +80,26 @@ exports.updateBulletin = async (req, res) => {
   try {
     const updateData = { ...req.body };
 
-    if (req.file) {
+    const bulletin = await Bulletin.findById(req.params.id);
+    if (!bulletin) return res.status(404).json({ error: "Bulletin not found" });
 
-      const imagePath = path.join("uploads", Date.now() + "-" + req.file.originalname);
+    if (req.file) {
+      if (bulletin.image && fs.existsSync(bulletin.image)) {
+        fs.unlinkSync(bulletin.image);
+      }
+
+      const uploadDir = path.join(__dirname, "..", "uploads");
+      if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
+
+      const imagePath = path.join(uploadDir, Date.now() + "-" + req.file.originalname);
       fs.writeFileSync(imagePath, req.file.buffer);
       updateData.image = imagePath.replace(/\\/g, "/");
     }
 
-    const bulletin = await Bulletin.findByIdAndUpdate(
-      req.params.id,
-      { $set: updateData },
-      { new: true, runValidators: true }
-    );
+    Object.assign(bulletin, updateData);
+    await bulletin.save();
 
-    if (!bulletin) return res.status(404).json({ error: "Bulletin not found" });
-
-    res.json({ message: "Bulletin news updated successfully", bulletin });
+    res.json({ message: "Bulletin news updated successfully" });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -99,6 +111,7 @@ exports.deleteBulletin = async (req, res) => {
     const bulletin = await Bulletin.findByIdAndDelete(req.params.id);
     if (!bulletin) return res.status(404).json({ error: "Bulletin not found" });
 
+    // Delete image if exists
     if (bulletin.image && fs.existsSync(bulletin.image)) {
       fs.unlinkSync(bulletin.image);
     }
@@ -108,3 +121,5 @@ exports.deleteBulletin = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+

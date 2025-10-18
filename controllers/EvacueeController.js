@@ -8,7 +8,6 @@ const path = require("path");
 // evacuee signup
 exports.signupEvacuee = async (req, res) => {
   try {
-
     if (!req.file) {
       return res.status(400).json({ error: "A valid ID picture is required" });
     }
@@ -27,7 +26,7 @@ exports.signupEvacuee = async (req, res) => {
     const uploadPath = path.join("uploads", Date.now() + "-" + req.file.originalname);
     fs.writeFileSync(uploadPath, req.file.buffer);
     
-    const evacuee = await Evacuee.create({
+    await Evacuee.create({
       ...req.body,
       password: await bcrypt.hash(req.body.password, 10),
       id_picture: uploadPath.replace(/\\/g, "/") 
@@ -60,7 +59,7 @@ exports.loginEvacuee = async (req, res) => {
       token
     });
 
-    res.json({ message: "Login successful", token});
+    res.json({ message: "Login successful", token, id: evacuee._id});
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -126,7 +125,7 @@ exports.updatePassword = async (req, res) => {
 
     const { currentPassword, newPassword } = req.body;
     if (!currentPassword || !newPassword) {
-      return res.status(400).json({ error: "Fill all the required fields" });
+      return res.status(400).json({ error: "Missing required fields" });
     }
 
     const evacuee = await Evacuee.findById(req.params.id);

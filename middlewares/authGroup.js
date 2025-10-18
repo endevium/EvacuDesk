@@ -1,10 +1,10 @@
 const { verifyToken, verifyRole } = require("./auth");
 
-const Admin = [verifyToken, verifyRole(["admin"])];
-const Staff = [verifyToken, verifyRole(["staff"])];
-const Evacuee = [verifyToken, verifyRole(["evacuee"])];
-const AdminAndStaff = [verifyToken, verifyRole(["admin", "staff"])];
-const AdminAndEvacuee = [verifyToken, verifyRole(["admin", "evacuee"])];
-const AdminStaffAndEvacuee = [verifyToken, verifyRole(["admin", "staff", "evacuee"])];
+const Admin = [verifyToken, verifyRole(["Admin"])];
+const EvacuationCenter = [verifyToken, verifyRole(["EvacuationCenter"])];
+const Evacuee = [verifyToken, verifyRole(["Evacuee"])];
+const AdminAndEvacuationCenter = [verifyToken, verifyRole(["Admin", "EvacuationCenter"])];
+const AdminAndEvacuee = [verifyToken, verifyRole(["Admin", "Evacuee"])];
+const AllUsers = [verifyToken, verifyRole(["Admin", "EvacuationCenter", "Evacuee"])];
 
-module.exports = { Admin, Staff, Evacuee, AdminAndStaff, AdminAndEvacuee, AdminStaffAndEvacuee };
+module.exports = { Admin, EvacuationCenter, Evacuee, AdminAndEvacuationCenter, AdminAndEvacuee, AllUsers };

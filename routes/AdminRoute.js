@@ -9,3 +9,7 @@ router.post("/login", AdminController.loginAdmin);
 router.patch("/password/:id", Admin, AdminController.updatePassword);
 
 module.exports = router;
+
+
+
+

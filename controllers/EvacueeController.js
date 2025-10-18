@@ -4,35 +4,33 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const fs = require("fs");
 const path = require("path");
+const { generateOTP } = require("../utils/otpGeneration");
+const { emailSender } = require("../utils/emailSender");
 
 // evacuee signup
 exports.signupEvacuee = async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: "A valid ID picture is required" });
-    }
+    if (!req.file) return res.status(400).json({ error: "A valid ID picture is required" });
 
-    if (!req.body.first_name || !req.body.last_name || !req.body.email_address || !req.body.password || !req.body.street_number ||
-      !req.body.barangay || !req.body.city || !req.body.province || !req.body.sex || !req.body.disabilities || !req.body.birthdate
-    ) {
-      return res.status(400).json({ error: "Missing required fields" });
-    }
-
-    const existingEvacuee = await Evacuee.findOne({ email_address: req.body.email_address });
-    if (existingEvacuee) {
-      return res.status(400).json({ error: "The email already exists. Use a different email" });
-    }
+    const existing = await Evacuee.findOne({ email_address: req.body.email_address });
+    if (existing) return res.status(400).json({ error: "The email already exists. Use a different one." });
 
     const uploadPath = path.join("uploads", Date.now() + "-" + req.file.originalname);
     fs.writeFileSync(uploadPath, req.file.buffer);
-    
-    await Evacuee.create({
+
+    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+
+    const evacuee = await Evacuee.create({
       ...req.body,
-      password: await bcrypt.hash(req.body.password, 10),
-      id_picture: uploadPath.replace(/\\/g, "/") 
+      password: hashedPassword,
+      id_picture: uploadPath.replace(/\\/g, "/"),
+      is_verified: false
     });
 
-    res.status(201).json({ message: "Evacuee created successfully" });
+    const otp = await generateOTP(evacuee._id, "Evacuee");
+    await emailSender(evacuee.email_address, evacuee.first_name, otp, "verify");
+
+    res.status(201).json({ message: "Please verify your email address. We have sent an OTP to your email." });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
@@ -41,25 +39,31 @@ exports.signupEvacuee = async (req, res) => {
 // evacuee login
 exports.loginEvacuee = async (req, res) => {
   try {
-    const evacuee = await Evacuee.findOne({ email_address: req.body.email_address });
+    const { email_address, password } = req.body;
+    const evacuee = await Evacuee.findOne({ email_address });
+
     if (!evacuee) return res.status(404).json({ error: "Evacuee not found" });
 
-    const isMatch = await bcrypt.compare(req.body.password, evacuee.password);
-    if (!isMatch) return res.status(401).json({ message: "Password or email is incorrect" });
-    
+    if (!evacuee.is_verified) {
+      return res.status(403).json({ error: "Invalid request" });
+    }
+
+    const isMatch = await bcrypt.compare(password, evacuee.password);
+    if (!isMatch) return res.status(401).json({ error: "Incorrect password or email." });
+
     const token = jwt.sign(
-      { id: evacuee._id, role: evacuee.role },
+      { id: evacuee._id, role: "Evacuee" },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || "1d" }
     );
 
     await UserToken.create({
       user_id: evacuee._id,
-      role: evacuee.role,
-      token
+      role: "Evacuee",
+      token,
     });
 
-    res.json({ message: "Login successful", token, id: evacuee._id});
+    res.json({ message: "Login successful", token });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -149,6 +153,24 @@ exports.updatePassword = async (req, res) => {
     res.json({ message: "Password updated successfully" });
   } catch (err) {
     res.status(400).json({ error: err.message });
+  }
+};
+
+// reset password
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email_address } = req.body;
+    if (!email_address) return res.status(400).json({ error: "Email is required" });
+
+    const evacuee = await Evacuee.findOne({ email_address });
+    if (!evacuee) return res.status(404).json({ error: "Evacuee not found" });
+
+    const otp = await generateOTP(evacuee._id, "Evacuee");
+    await emailSender(evacuee.email_address, evacuee.first_name, otp, "reset");
+
+    res.json({ message: "An OTP has been sent to your email" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 

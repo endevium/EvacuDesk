@@ -36,7 +36,6 @@ exports.createEvacuationCenter = async (req, res) => {
   }
 };
 
-
 // login evacuation center
 exports.loginEvacuationCenter = async (req, res) => {
   try {
@@ -64,12 +63,9 @@ exports.loginEvacuationCenter = async (req, res) => {
       token,
     });
 
-    res.status(200).json({
-      message: "Login successful",
-      token
-    });
+    res.status(200).json({ message: "Login successful", token });
   } catch (err) {
-    console.error("❌ Login error:", err);
+    console.error("Login error:", err);
     res.status(500).json({ error: err.message });
   }
 };

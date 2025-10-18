@@ -50,12 +50,18 @@ exports.getBulletinsByCenter = async (req, res) => {
     const centerName = req.query.center_name;
 
     if (!centerName) {
-      return res.status(400).json({ error: "Center name is required as a query parameter" });
+      return res.status(400).json({ error: "Center name is required" });
     }
 
+    const escapeRegex = text => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
     const bulletins = await Bulletin.find({
-      evacuation_center_name: { $regex: centerName, $options: "i" }
+      evacuation_center_name: { $regex: escapeRegex(centerName.trim()), $options: "i" }
     }).sort({ createdAt: -1 });
+    
+    if (!bulletins.length) {
+      return res.status(404).json({ message: "No bulletins found for this center" });
+    }
 
     res.json(bulletins);
   } catch (err) {
@@ -111,7 +117,6 @@ exports.deleteBulletin = async (req, res) => {
     const bulletin = await Bulletin.findByIdAndDelete(req.params.id);
     if (!bulletin) return res.status(404).json({ error: "Bulletin not found" });
 
-    // Delete image if exists
     if (bulletin.image && fs.existsSync(bulletin.image)) {
       fs.unlinkSync(bulletin.image);
     }

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const EvacuationCenterController = require("../controllers/EvacuationCenterController");
-const upload = require("../middlewares/uploads"); 
+const upload = require("../utils/uploads"); 
 const { Admin, AdminAndEvacuationCenter } = require("../middlewares/authGroup");
 
 router.get("/", EvacuationCenterController.getEvacuationCenters);

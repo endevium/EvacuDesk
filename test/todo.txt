@@ -8,10 +8,9 @@ TODO
 
 SECURITY
 
--rate limit
 -canary token
 -encrypt endpoints
--arcjet implementation
+
 
 
 LIST OF BUGS

@@ -142,11 +142,15 @@ exports.updateEvacuationCenterPassword = async (req, res) => {
 // delete evacuation center
 exports.deleteEvacuationCenterById = async (req, res) => {
   try {
-    const center = await EvacuationCenter.findByIdAndDelete(req.params.id);
+    const center = await EvacuationCenter.findById(req.params.id);
     if (!center) return res.status(404).json({ error: "Evacuation center not found" });
 
-    if (center.image && fs.existsSync(center.image)) {
-      fs.unlinkSync(center.image);
+    const imagePath = center.image;
+
+    await center.deleteOne();
+
+    if (imagePath && fs.existsSync(imagePath)) {
+        fs.unlinkSync(imagePath);
     }
 
     res.json({ message: "Evacuation center deleted successfully" });

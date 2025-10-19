@@ -12,6 +12,6 @@ router.get("/:id", ...AllUsers, EvacueeController.getEvacueeById);
 router.patch("/:id", ...AdminAndEvacuee, EvacueeController.updateEvacuee);
 router.patch("/password/:id", ...Evacuee, EvacueeController.updatePassword);
 router.post("/forgot-password", EvacueeController.forgotPassword);
-router.delete("/:id", ...AdminAndEvacuationCenter, EvacueeController.deleteEvacueeById);
+router.delete("/:id", ...AdminAndEvacuee, EvacueeController.deleteEvacueeById);
 
 module.exports = router;

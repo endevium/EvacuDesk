@@ -30,7 +30,7 @@ exports.verifyOTP = async (req, res) => {
     }
 
     if (purpose === "verify") {
-      user.isVerified = true;
+      user.is_verified = true;
       await user.save();
       await UserOTP.deleteMany({ user_id: user._id, role });
       return res.json({ message: "Your Gmail account has been verified successfully" });

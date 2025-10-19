@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const EvacuationRegistration = require("../models/EvacuationRegistrationModel");
 const EvacuationCenterOccupant = require("../models/EvacuationCenterOccupantsModel");
 const EvacuationCenter = require("../models/EvacuationCenterModel");
+const Evacuee = require("../models/EvacueeModel");
 
 // create new registration
 exports.registerEvacuee = async (req, res) => {
@@ -39,7 +40,7 @@ exports.registerEvacuee = async (req, res) => {
       status: "Pending"
     });
 
-    res.status(201).json({ message: "Registration submitted successfully. Awaiting approval." });
+    res.status(201).json({ message: "Registration submitted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -180,7 +181,7 @@ exports.updateRegistrationStatus = async (req, res) => {
           evacuation_center_id: registration.evacuation_center_id,
           number_of_family_members: registration.number_of_family_members,
           date_joined: new Date(),
-          status: "active",
+          status: "Active",
         });
 
         await EvacuationCenter.findByIdAndUpdate(

@@ -4,7 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/dbconnection");
 const app = express();
-const { arcjetMiddleware } = require("./middlewares/arcjet");
+const { arcjetMiddleware } = require("./services/arcjet");
 
 app.use(cors());
 app.use(express.json());
@@ -23,5 +23,6 @@ app.use("/evacuation-center-occupant", require("./routes/EvacuationCenterOccupan
 app.use("/evacuation-registration", require("./routes/EvacuationRegistrationRoute"));
 app.use("/evacuee-request", require("./routes/EvacueeRequestRoute"));
 app.use("/bulletin", require("./routes/BulletinRoute"));
+app.use("/dashboard", require("./routes/DashboardRoute"));
 
 module.exports = app;

@@ -177,8 +177,10 @@ exports.forgotPassword = async (req, res) => {
 // delete evacuee
 exports.deleteEvacueeById = async (req, res) => {
   try {
-    const evacuee = await Evacuee.findByIdAndDelete(req.params.id);
+    const evacuee = await Evacuee.findById(req.params.id);
     if (!evacuee) return res.status(404).json({ error: "Evacuee not found" });
+
+    await evacuee.deleteOne();
 
     if (evacuee.id_picture && fs.existsSync(evacuee.id_picture)) {
       fs.unlinkSync(evacuee.id_picture);

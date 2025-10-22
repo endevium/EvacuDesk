@@ -24,5 +24,7 @@ app.use("/evacuation-registration", require("./routes/EvacuationRegistrationRout
 app.use("/evacuee-request", require("./routes/EvacueeRequestRoute"));
 app.use("/bulletin", require("./routes/BulletinRoute"));
 app.use("/dashboard", require("./routes/DashboardRoute"));
+app.use("/notification", require("./routes/NotificationRoute"));
+app.use("/push-subscription", require("./routes/PushSubscriptionRoute"));
 
 module.exports = app;

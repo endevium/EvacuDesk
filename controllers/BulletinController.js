@@ -1,8 +1,9 @@
 const Bulletin = require("../models/BulletinModel");
 const fs = require("fs");
 const path = require("path");
+const { createNotification } = require('../controllers/NotificationController');
 
-// create bulletin
+// create bulletin    
 exports.createBulletin = async (req, res) => {
   try {
     const { title, body, evacuation_center_name } = req.body;
@@ -15,10 +16,7 @@ exports.createBulletin = async (req, res) => {
       return res.status(400).json({ error: "An image is required for the bulletin" });
     }
 
-    const uploadDir = path.join(__dirname, "..", "uploads");
-    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
-
-    const uploadPath = path.join(uploadDir, Date.now() + "-" + req.file.originalname);
+    const uploadPath = path.join("uploads", Date.now() + "-" + req.file.originalname);
     fs.writeFileSync(uploadPath, req.file.buffer);
 
     await Bulletin.create({
@@ -27,6 +25,19 @@ exports.createBulletin = async (req, res) => {
       image: uploadPath.replace(/\\/g, "/"),
       evacuation_center_name
     });
+
+    // create bulletin notification to evacuees
+    try {
+      await createNotification({
+        title: `New bulletin: ${title}`,
+        body: body,
+        recipient_id: req.query.center_id || null,
+        recipient_role: 'Evacuee',
+        meta: { evacuation_center_name }
+      });
+    } catch (err) {
+      console.error('Failed to create bulletin notification:', err.message || err);
+    }
 
     res.status(201).json({ message: "Bulletin news created successfully" });
   } catch (err) {
@@ -126,5 +137,3 @@ exports.deleteBulletin = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
-

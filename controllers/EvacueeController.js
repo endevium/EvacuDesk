@@ -43,11 +43,7 @@ exports.loginEvacuee = async (req, res) => {
     const evacuee = await Evacuee.findOne({ email_address });
 
     if (!evacuee) return res.status(404).json({ error: "Evacuee not found" });
-
-    if (!evacuee.is_verified) {
-      return res.status(403).json({ error: "Invalid request" });
-    }
-
+    
     const isMatch = await bcrypt.compare(password, evacuee.password);
     if (!isMatch) return res.status(401).json({ error: "Incorrect password or email." });
 
@@ -63,7 +59,7 @@ exports.loginEvacuee = async (req, res) => {
       token,
     });
 
-    res.json({ message: "Login successful", token });
+    res.json({ message: "Login successful", token, id: evacuee._id, role: "Evacuee" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

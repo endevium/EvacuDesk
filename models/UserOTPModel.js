@@ -7,7 +7,7 @@ const UserOTPSchema = new mongoose.Schema({
   expiresAt: { type: Date, required: true, index: { expires: 0 } },
   attempts: { type: Number, default: 0 },
   used: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now, expires: "15m" }
 });
 
 module.exports = mongoose.model("UserOTP", UserOTPSchema, "user_otps");

@@ -2,6 +2,7 @@ const EvacueeRequest = require('../models/EvacueeRequestModel');
 const EvacuationCenter = require('../models/EvacuationCenterModel');
 const Evacuee = require('../models/EvacueeModel');
 const mongoose = require('mongoose');
+const { createNotification } = require('./NotificationController');
 
 // create evacuee request
 exports.createRequest = async (req, res) => {
@@ -36,6 +37,20 @@ exports.createRequest = async (req, res) => {
       description, 
       quantity,
     });
+
+    // create request notification for the evacuation center
+    try {
+      const evac = await Evacuee.findById(evacuee_id).select('first_name last_name');
+      await createNotification({
+        title: 'New evacuee request',
+        body: `${evac.first_name} ${evac.last_name} submitted a ${request_type} request`,
+        recipient_id: evacuation_center_id,
+        recipient_role: 'EvacuationCenter',
+        meta: { request_type, quantity }
+      });
+    } catch (err) {
+      console.error('Failed to notify center about request:', err.message || err);
+    }
 
     res.status(201).json({ message: 'Request created successfully' });
   } catch (err) {
@@ -128,7 +143,7 @@ exports.getRequestById = async (req, res) => {
 exports.updateRequestStatus = async (req, res) => {
   try {
     const { status } = req.body;
-    if (!status || !['pending', 'fulfilled', 'rejected'].includes(status)) {
+    if (!status || !['Pending', 'Fulfilled', 'Rejected'].includes(status)) {
       return res.status(400).json({ error: 'Invalid status value' });
     }
     const request = await EvacueeRequest.findByIdAndUpdate(
@@ -137,6 +152,20 @@ exports.updateRequestStatus = async (req, res) => {
       { new: true, runValidators: true }
     );
     if (!request) return res.status(404).json({ error: 'Request not found' }); 
+
+    // update request status notification for evacuee
+    try {
+      await Evacuee.findById(request.evacuee_id).select('first_name last_name');
+      await createNotification({
+        title: `Request ${status}`,
+        body: `Your request has been ${status.toLowerCase()}`,
+        recipient_id: request.evacuee_id,
+        recipient_role: 'Evacuee',
+        meta: { request_id: request._id, status }
+      });
+    } catch (err) {
+      console.error('Failed to notify evacuee about request status:', err.message || err);
+    }
 
     res.json({ message: 'Request status updated successfully' });
   } catch (err) {

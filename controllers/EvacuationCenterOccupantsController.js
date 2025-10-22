@@ -51,7 +51,7 @@ exports.getOccupantsByCenterId = async (req, res) => {
       .populate("evacuee_id")
       .lean(); 
 
-    const formattedOccupants = occupants.map(({ _id, evacuee_id, status, date_joined, date_left, family_members = [] }) => {
+    const formattedOccupants = occupants.map(({ _id, evacuee_id, status, date_joined, date_left, number_of_family_members }) => {
       if (evacuee_id) {
         delete evacuee_id.password;
         delete evacuee_id.createdAt;
@@ -59,7 +59,7 @@ exports.getOccupantsByCenterId = async (req, res) => {
         delete evacuee_id.__v;
       }
 
-      return { _id, evacuee: evacuee_id || {}, status, date_joined, date_left, family_members };
+      return { _id, evacuee: evacuee_id || {}, status, date_joined, date_left, number_of_family_members };
     });
 
     res.status(200).json({ evacuation_center_id: id, occupants: formattedOccupants });
@@ -126,7 +126,7 @@ exports.updateOccupantStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    if (!status || !["active", "left"].includes(status)) {
+    if (!status || !["Active", "Left"].includes(status)) {
       return res.status(400).json({ error: "Invalid status value" });
     }
 
@@ -135,7 +135,7 @@ exports.updateOccupantStatus = async (req, res) => {
       return res.status(404).json({ error: "Occupant not found" });
     }
 
-    if (status === "left" && occupant.status !== "left") {
+    if (status === "Left" && occupant.status !== "Left") {
       const familyCount = occupant.family_members?.length || 0;
 
       await EvacuationCenter.findByIdAndUpdate(

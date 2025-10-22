@@ -4,6 +4,7 @@ const path = require("path");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const UserToken = require("../models/UserTokenModel");
+const { createNotification } = require('./NotificationController');
 
 // create evacuation center
 exports.createEvacuationCenter = async (req, res) => {
@@ -27,8 +28,21 @@ exports.createEvacuationCenter = async (req, res) => {
       ...req.body,
       image: uploadPath.replace(/\\/g, "/"),
       password: hashedPassword,
-      is_verified: false,
+      is_verified: true,
     });
+
+    // create evacuation center notification to admin
+    try {
+      await createNotification({
+        title: 'New evacuation center created',
+        body: `${req.body.name} was created and awaits verification`,
+        recipient_id: req.user ? req.user.id : null,
+        recipient_role: 'Admin',
+        meta: { evacuation_center_name: req.body.name }
+      });
+    } catch (err) {
+      console.error('Failed to notify admin about new center:', err.message || err);
+    }
 
     res.status(201).json({ message: "Evacuation center created successfully" });
   } catch (err) {
@@ -63,7 +77,7 @@ exports.loginEvacuationCenter = async (req, res) => {
       token,
     });
 
-    res.status(200).json({ message: "Login successful", token });
+    res.status(200).json({ message: "Login successful", token, id: center._id });
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ error: err.message });

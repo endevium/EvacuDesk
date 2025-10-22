@@ -3,6 +3,7 @@ const EvacuationRegistration = require("../models/EvacuationRegistrationModel");
 const EvacuationCenterOccupant = require("../models/EvacuationCenterOccupantsModel");
 const EvacuationCenter = require("../models/EvacuationCenterModel");
 const Evacuee = require("../models/EvacueeModel");
+const { createNotification } = require('./NotificationController');
 
 // create new registration
 exports.registerEvacuee = async (req, res) => {
@@ -40,6 +41,19 @@ exports.registerEvacuee = async (req, res) => {
       status: "Pending"
     });
 
+    // create evacuation registration notification to evacuation center
+    try {
+      await createNotification({
+        title: 'New evacuation registration',
+        body: `${evacuee.first_name} ${evacuee.last_name} applied for ${center.name}`,
+        recipient_id: evacuation_center_id,
+        recipient_role: 'EvacuationCenter',
+        meta: { type: 'registration', evacuee_id, evacuation_center_id }
+      });
+    } catch (err) {
+      console.error('Failed to create notification for center:', err.message || err);
+    }
+
     res.status(201).json({ message: "Registration submitted successfully" });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -70,7 +84,7 @@ exports.getPendingRegistrationsByEvacueeId = async (req, res) => {
 
     const registrations = await EvacuationRegistration.find({
       evacuee_id: id,
-      status: "pending",
+      status: "Pending",
     });
 
     if (registrations.length === 0) {
@@ -94,7 +108,7 @@ exports.getApprovedRegistrationsByEvacueeId = async (req, res) => {
 
     const registrations = await EvacuationRegistration.find({
       evacuee_id: id,
-      status: "approved",
+      status: { $in: ["Approved", "approved"] },
     });
 
     if (registrations.length === 0) {
@@ -117,7 +131,31 @@ exports.getRegistrationByCenterId = async (req, res) => {
     }
 
     const registrations = await EvacuationRegistration.find({ evacuation_center_id: id })
-      .populate("evacuee_id", "first_name last_name")
+      .populate("evacuee_id", "first_name last_name sex birthdate phone_number street_number barangay city province disabilities")
+      .populate("evacuation_center_id", "name address");
+
+    res.status(200).json(registrations);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.getNotApprovedRegistrationByCenterId = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid Evacuation Center ID" });
+    }
+
+    const registrations = await EvacuationRegistration.find({
+      evacuation_center_id: id,
+      status: { $ne: "Approved" }
+    })
+      .populate(
+        "evacuee_id",
+        "first_name last_name sex birthdate phone_number street_number barangay city province disabilities"
+      )
       .populate("evacuation_center_id", "name address");
 
     res.status(200).json(registrations);
@@ -191,9 +229,21 @@ exports.updateRegistrationStatus = async (req, res) => {
       }
     }
 
+    // update registration status notification to evacuee
+    try {
+      await createNotification({
+        title: `Registration ${status}`,
+        body: `Your registration has been ${status.toLowerCase()}`,
+        recipient_id: registration.evacuee_id,
+        recipient_role: 'Evacuee',
+        meta: { registration_id: registration._id, status }
+      });
+    } catch (err) {
+      console.error('Failed to notify evacuee:', err.message || err);
+    }
+
     res.status(200).json({ message: `Registration status updated to ${status} successfully` });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
-

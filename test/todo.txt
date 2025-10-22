@@ -1,0 +1,23 @@
+TODO
+
+-kung ano lang kelangan gamitin sa response yun lang iresponseeee (iverify ano kelangan sa frontend)
+-on delete cascade 
+-date validation
+-stress testing
+
+
+SECURITY
+
+-canary token
+-encrypt endpoints
+
+
+
+LIST OF BUGS
+
+-
+
+
+
+
+

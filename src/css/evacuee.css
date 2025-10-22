@@ -19,6 +19,7 @@
     display: flex;
     flex-direction: row;
     font-family: Inter;
+    width: 97%;
 }
 
 .evacuee .evacuee-body .page-label .page-icon {
@@ -26,8 +27,8 @@
     flex-direction: column;
     background-color: #45AD7F;
     border-radius: 15px;
-    width: 50px;
-    height: 50px;
+    width: 45px;
+    height: 45px;
     justify-content: center;
     align-items: center;
     margin-right: 10px;
@@ -41,15 +42,15 @@
 }
 
 .evacuee .evacuee-body .page-label .page-label-text p {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     color: #224539;
 }
 
 .evacuee .evacuee-body .page-content {
     background-color: #f7f7f7;
-    width: 97.5%;
-    height: 532px;
+    width: 93%;
+    height: 500px;
     border-radius: 20px;
     margin-top: 15px;
     padding: 5px;
@@ -58,22 +59,24 @@
 
 .evacuee .evacuee-body .page-content h2 {
     color: #45AD7F;
+    font-size: 15px;
 }
 
 .evacuee .evacuee-body .page-content .dashboard-mini-root {
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
-    gap: 50px;
+    gap: 30px;
 }
 
 .dashboard-mini-root .dashboard-mini-card {
     width: 300px;
-    height: 80px;
+    height: 60px;
     padding: 10px;
     background-color: white;
     border-radius: 10px;
     font-family: Inter;
+    box-shadow: rgba(0, 0, 0, 0.10) 0px 3px 7px;
 }
 
 .dashboard-mini-root .dashboard-mini-card .dashboard-mini-icon {
@@ -86,14 +89,21 @@
 .dashboard-mini-root .dashboard-mini-card .dashboard-mini-icon img {
     margin-left: auto;
     margin-right: 10px;
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
     object-fit: contain;
     object-position: center;
 }
 
+.dashboard-mini-root .dashboard-mini-card h2 {
+    color: #224539;
+    font-size: 14px;
+    margin: 0;
+}
+
 .dashboard-mini-root .dashboard-mini-card p {
     color: #224539;
+    font-size: 14px;
     margin: 0;
 }
 
@@ -114,11 +124,12 @@
 
 .charts .graph-root {
     background-color: white;
-    width: 500px;
-    height: 300px;
+    width: 485px;
+    height: 290px;
     border-radius: 10px;
     display: flex;
     align-items: center;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 3px 7px;
 }
 
 
@@ -127,7 +138,7 @@
 
 .evacuee .evacuee-body .page-content-none {
     width: 97.5%;
-    height: 545px;
+    height: 490px;
     border-radius: 20px;
     overflow-y: scroll;
     padding: 5px;
@@ -135,6 +146,25 @@
 
 .evacuee .evacuee-body .page-content-none h2 {
     color: #45AD7F;
+}
+
+.evacuee .evacuee-body .evacuation-centers-buttons {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+    margin-top: 10px;
+    padding-bottom: 10px;
+}
+
+.evacuee .evacuee-body .evacuation-centers-buttons button {
+    width: 100px;
+    height: 35px;
+    border: 0;
+    border-radius: 15px;
+    color:#555;
+    font-size: 13px;
+    cursor: pointer;
 }
 
 .no-current-evac {
@@ -148,35 +178,45 @@
 .evacuee .evacuee-body .page-content-none .evacuation-centers-root {
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 10px;
 }
 
 .evacuation-center-card {
     background-color: white;
-    box-shadow: rgba(0, 0, 0, 0.15) 0px 3px 7px;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 3px 7px;
     height: 42vh;
     max-height: 42vh;
-    padding: 1rem;
     border-radius: 10px;
     width: 14vw;
 }
 
+.evacuation-center-card .evacuation-center-details {
+    padding: 10px;
+    height: 20%;
+}
+
 .evacuation-center-card h2 {
-    font-size: 17px;
+    font-size: 15px;
+    margin: 0;
     margin-bottom: 10px;
     color: #45AD7F;
 }
 
 .evacuation-center-card p {
-    font-size: 12.5px;
+    font-size: 12px;
     font-family: Inter;
     margin-top: 0px;
     margin-bottom: 5px;
 }
 
+.evacuation-center-card span {
+    font-size: 14px;
+    color: #45AD7F;
+}
+
 .evacuation-center-card .evacuation-center-image {
-    width: 99%;
+    width: 100%;
     height: 48%;
 
 }
@@ -184,14 +224,19 @@
 .evacuation-center-card .evacuation-center-image img {
     width: 100%;
     height: 100%;
-    border-radius: 10px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.evacuation-center-card .evacuation-button, .view-button {
+    padding: 15px;
 }
 
 .evacuation-center-card button {
     border: 0;
-    font-size: 14px;
+    font-size: 13px;
     width: 100%;
-    height: 42px;
+    height: 35px;
     background-color: #224539;
     border-radius: 5px;
     justify-self: end;
@@ -217,7 +262,7 @@
     display: flex;
     flex-direction: column;
     background: rgba(255, 255, 255);
-    width: 950px;
+    width: 500px;
     height: 600px;
     border: 1px #c0c0c0 solid;
     border-radius: 25px;
@@ -244,7 +289,7 @@
 .evacuation-center-info .evacuation-center-info-body .info {
     width: 100%;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     gap: 1rem;
     padding-left: 5px;
 }
@@ -254,7 +299,7 @@
 }
 
 .evacuation-center-info .evacuation-center-info-body .info .evac-img {
-    width: 50%;
+    width: 97%;
     height: 240px;
 
 }
@@ -265,26 +310,26 @@
 }
 
 .evacuation-center-info .evacuation-center-info-body .info .evac-text {
-    width: 45%;
+    width: 97%;
     display: flex;
     flex-direction: column;
     font-family: Inter;
-    padding-left: 10px;
 }
 
 .evacuation-center-info .evacuation-center-info-body .info .evac-text h2 {
     color:#45AD7F;
-    font-size: 25px;
+    font-size: 20px;
     margin-top: 0;
 }
 
 .evacuation-center-info .evacuation-center-info-body .info .evac-text p {
     margin-top: 0;
     margin-bottom: 5px;
+    font-size: 15px;
 }
 
 .evacuation-center-info .evacuation-center-info-body .family-members-section {
-    width: 100%;
+    width: 97%;
     padding-left: 5px;
 }
 
@@ -305,10 +350,20 @@
 }
 
 .evacuation-center-info .evacuation-center-info-body .family-members-section .family-members-table-root {
-    max-height: 140px;
-    overflow-y: scroll;
-    margin-bottom: 0;
-    padding-bottom: 0;
+    height: 35px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.evacuation-center-info .evacuation-center-info-body .family-members-section .family-members-table-root button {
+    height: 30px;
+    width: 30px;
+    background-color: #224539;
+    border: 0;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
 .evacuation-center-info .evacuation-center-info-body .family-members-section table {
@@ -339,9 +394,9 @@
 }
 
 .evacuation-center-info .evacuation-center-info-body .buttons {
-    width: 100%;
+    width: 97%;
     height: 50px;
-    gap: 20px;
+    gap: 15px;
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
@@ -351,11 +406,12 @@
 }
 
 .evacuation-center-info .evacuation-center-info-body .buttons button {
-    width: 175px;
-    height: 45px;
+    width: 140px;
+    height: 40px;
     border: 0;
     border-radius: 10px;
     cursor: pointer;
+    font-size: 15px;
 }
 
 .evacuation-center-info .evacuation-center-info-body .buttons .cancel-button {
@@ -558,8 +614,8 @@
 
 /* EVACUEE REQUEST */
 .page-content-request {
-    width: 97.5%;
-    height: 535px;
+    width: 95%;
+    height: 515px;
     border-radius: 20px;
     padding: 5px;
 }
@@ -589,13 +645,13 @@
 }
 
 .page-content-request .evacuee-request-table th {
-    font-size: 15px;
+    font-size: 14px;
     background-color:#c4e6d6;
     text-align: center;
 }
 
 .page-content-request .evacuee-request-table td {
-    font-size: 13.5px;
+    font-size: 13px;
 }
 
 .evacuee .evacuee-body .page-label .request-button {
@@ -605,12 +661,12 @@
     align-items: center;
     background-color: #224539;
     border: 0;
-    font-size: 15px;
+    font-size: 13px;
     margin-left: auto;
     padding-right: 1.2%;
     border-radius: 15px;
-    width: 175px;
-    height: 50px;
+    width: 150px;
+    height:45px;
     gap: 5px;
     cursor: pointer;
 }
@@ -926,38 +982,47 @@
 
 /* EVACUEE ANNOUNCEMENTS */
 .page-content-announcements {
-    width: 97.5%;
-    height: 535px;
+    width: 95%;
+    height: 510px;
     border-radius: 20px;
     padding: 5px;
     margin-top: 10px;
 }
 
 .page-content-announcements .evacuee-announcements {
-    width: 100%;
-    height: 100%;
-    max-height: 100%;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
-    overflow-y: scroll;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0;
+    align-items: start; 
+}
+
+.evacuee-announcements > * {
+    margin: 0;
+    padding: 0;
+    height: auto;
+    display: block;
 }
 
 .evacuee-announcements .announcement-card {
-    width: 90%;
-    height: 19vh;
+    width: 310px;
+    height: 110px;
     border: 1px #45AD7F solid;
     border-radius: 25px;
     box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px;
     display: flex;
     flex-direction: row;
-    padding: 20px;
+    padding: 15px;
     font-family: Inter;
+    justify-content: center;
+    align-items: center;
 }
 
 .evacuee-announcements .announcement-card .announcement-image {
-    width: 15vw;
-    height: 18.5vh;
+    width: 210px;
+    height: 110px;
 }
 
 .evacuee-announcements .announcement-card .announcement-image img {
@@ -969,34 +1034,34 @@
 .evacuee-announcements .announcement-card .announcement-text {
     width: 100%;
     margin-left: 15px;
+    margin-top: -15px;
 }
 .evacuee-announcements .announcement-card h2 {
     color: #224539;
-    margin: 0;
-    font-size: 17px;
+    margin-bottom: 0;
+    font-size: 14px;
 }
 
 .evacuee-announcements .announcement-card p {
     margin-bottom: 5px;
     margin-top: 5px;
-    font-size: 14px;
+    font-size: 12px;
 }
 
 .evacuee-announcements .announcement-card .announcement-button {
-    width: 99%;
-    height: 55px;
+    height: 45px;
     display: flex;
     justify-content: flex-end;
     align-items: flex-end;
 }
 
 .evacuee-announcements .announcement-card .announcement-button button {
-    width: 100px;
-    height: 35px;
+    width: 75px;
+    height: 28px;
     background-color: #224539;
     border-radius: 10px;
     border: 0;
-    font-size: 14px;
+    font-size: 13px;
     cursor: pointer;
 }
 
@@ -1016,8 +1081,8 @@
 
 .announcement-info .announcement-info-body {
     background: rgba(255, 255, 255);
-    width: 900px;
-    height: 600px;
+    width: 800px;
+    height: 500px;
     border: 1px #c0c0c0 solid;
     border-radius: 25px;
     box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px;
@@ -1059,19 +1124,26 @@
 .announcement-info .announcement-info-body .announcement-text h2 {
     color: #224539;
     margin-bottom: 5px;
-    font-size: 22px;
+    font-size: 19px;
 }
 
 .announcement-info .announcement-info-body .announcement-text p {
     margin-top: 5px;
     margin-bottom: 5px;
+    font-size: 14px;
 }
 
 
 
+
+
+
+
+
+
 .page-content-notifications {
-    width: 97.5%;
-    height: 485px;
+    width: 95%;
+    height: 460px;
     border-radius: 20px;
     padding: 5px;
     margin-top: 10px;
@@ -1106,7 +1178,7 @@
 }
 
 .page-content-notifications .notifications-root .notification-card {
-    width: 98%;
+    width: 97%;
     height: 10vh;
     border: 1px #ccc solid;
     border-radius: 25px;
@@ -1115,6 +1187,7 @@
     flex-direction: column;
     padding: 5px;
     font-family: Inter;
+    justify-content: center;
 }
 
 .page-content-notifications .notifications-root .notification-card .notification-text {
@@ -1122,12 +1195,12 @@
 }
 
 .page-content-notifications .notifications-root .notification-card h2 {
-    font-size: 17px;
+    font-size: 16px;
     margin-bottom: 0;
     color:#224539;
 }
 
 .page-content-notifications .notifications-root .notification-card p {
-    font-size: 15px;
+    font-size: 13px;
     margin-top: 7.5px;
 }

@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Route, Routes, Link, useLocation, useNavigate } from 'react-router-dom'
-import evacudesk from '../assets/evacudesk.png'
-import '../css/App.css'
+import evacudesk from '../../assets/evacudesk.png'
+import '../../css/App.css'
 
 function Header() {
     const location = useLocation();

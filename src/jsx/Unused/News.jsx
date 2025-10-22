@@ -1,8 +1,8 @@
 import { useState } from "react";
 
-import Header from './Header'
-import Footer from './Footer'
-import '../css/news.css'
+import Header from '../Landing/Header'
+import Footer from '../Landing/Footer'
+import '../../css/news.css'
 
 function News() {
     return(

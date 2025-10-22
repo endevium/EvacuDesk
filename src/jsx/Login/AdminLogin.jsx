@@ -1,8 +1,8 @@
-import '../css/admin-login.css';
-import evacudesk from '../assets/logo-two.png';
-import backButton from '../assets/back-button.png';
-import check from '../assets/check.png';
-import error from '../assets/error.png';
+import '../../css/admin.css';
+import evacudesk from '../../assets/logo-two.png';
+import backButton from '../../assets/back-button.png';
+import check from '../../assets/check.png';
+import error from '../../assets/error.png';
 import { useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 

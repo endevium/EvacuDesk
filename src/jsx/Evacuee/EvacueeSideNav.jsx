@@ -1,18 +1,18 @@
-import '../css/evacuee_side.css'
-import evacudesk from '../assets/evacudesk.png'
-import homeActive from '../assets/home-active.png'
-import evacuationCenterActive from '../assets/evacuation-center-active.png'
-import requestActive from '../assets/request-active.png'
-import announcementsActive from '../assets/announcements-active.png'
-import notificationsActive from '../assets/notification-active.png'
-import settingsActive from '../assets/settings-active.png'
-import home from '../assets/home.png'
-import evacuationCenter from '../assets/evacuation-center.png'
-import request from '../assets/request.png'
-import announcements from '../assets/announcements.png'
-import notifications from '../assets/notification.png'
-import settings from '../assets/settings.png'
-import logout from '../assets/logout.png'
+import '../../css/evacuee_side.css'
+import evacudesk from '../../assets/evacudesk-white.png'
+import homeActive from '../../assets/home-active.png'
+import evacuationCenterActive from '../../assets/evacuation-center-active.png'
+import requestActive from '../../assets/request-active.png'
+import announcementsActive from '../../assets/announcements-active.png'
+import notificationsActive from '../../assets/notification-active.png'
+import settingsActive from '../../assets/settings-active.png'
+import home from '../../assets/home.png'
+import evacuationCenter from '../../assets/evacuation-center.png'
+import request from '../../assets/request.png'
+import announcements from '../../assets/announcements.png'
+import notifications from '../../assets/notification.png'
+import settings from '../../assets/settings.png'
+import logout from '../../assets/logout.png'
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -21,12 +21,12 @@ function EvacueeSideNav({ activeMenu, setActiveMenu }) {
     const navigate = useNavigate();
 
     const menuItems = [
-        { id: 'home', label: 'Home', activeIcon: homeActive, icon: home },
-        { id: 'evacuation-center', label: 'Evacuation Center', activeIcon: evacuationCenterActive, icon: evacuationCenter },
-        { id: 'request', label: 'Request', activeIcon: requestActive, icon: request },
-        { id: 'announcements', label: 'Announcements', activeIcon: announcementsActive, icon: announcements },
-        { id: 'notifications', label: 'Notifications', activeIcon: notificationsActive, icon: notifications },
-        { id: 'settings', label: 'Settings', activeIcon: settingsActive, icon: settings },
+        { id: 'home', label: 'Home', activeIcon: home, icon: homeActive },
+        { id: 'evacuation-center', label: 'Evacuation Center', activeIcon: evacuationCenter, icon: evacuationCenterActive },
+        { id: 'request', label: 'Request', activeIcon: request, icon: requestActive },
+        { id: 'announcements', label: 'Announcements', activeIcon: announcements, icon: announcementsActive },
+        { id: 'notifications', label: 'Notifications', activeIcon: notifications, icon: notificationsActive },
+        { id: 'settings', label: 'Settings', activeIcon: settings, icon: settingsActive },
     ];
 
     const handleLogout = () => {

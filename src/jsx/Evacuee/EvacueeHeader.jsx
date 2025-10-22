@@ -1,5 +1,5 @@
-import '../css/evacuee-header.css'
-import profilePlaceholder from '../assets/profile-placeholder.png'
+import '../../css/evacuee-header.css'
+import profilePlaceholder from '../../assets/profile-placeholder.png'
 import { useEffect, useState } from 'react'
 
 function EvacueeHeader() {

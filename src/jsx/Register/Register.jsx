@@ -1,8 +1,8 @@
-import '../css/register.css'
-import evacudesk from '../assets/logo-two.png';
-import backButton from '../assets/back-button.png';
-import check from '../assets/check.png';
-import error from '../assets/error.png';
+import '../../css/register.css'
+import evacudesk from '../../assets/logo-two.png';
+import backButton from '../../assets/back-button.png';
+import check from '../../assets/check.png';
+import error from '../../assets/error.png';
 import { useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 
@@ -291,7 +291,6 @@ function ChooseRegister({ onRoleSelect }) {
                 <select className="role-select" id="role-select">
                     <option value="">Select Role</option>
                     <option value="evacuee">Evacuee</option>
-                    <option value="staff">Staff</option>
                 </select>
 
                 <button className="proceed-button" onClick={handleContinue}>
@@ -490,8 +489,8 @@ function EvacueeRegisterTwo({
                         required
                     >
                         <option value="">Select Sex</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
                     </select>
 
                     <label htmlFor="birthdate">Birthday</label>

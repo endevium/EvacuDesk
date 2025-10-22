@@ -1,32 +1,33 @@
 import { useState } from 'react'
-import bodyImage from '../assets/body-image.png'
-import secondaryBodyImage from '../assets/secondary-body-image.png'
-import raiseHands from '../assets/raise-hands.png'
-import gala from '../assets/gala.png'
-import donation from '../assets/donation.png'
-import fourthBodyImage from '../assets/fourth-image.png'
-import fifthImage from '../assets/fifth-image.png'
-import bulbCard from '../assets/bulb-card.png'
-import handCard from '../assets/hand-card.png'
-import cycleCard from '../assets/cycle-card.png'
-import sixthImage from '../assets/sixth-image.png'
-import family from '../assets/family.png'
-import emergencyResponse from '../assets/emergency-response.png'
-import empowerment from '../assets/empowerment.png'
-import support from '../assets/support.png'
-import eighthImage from '../assets/eighth-image.png'
+import bodyImage from '../../assets/body-image.png'
+import secondaryBodyImage from '../../assets/secondary-body-image.png'
+import raiseHands from '../../assets/raise-hands.png'
+import gala from '../../assets/gala.png'
+import donation from '../../assets/donation.png'
+import fourthBodyImage from '../../assets/fourth-image.png'
+import fifthImage from '../../assets/fifth-image.png'
+import bulbCard from '../../assets/bulb-card.png'
+import handCard from '../../assets/hand-card.png'
+import cycleCard from '../../assets/cycle-card.png'
+import sixthImage from '../../assets/sixth-image.png'
+import family from '../../assets/family.png'
+import emergencyResponse from '../../assets/emergency-response.png'
+import empowerment from '../../assets/empowerment.png'
+import support from '../../assets/support.png'
+import eighthImage from '../../assets/eighth-image.png'
 import { BrowserRouter as Router, Route, Routes, Link, useLocation } from 'react-router-dom'
-import '../css/App.css'
+import '../../css/App.css'
 import Header from './Header'
 import Footer from './Footer'
-import About from './About'
-import News from './News'
-import Contact from './Contact'
-import AdminLogin from './AdminLogin'
-import Login from './Login'
-import Register from './Register'
-import Evacuee from './Evacuee'
-import Staff from './Staff'
+import About from '../About/About'
+import News from '../Unused/News'
+import Contact from '../Contact/Contact'
+import AdminLogin from '../Login/AdminLogin'
+import Login from '../Login/Login'
+import Register from '../Register/Register'
+import Evacuee from '../Evacuee/Evacuee'
+import EvacuationCenter from '../EvacuationCenter/EvacuationCenter'
+import Admin from '../Admin/Admin'
 
 function App() {
   return (
@@ -42,7 +43,8 @@ function App() {
           <Route path='/register' element={<Register />}/>
 
           <Route path='/evacuee' element={<Evacuee />}/>
-          <Route path='/staff' element={<Staff />}/>
+          <Route path='/evacuation-center' element={<EvacuationCenter />}/>
+          <Route path='/admin' element={<Admin />}/>
         </Routes>
       </Router>
     </>

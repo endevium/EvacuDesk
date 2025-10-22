@@ -1,8 +1,8 @@
-import '../css/App.css'
-import facebookIcon from '../assets/facebook.png'
-import twitterIcon from '../assets/twitter.png'
-import linkedInIcon from '../assets/linkedin.png'
-import footerImage from '../assets/footer-image.png'
+import '../../css/App.css'
+import facebookIcon from '../../assets/facebook.png'
+import twitterIcon from '../../assets/twitter.png'
+import linkedInIcon from '../../assets/linkedin.png'
+import footerImage from '../../assets/footer-image.png'
 
 function Footer() {
     return(

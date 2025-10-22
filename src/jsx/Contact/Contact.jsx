@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 
-import Header from './Header'
-import Footer from './Footer'
-import '../css/contact.css'
-import phone from '../assets/phone.png'
-import email from '../assets/email.png'
-import check from '../assets/check.png'
+import Header from '../Landing/Header'
+import Footer from '../Landing/Footer'
+import '../../css/contact.css'
+import phone from '../../assets/phone.png'
+import email from '../../assets/email.png'
+import check from '../../assets/check.png'
 
 function Contact() {
     return(

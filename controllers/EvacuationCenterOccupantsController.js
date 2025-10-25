@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const EvacuationCenter = require('../models/EvacuationCenterModel')
 const EvacuationCenterOccupants = require("../models/EvacuationCenterOccupantsModel");
+const CenterArea = require("../models/CenterAreaModel");
 
 // 
 // // add occupant to a center
@@ -130,7 +131,7 @@ exports.updateOccupantStatus = async (req, res) => {
       return res.status(400).json({ error: "Invalid status value" });
     }
 
-    const occupant = await EvacuationCenterOccupants.findById(id);
+    const occupant = await EvacuationCenterOccupants.findOne({evacuee_id: id});
     if (!occupant) {
       return res.status(404).json({ error: "Occupant not found" });
     }
@@ -138,10 +139,17 @@ exports.updateOccupantStatus = async (req, res) => {
     if (status === "Left" && occupant.status !== "Left") {
       const familyCount = occupant.family_members?.length || 0;
 
+      // remove from evac center
       await EvacuationCenter.findByIdAndUpdate(
         occupant.evacuation_center_id,
         { $inc: { taken_slots: -familyCount } }
       );
+
+      // remove from center area
+      await CenterArea.findOneAndDelete({
+        evacuee_id: occupant.evacuee_id,
+        evacuation_center_id: occupant.evacuation_center_id,
+      });
       
       occupant.date_left = new Date();
     }

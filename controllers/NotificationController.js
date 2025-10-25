@@ -21,10 +21,10 @@ async function createNotification({ title, body, recipient_id, recipient_role, m
 
   // socket.io notifications
   if (recipient_id) {
-    console.log('📤 Sending socket notification to user:', recipient_id);
+    console.log('Sending socket notification to user:', recipient_id);
     sendToUser(recipient_id, payload);
   } else if (recipient_role) {
-    console.log('📢 Broadcasting socket notification to role:', recipient_role);
+    console.log('Broadcasting socket notification to role:', recipient_role);
     broadcastToRole(recipient_role, payload);
   }
 
@@ -38,7 +38,7 @@ async function createNotification({ title, body, recipient_id, recipient_role, m
     try {
       await webpush.sendNotification(sub.subscription, JSON.stringify(payload));
     } catch (err) {
-      console.error('❌ Failed to send web push notification:', err.message || err);
+      console.error('Failed to send web push notification:', err.message || err);
     }
   }
 

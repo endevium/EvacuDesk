@@ -26,5 +26,6 @@ app.use("/bulletin", require("./routes/BulletinRoute"));
 app.use("/dashboard", require("./routes/DashboardRoute"));
 app.use("/notification", require("./routes/NotificationRoute"));
 app.use("/push-subscription", require("./routes/PushSubscriptionRoute"));
+app.use("/center-area", require("./routes/CenterAreaRoute"));
 
 module.exports = app;

@@ -45,7 +45,7 @@ exports.registerEvacuee = async (req, res) => {
     try {
       await createNotification({
         title: 'New evacuation registration',
-        body: `${evacuee.first_name} ${evacuee.last_name} applied for ${center.name}`,
+        body: `An evacuee ${evacuee.first_name} ${evacuee.last_name} applied for ${center.name}`,
         recipient_id: evacuation_center_id,
         recipient_role: 'EvacuationCenter',
         meta: { type: 'registration', evacuee_id, evacuation_center_id }

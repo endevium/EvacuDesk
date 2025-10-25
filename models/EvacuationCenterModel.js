@@ -12,6 +12,7 @@ const EvacuationCenterSchema = new mongoose.Schema({
   city: { type: String, required: true },
   barangay: { type: String, required: true },
   street: { type: String },
+  type: { type: String, enum: ['School', 'Covered Court', 'Auditorium', 'Barangay Hall', 'Open Field', 'Others'], default: "School", required: true},
   capacity: { type: Number, required: true, min: 0 },
   taken_slots: { type: Number, default: 0, min: 0 },
   staff_contact_number: { type: String, required: true },
@@ -25,6 +26,7 @@ async function _cascadeDelete(next) {
     await mongoose.model('EvacueeRequest').deleteMany({ evacuation_center_id: doc._id });
     await mongoose.model('EvacuationCenterOccupants').deleteMany({ evacuation_center_id: doc._id });
     await mongoose.model('EvacuationRegistration').deleteMany({ evacuation_center_id: doc._id });
+    await mongoose.model('CenterArea').deleteMany({ evacuation_center_id: doc._id });
     next();
   } catch (err) {
     next(err);

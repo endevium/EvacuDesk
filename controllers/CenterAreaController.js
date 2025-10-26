@@ -54,7 +54,7 @@ exports.getCenterAreaById = async (req, res) => {
   }
 };
 
-// update center area 
+// update center area
 exports.updateCenterArea = async (req, res) => {
   try {
     const { id } = req.params;
@@ -66,6 +66,7 @@ exports.updateCenterArea = async (req, res) => {
     }
 
     if (evacuee_id) {
+      // check if an active occupant
       const occupant = await EvacuationCenterOccupants.findOne({
         evacuee_id,
         evacuation_center_id: area.evacuation_center_id,
@@ -73,30 +74,51 @@ exports.updateCenterArea = async (req, res) => {
       });
 
       if (!occupant) {
-        return res.status(400).json({ error: "This evacuee is not an active occupant in this evacuation center" });
+        return res.status(400).json({ error: "This evacuee is not an active occupant in this evacuation center." });
       }
 
+      // evacuee is already assigned to another area
       const alreadyAssigned = await CenterArea.findOne({
         evacuee_id,
         _id: { $ne: id },
       });
 
       if (alreadyAssigned) {
-        return res.status(400).json({ error: "This evacuee is already assigned to another area" });
+        return res.status(400).json({ error: "This evacuee is already assigned to another area." });
       }
 
+      // assign evacuee to the area
       area.evacuee_id = evacuee_id;
-      area.number_of_family_member = number_of_family_member || occupant.number_of_family_members;
-    }
-    // remove evacuee in center area 
-    else {
+      area.number_of_family_member = occupant.number_of_family_members;
+
+      // update occupant assigned area
+      occupant.assigned_area = area._id;
+      await occupant.save();
+
+    } else {
+      // remove evacuee to the area
+      if (area.evacuee_id) {
+        const occupant = await EvacuationCenterOccupants.findOne({
+          evacuee_id: area.evacuee_id,
+          evacuation_center_id: area.evacuation_center_id,
+          status: "Active",
+        });
+
+        if (occupant) {
+          occupant.assigned_area = null;
+          await occupant.save();
+        }
+      }
+
       area.evacuee_id = null;
       area.number_of_family_member = null;
     }
 
     await area.save();
+
     res.json({ message: "Center area updated successfully." });
   } catch (err) {
+    console.error(err);
     res.status(400).json({ error: err.message });
   }
 };

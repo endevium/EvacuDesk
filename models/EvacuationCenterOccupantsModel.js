@@ -3,6 +3,7 @@ const Schema = mongoose.Schema;
 
 const EvacuationCenterOccupantsSchema = new Schema({
     evacuation_center_id: { type: Schema.Types.ObjectId, ref: 'EvacuationCenter', required: true },
+    assigned_area: { Type: String },
     evacuee_id: { type: Schema.Types.ObjectId, ref: 'Evacuee', required: true, ref: 'Evacuee' },
     date_joined: { type: Date, default: Date.now, required: true },
     date_left: { type: Date, default: null },

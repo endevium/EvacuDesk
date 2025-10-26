@@ -22,7 +22,6 @@ const EvacueeSchema = new mongoose.Schema({
 
 async function _cascadeDelete(next) {
     const doc = this;
-    console.log("Deleting Evacuee:", doc._id);
     try {
         await mongoose.model('EvacueeRequest').deleteMany({ evacuee_id: doc._id });
         await mongoose.model('EvacuationRegistration').deleteMany({ evacuee_id: doc._id });

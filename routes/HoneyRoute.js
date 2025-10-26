@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const { triggerCanary } = require("../services/canary");
+const { blockIPHit } = require('../utils/ipblocker');
+const { recordHit } = require('../utils/hitlogger');
 
 const donators = [
   {
@@ -678,22 +680,105 @@ const donators = [
   }
 ];
 
+function getClientIP(req) {
+  return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress;
+}
 
-// route
-router.get("/admin/donations", async (req, res) => {
-  try {
-    // hidden trigger
-    await triggerCanary(`Admin donations route accessed by IP: ${req.ip}`);
+// honeypot route logic handler
+function honeypotRoute(path, fakeData, reasonDescription) {
+  router.get(path, async (req, res) => {
+    const ip = getClientIP(req);
+    const user_agent = req.headers['user-agent'];
 
-    // dummy response
-    res.status(200).json({
-      success: true,
-      count: 21,
-      donators
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-});
+    try {
+      await triggerCanary(`${reasonDescription} accessed by IP: ${ip}`);
+      await recordHit({ ip, user_agent, reason: reasonDescription });
+      // block ip 
+      // await blockIPHit({ ip, user_agent, reason: reasonDescription });
+
+      res.status(200).json({ success: true, ...fakeData });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ success: false, message: "Internal server error" });
+    }
+  });
+}
+
+// honeypot routes
+honeypotRoute(
+  "/admin/donators",
+  { 
+    count: 21,
+    donators: donators 
+  },
+  "Accessing hidden route",
+  200
+);
+
+honeypotRoute(
+  "/admin/users",
+  {
+    success: false,
+    error: "Malformed JSON request",
+    message: "Failed to parse input"
+  },
+  "Accessing hidden route",
+  400
+);
+
+honeypotRoute(
+  "/admin/system-config",
+  {
+    success: true,
+    config: {
+      maintenanceMode: false,
+      maxEvacueesPerCenter: 500,
+      version: "v1.2.3"
+    }
+  },
+  "Accessing hidden route",
+  200
+);
+
+honeypotRoute(
+  "/admin/payouts",
+  {
+    success: true,
+    payouts: [
+      { id: "683rbbfwfnsr3ru9qfhnisao33", amount: 150.5, status: "pending", createdAt: "2025-10-26T08:30:00Z" },
+      { id: "68wr2bwq2eb3rqgdd38dn3wirb", amount: 200, status: "completed", createdAt: "2025-10-25T12:15:00Z" }
+    ]
+  },
+  "Accessing hidden route",
+  200
+);
+
+honeypotRoute(
+  "/evacuee/families",
+  {
+    success: false,
+    message: "Access denied",
+    errorCode: "E403",
+    data: []
+  },
+  "Accessing hidden route",
+  403
+);
+
+honeypotRoute(
+  "/evacuee/home",
+  {
+    success: true,
+    data: {
+      welcomeMessage: "Welcome back!",
+      activeRequests: [],
+      notifications: [
+        { id: "6834fwhf3811b1e2nn3456erw", message: "Center update available", read: false, date: "2025-10-25T18:00:00Z" }
+      ]
+    }
+  },
+  "Accessing hidden route",
+  200
+);
 
 module.exports = router;

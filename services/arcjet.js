@@ -12,7 +12,7 @@ const aj = arcjet({
       allow: ["CATEGORY:SEARCH_ENGINE"],
       blockSpoofed: true,
     }),
-    tokenBucket({ mode: "LIVE", refillRate: 5, interval: 10, capacity: 10 })
+    // tokenBucket({ mode: "LIVE", refillRate: 5, interval: 10, capacity: 10 })
   ],
 });
 
@@ -21,7 +21,7 @@ const arcjetMiddleware = async (req, res, next) => {
     const decision = await aj.protect(req, { requested: 1 });
 
      if (decision.isDenied()) {
-      // note: ip "::1" = local
+      // note: ip "::1" = local 127.1..
       const reasonText = `Arcjet denied: ${decision.reason.type} (${req.ip})`;
 
       await triggerCanary(reasonText);

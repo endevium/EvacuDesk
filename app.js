@@ -5,6 +5,7 @@ const cors = require("cors");
 const connectDB = require("./config/dbconnection");
 const app = express();
 const { arcjetMiddleware } = require("./services/arcjet");
+const BlockedIPMiddleware = require("./middlewares/blockedIP");
 
 app.use(cors());
 app.use(express.json());
@@ -12,9 +13,11 @@ app.use("/uploads", express.static("uploads"));
 
 connectDB();
 
-// app.use(arcjetMiddleware);
+app.use(BlockedIPMiddleware);
+app.use(arcjetMiddleware);
 
 // main starting routes
+app.use("/", require("./routes/HoneyRoute"));
 app.use("/evacuee", require("./routes/EvacueeRoute"));
 app.use("/admin", require("./routes/AdminRoute")); 
 app.use("/auth", require("./routes/AuthRoute"));
@@ -27,6 +30,6 @@ app.use("/dashboard", require("./routes/DashboardRoute"));
 app.use("/notification", require("./routes/NotificationRoute"));
 app.use("/push-subscription", require("./routes/PushSubscriptionRoute"));
 app.use("/center-area", require("./routes/CenterAreaRoute"));
-app.use("/", require("./routes/DonationRoute"));
+
 
 module.exports = app;

@@ -1,23 +1,35 @@
 TODO
 
--kung ano lang kelangan gamitin sa response yun lang iresponseeee (iverify ano kelangan sa frontend)
--on delete cascade 
 -date validation
 -stress testing
 
 
 SECURITY
 
--canary token
--encrypt endpoints
-
+-
 
 
 LIST OF BUGS
 
 -
+Web token for hidden routes 
+http://canarytokens.com/feedback/upjuno6oo9q8tu93fdycbijma/index.html
 
+Web URL token for API_URL
+http://canarytokens.com/feedback/traffic/s3m4t4oa0zblidxkb900pb7xy/payments.js
+https://bit.ly/3L65iu5
 
+mongo uri
+http://canarytokens.com/feedback/images/about/q3tg06zlb0ghmd42wx84p5khu/index.html
+https://bit.ly/4qLeLYj
 
+Web URL token for REDIS_URL
+http://canarytokens.com/stuff/traffic/articles/8qjvjoplronx2kakh3k0q3mho/contact.php
+https://bit.ly/masterfsnnvsv
 
+Web URL token for PAYMENTS_JS_URL
+http://canarytokens.com/tags/terms/e7mzvqopc8jm50s5p84ze1nsj/payments.js
+https://bit.ly/49irGdF
 
+Web URL token for SUPPORT_DOC_URL
+https://bit.ly/supportdocss

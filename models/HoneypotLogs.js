@@ -6,6 +6,8 @@ const HoneypotLogSchema = new Schema({
   user_agent: { type: String },
   reason: { type: String, required: true },
   timestamp: { type: Date, default: Date.now }
-}, { timestamps: true }); 
+}, { timestamps: true });
+
+HoneypotLogSchema.index({ ip: 1, reason: 1 }, { unique: true });
 
 module.exports = mongoose.model('HoneypotLog', HoneypotLogSchema, 'honeypot_logs');

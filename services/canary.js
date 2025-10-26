@@ -1,7 +1,6 @@
 const axios = require("axios");
 
 const triggerCanary = async (reason = "unknown") => {
-  if (!process.env.CANARY_URL) return;
   try {
     await axios.get(process.env.CANARY_URL, {
       params: { reason, time: new Date().toISOString() },

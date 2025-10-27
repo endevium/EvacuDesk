@@ -41,7 +41,10 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
         CURRENT: 'current'
     };
 
-    const hasActiveEvacuation = currentEvac && currentEvac.status === "Active" && currentCenter;
+    const hasActiveEvacuation = currentEvac && 
+                            currentEvac.status === "Active" && 
+                            currentEvac.isActive !== false && 
+                            currentCenter;
 
     // Utility functions
     const clearAllTimeouts = () => {

@@ -80,13 +80,13 @@ function EvacueeRequest({ currentEvac, setActiveMenu }) {
         }
 
         const payload = {
-            evacuee_id: evacueeId,
-            evacuation_center_id: evacuationCenter,
-            request_type: newRequest.type,
-            quantity: newRequest.quantity,
-            description: newRequest.description,
-            date: today,
-            status: 'Pending'
+          evacuee_id: evacueeId,
+          evacuation_center_id: typeof evacuationCenter === 'object' ? evacuationCenter._id : evacuationCenter,
+          request_type: newRequest.type,
+          quantity: newRequest.quantity,
+          description: newRequest.description,
+          date: today,
+          status: 'Pending'
         };
 
         console.log(payload)
@@ -141,10 +141,14 @@ function EvacueeRequest({ currentEvac, setActiveMenu }) {
     };
 
     useEffect(() => {
-        if (currentEvac && currentEvac.length > 0) {
-            const centerId = currentEvac[0].evacuation_center_id;
-            setEvacuationCenter(centerId);
-        }
+      if (currentEvac && currentEvac.evacuation_center_id) {
+          setEvacuationCenter(currentEvac.evacuation_center_id._id);
+      } else if (currentEvac && currentEvac.length > 0) {
+          const centerId = currentEvac[0].evacuation_center_id;
+          setEvacuationCenter(centerId);
+      } else {
+          setEvacuationCenter("");
+      }
     }, [currentEvac]);
 
     useEffect(() => {

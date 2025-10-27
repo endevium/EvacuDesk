@@ -83,6 +83,77 @@ exports.getOccupantById = async (req, res) => {
   }
 };
 
+// get active occupants
+exports.getActiveOccupants = async (req, res) => {
+  try {
+    const activeOccupants = await EvacuationCenterOccupants.find({ status: "Active" })
+      .populate("evacuee_id")
+      .populate("evacuation_center_id")
+      .lean();
+
+    if (!activeOccupants || activeOccupants.length === 0) {
+      return res.status(404).json({ message: "No active occupants found" });
+    }
+
+    const formattedOccupants = activeOccupants.map(({ _id, evacuee_id, evacuation_center_id, status, date_joined, number_of_family_members }) => {
+      if (evacuee_id) {
+        delete evacuee_id.password;
+        delete evacuee_id.createdAt;
+        delete evacuee_id.updatedAt;
+        delete evacuee_id.__v;
+      }
+
+      return {
+        _id,
+        evacuee: evacuee_id || {},
+        evacuation_center: evacuation_center_id || {},
+        status,
+        date_joined,
+        number_of_family_members,
+      };
+    });
+
+    res.status(200).json({ occupants: formattedOccupants });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// get active occupant by evacuee id
+exports.getActiveOccupantById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "Invalid evacuee ID" });
+    }
+
+    const occupant = await EvacuationCenterOccupants.findOne({
+      evacuee_id: id,
+      status: "Active"
+    })
+      .populate("evacuee_id")
+      .populate("evacuation_center_id")
+      .lean();
+
+    if (!occupant) {
+      return res.status(404).json({ message: "No active occupant found for this evacuee" });
+    }
+
+    if (occupant.evacuee_id) {
+      delete occupant.evacuee_id.password;
+      delete occupant.evacuee_id.createdAt;
+      delete occupant.evacuee_id.updatedAt;
+      delete occupant.evacuee_id.__v;
+    }
+
+    res.status(200).json({ occupant });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
 // // update occupant details
 // exports.updateOccupantDetails = async (req, res) => {
 //   try {

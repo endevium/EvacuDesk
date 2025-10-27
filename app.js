@@ -13,8 +13,8 @@ app.use("/uploads", express.static("uploads"));
 
 connectDB();
 
-app.use(BlockedIPMiddleware);
-app.use(arcjetMiddleware);
+// app.use(BlockedIPMiddleware);
+// app.use(arcjetMiddleware);
 
 // main starting routes
 app.use("/", require("./routes/HoneyRoute"));

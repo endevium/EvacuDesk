@@ -716,28 +716,23 @@ honeypotRoute(
 );
 
 honeypotRoute(
-  "/admin/users",
+  "/admin/login",
   {
     success: false,
-    error: "Malformed JSON request",
-    message: "Failed to parse input"
+    error: "Internal Server Error"
   },
   "Accessing hidden route",
-  400
+  401
 );
 
 honeypotRoute(
-  "/admin/system-config",
+  "/admin/home",
   {
-    success: true,
-    config: {
-      maintenanceMode: false,
-      maxEvacueesPerCenter: 500,
-      version: "v1.2.3"
-    }
+    success: false,
+    message: "Invalid request"
   },
   "Accessing hidden route",
-  200
+  401
 );
 
 honeypotRoute(

@@ -27,9 +27,11 @@ exports.registerEvacuee = async (req, res) => {
     const existing = await EvacuationRegistration.findOne({
       evacuee_id,
       evacuation_center_id,
-      status: { $in: ["Pending", "Approved"] }
+      $or: [
+        { status: "Pending", isActive: true },
+        { status: "Approved", isActive: true }
+      ]
     });
-
     if (existing) {
       return res.status(400).json({ error: "You already have a pending registration in this evacuation center" });
     }

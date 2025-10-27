@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const EvacuationCenter = require('../models/EvacuationCenterModel')
 const EvacuationCenterOccupants = require("../models/EvacuationCenterOccupantsModel");
 const CenterArea = require("../models/CenterAreaModel");
+const EvacuationRegistration = require("../models/EvacuationRegistrationModel");
 
 // 
 // // add occupant to a center
@@ -222,9 +223,21 @@ exports.updateOccupantStatus = async (req, res) => {
         evacuation_center_id: occupant.evacuation_center_id,
       });
       
+      // update isActive status of evac reg to 
+      await EvacuationRegistration.findOneAndUpdate(
+        {
+          evacuee_id: occupant.evacuee_id,
+          evacuation_center_id: occupant.evacuation_center_id,
+          status: "Approved" 
+        },
+        {
+          isActive: false
+        }
+      );
+      
       occupant.date_left = new Date();
-      occupant.isActive = false;
     }
+
 
     occupant.status = status;
     await occupant.save();

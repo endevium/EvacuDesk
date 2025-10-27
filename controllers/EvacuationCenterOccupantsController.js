@@ -208,12 +208,12 @@ exports.updateOccupantStatus = async (req, res) => {
     }
 
     if (status === "Left" && occupant.status !== "Left") {
-      const familyCount = occupant.family_members?.length || 0;
+      const familyCount = occupant.number_of_family_members || 1; 
 
       // remove from evac center
       await EvacuationCenter.findByIdAndUpdate(
         occupant.evacuation_center_id,
-        { $inc: { taken_slots: -familyCount } }
+        { $inc: { taken_slots: -familyCount, $min: { taken_slots: 0 } } }
       );
 
       // remove from center area

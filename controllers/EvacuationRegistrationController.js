@@ -228,9 +228,37 @@ exports.updateRegistrationStatus = async (req, res) => {
           registration.evacuation_center_id,
           { $inc: { taken_slots: registration.number_of_family_members } } 
         );
+      } else {
+        // if exists
+        if (occupantExists.status === "Left") {
+          // re-activate existing occupant with left status
+          occupantExists.status = "Active";
+          occupantExists.date_joined = new Date();
+          occupantExists.date_left = null;
+          occupantExists.number_of_family_members = registration.number_of_family_members;
+          
+          await occupantExists.save();
+
+          await EvacuationCenter.findByIdAndUpdate(
+            registration.evacuation_center_id,
+            { $inc: { taken_slots: registration.number_of_family_members } } 
+          );
+        } else if (occupantExists.status === "Active") {
+          // update fam num count if changed
+          const familyCountDifference = registration.number_of_family_members - occupantExists.number_of_family_members;
+          
+          if (familyCountDifference !== 0) {
+            occupantExists.number_of_family_members = registration.number_of_family_members;
+            await occupantExists.save();
+
+            await EvacuationCenter.findByIdAndUpdate(
+              registration.evacuation_center_id,
+              { $inc: { taken_slots: familyCountDifference } } 
+            );
+          }
+        }
       }
     }
-
     // update registration status notification to evacuee
     try {
       await createNotification({

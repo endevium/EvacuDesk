@@ -1,24 +1,8 @@
-import { useEffect, useState, useRef, useMemo } from 'react';
-import { 
-    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
-    ResponsiveContainer, PieChart, Pie, Cell 
-} from 'recharts';
-
-import homeActive from '../../assets/home-active.png'
-import evacuationCenterActive from '../../assets/evacuation-center-active.png'
-import requestActive from '../../assets/request-active.png'
-import announcementsActive from '../../assets/announcements-active.png'
-import notificationsActive from '../../assets/notification-active.png'
-import settingsActive from '../../assets/settings-active.png'
-import evacCenter from '../../assets/evac-center-placeholder.png'
-import close from '../../assets/close.png'
-import addCircle from '../../assets/add_circle.png'
-import check from '../../assets/check.png'
-import error from '../../assets/error.png'
-import requestBtn from '../../assets/request-button.png'
-import fulfilled from '../../assets/request_completed.png'
-import pending from '../../assets/pending.png'
-import denied from '../../assets/denied.png'
+import { useEffect, useState, useRef } from 'react';
+import announcementsActive from '../../assets/announcements-active.png';
+import evacCenter from '../../assets/evac-center-placeholder.png';
+import close from '../../assets/close.png';
+import error from '../../assets/error.png';
 
 function EvacueeAnnouncements({
     currentEvac,
@@ -31,12 +15,14 @@ function EvacueeAnnouncements({
     const [loading, setLoading] = useState(true);
   
     useEffect(() => {
-      const storedName = localStorage.getItem("evacuationCenterName");
-      if (storedName) {
-        setEvacuationCenter(storedName.replace(/"/g, ""));
+      // Use the same logic as EvacueeRequest to get evacuation center ID
+      if (currentEvac && currentEvac.evacuation_center_id) {
+          setEvacuationCenter(currentEvac.evacuation_center_id._id);
       } else if (currentEvac && currentEvac.length > 0) {
-        const centerId = currentEvac[0].evacuation_center_id;
-        setEvacuationCenter(centerId);
+          const centerId = currentEvac[0].evacuation_center_id;
+          setEvacuationCenter(centerId);
+      } else {
+          setEvacuationCenter("");
       }
     }, [currentEvac]);
 
@@ -46,15 +32,13 @@ function EvacueeAnnouncements({
       const fetchBulletins = async () => {
         setLoading(true);
         try {
+          // Use the center ID instead of center name in the API call
           const res = await fetch(
-            `http://localhost:3000/bulletin/center-name?center_name=${encodeURIComponent(
-              evacuationCenter
-            )}`
+            `http://localhost:3000/bulletin/center/${evacuationCenter}`
           );
   
           if (!res.ok) {
             setBulletins([]);
-            // console.warn("No bulletins found.");
             return;
           }
   
@@ -69,6 +53,11 @@ function EvacueeAnnouncements({
       };
   
       fetchBulletins();
+
+      // Optional: Refresh bulletins periodically
+      const interval = setInterval(fetchBulletins, 30000); // Every 30 seconds
+    
+      return () => clearInterval(interval);
     }, [evacuationCenter]);
 
     const handleGoToCenters = () => {
@@ -115,6 +104,7 @@ function EvacueeAnnouncements({
                                     : evacCenter
                                 }
                                 alt="Announcement"
+                                onError={(e) => { e.target.src = evacCenter; }}
                             />
                             </div>
                             <div className="announcement-text">
@@ -136,8 +126,10 @@ function EvacueeAnnouncements({
                 {showAnnouncement && selectedBulletin && (
                     <div className="announcement-info">
                     <div className="announcement-info-body">
-                        <div className="close-container" onClick={handleCloseAnnouncement}>
-                        <img src={close} alt="close" />
+                        <div className="close-container">
+                          <button onClick={handleCloseAnnouncement}>
+                            <img src={close} alt="close" />
+                          </button>
                         </div>
                         <div className="announcement-image">
                         <img
@@ -147,6 +139,7 @@ function EvacueeAnnouncements({
                                 : evacCenter
                             }
                             alt="Announcement"
+                            onError={(e) => { e.target.src = evacCenter; }}
                         />
                         </div>
                         <div className="announcement-text">
@@ -181,4 +174,4 @@ function EvacueeAnnouncements({
     );
 }
 
-export default EvacueeAnnouncements
+export default EvacueeAnnouncements;

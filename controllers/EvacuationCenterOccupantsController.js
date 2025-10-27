@@ -154,7 +154,6 @@ exports.getActiveOccupantById = async (req, res) => {
   }
 };
 
-
 // // update occupant details
 // exports.updateOccupantDetails = async (req, res) => {
 //   try {

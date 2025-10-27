@@ -88,7 +88,7 @@ exports.getPendingRegistrationsByEvacueeId = async (req, res) => {
     });
 
     if (registrations.length === 0) {
-      return res.status(404).json({ message: "No pending registrations found" });
+      return res.status(204).json({ message: "No pending registrations found" });
     }
 
     res.status(200).json(registrations);

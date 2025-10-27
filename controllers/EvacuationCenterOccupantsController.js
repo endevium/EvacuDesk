@@ -92,7 +92,7 @@ exports.getActiveOccupants = async (req, res) => {
       .lean();
 
     if (!activeOccupants || activeOccupants.length === 0) {
-      return res.status(404).json({ message: "No active occupants found" });
+      return res.status(204).json({ message: "No active occupants found" });
     }
 
     const formattedOccupants = activeOccupants.map(({ _id, evacuee_id, evacuation_center_id, status, date_joined, number_of_family_members }) => {
@@ -137,7 +137,7 @@ exports.getActiveOccupantById = async (req, res) => {
       .lean();
 
     if (!occupant) {
-      return res.status(404).json({ message: "No active occupant found for this evacuee" });
+      return res.status(200).json({ message: "No active occupant found for this evacuee" });
     }
 
     if (occupant.evacuee_id) {
@@ -223,6 +223,7 @@ exports.updateOccupantStatus = async (req, res) => {
       });
       
       occupant.date_left = new Date();
+      occupant.isActive = false;
     }
 
     occupant.status = status;

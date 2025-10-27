@@ -9,7 +9,8 @@ const EvacuationCenterOccupantsSchema = new Schema({
     date_left: { type: Date, default: null },
     status: { type: String, enum: ['Active', 'Left'], default: 'Active', required: true },
     medical_needs: { type: String },
-    number_of_family_members: { type: Number }
+    number_of_family_members: { type: Number },
+    isActive: { type: Boolean, default: true}
 }, { timestamps: true });
 
 module.exports = mongoose.model('EvacuationCenterOccupants', EvacuationCenterOccupantsSchema, "evacuation_center_occupants");

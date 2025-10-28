@@ -7,6 +7,7 @@ const connectDB = require("./config/dbconnection");
 const app = express();
 const { arcjetMiddleware } = require("./services/arcjet");
 const BlockedIPMiddleware = require("./middlewares/blockedIP");
+const errorHandler = require('./middlewares/errorHandler');
 
 app.use(cors());
 app.use(express.json());
@@ -37,5 +38,6 @@ app.use("/notification", require("./routes/NotificationRoute"));
 app.use("/push-subscription", require("./routes/PushSubscriptionRoute"));
 app.use("/center-area", require("./routes/CenterAreaRoute"));
 
+app.use(errorHandler);
 
 module.exports = app;

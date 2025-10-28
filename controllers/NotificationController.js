@@ -2,6 +2,7 @@ const Notification = require('../models/NotificationModel');
 const PushSubscription = require('../models/PushSubscriptionModel');
 const { sendToUser, broadcastToRole } = require('../services/io'); 
 const webpush = require('../services/webpush');
+const asyncHandler = require('../utils/asyncHandler');
 
 async function createNotification({ title, body, recipient_id, recipient_role, meta = {} }) {
   const notification = await Notification.create({
@@ -46,50 +47,40 @@ async function createNotification({ title, body, recipient_id, recipient_role, m
 }
 
 // get notifications for an Evacuation Center
-const getEvacuationCenterNotifications = async (req, res) => {
-  try {
-    const { id } = req.params; 
+const getEvacuationCenterNotifications = asyncHandler(async (req, res) => {
+  const { id } = req.params; 
 
-    if (!id) {
-      return res.status(400).json({ error: "Evacuation center ID is required" });
-    }
-
-    const notifications = await Notification.find({
-      $or: [
-        { recipient_id: id },
-        // { recipient_role: "EvacuationCenter" }
-      ]
-    }).sort({ createdAt: -1 });
-
-    res.json({ count: notifications.length, notifications });
-  } catch (err) {
-    console.error("Error fetching center notifications:", err);
-    res.status(500).json({ error: err.message });
+  if (!id) {
+    return res.status(400).json({ error: "Evacuation center ID is required" });
   }
-};
+
+  const notifications = await Notification.find({
+    $or: [
+      { recipient_id: id },
+      // { recipient_role: "EvacuationCenter" }
+    ]
+  }).sort({ createdAt: -1 });
+
+  res.json({ count: notifications.length, notifications });
+});
 
 // get notifications for an Evacuee
-const getEvacueeNotifications = async (req, res) => {
-  try {
-    const { id } = req.params;
+const getEvacueeNotifications = asyncHandler(async (req, res) => {
+  const { id } = req.params;
 
-    if (!id) {
-      return res.status(400).json({ error: "Evacuee ID is required" });
-    }
-
-    const notifications = await Notification.find({
-      $or: [
-        { recipient_id: id },
-        // { recipient_role: "Evacuee" }
-      ]
-    }).sort({ createdAt: -1 });
-
-    res.json({ count: notifications.length, notifications });
-  } catch (err) {
-    console.error("Error fetching evacuee notifications:", err);
-    res.status(500).json({ error: err.message });
+  if (!id) {
+    return res.status(400).json({ error: "Evacuee ID is required" });
   }
-};
+
+  const notifications = await Notification.find({
+    $or: [
+      { recipient_id: id },
+      // { recipient_role: "Evacuee" }
+    ]
+  }).sort({ createdAt: -1 });
+
+  res.json({ count: notifications.length, notifications });
+});
 
 module.exports = { 
   createNotification,

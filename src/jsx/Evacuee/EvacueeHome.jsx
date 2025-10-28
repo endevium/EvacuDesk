@@ -40,7 +40,7 @@ function EvacueeHome() {
     }, [evacueeId]);
 
     const lineData = useMemo(() => {
-        if (!dashboardData) return [];
+        if (!dashboardData || !dashboardData.RequestsPerWeek) return [];
         return Object.entries(dashboardData.RequestsPerWeek).map(([week, count]) => ({
             week,
             count

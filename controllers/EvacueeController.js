@@ -10,7 +10,6 @@ const { emailSender } = require("../utils/emailSender");
 // evacuee signup
 exports.signupEvacuee = async (req, res) => {
   try {
-    // Require ID picture
     if (!req.file) {
       return res.status(400).json({ error: "A valid ID picture is required" });
     }
@@ -18,13 +17,7 @@ exports.signupEvacuee = async (req, res) => {
     const existing = await Evacuee.findOne({ email_address: req.body.email_address });
     if (existing) return res.status(400).json({ error: "The email already exists. Use a different one." });
 
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = path.join(__dirname, '../uploads');
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
-    }
-
-    // Process the file (required now)
+    // id
     const uploadPath = path.join("uploads", Date.now() + "-" + req.file.originalname);
     fs.writeFileSync(uploadPath, req.file.buffer);
 

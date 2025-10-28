@@ -57,7 +57,7 @@ const getEvacuationCenterNotifications = async (req, res) => {
     const notifications = await Notification.find({
       $or: [
         { recipient_id: id },
-        { recipient_role: "EvacuationCenter" }
+        // { recipient_role: "EvacuationCenter" }
       ]
     }).sort({ createdAt: -1 });
 
@@ -80,7 +80,7 @@ const getEvacueeNotifications = async (req, res) => {
     const notifications = await Notification.find({
       $or: [
         { recipient_id: id },
-        { recipient_role: "Evacuee" }
+        // { recipient_role: "Evacuee" }
       ]
     }).sort({ createdAt: -1 });
 

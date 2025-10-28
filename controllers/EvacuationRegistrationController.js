@@ -24,18 +24,34 @@ exports.registerEvacuee = async (req, res) => {
       return res.status(404).json({ error: "Evacuation center not found" });
     }
 
-    const existing = await EvacuationRegistration.findOne({
+    // check if evacuee is an active occupant to a center
+    const existingActiveRegistration = await EvacuationRegistration.findOne({
       evacuee_id,
-      evacuation_center_id,
-      $or: [
-        { status: "Pending", isActive: true },
-        { status: "Approved", isActive: true }
-      ]
+      status: "Approved",
+      isActive: true
     });
-    if (existing) {
-      return res.status(400).json({ error: "You already have a pending registration in this evacuation center" });
+
+    if (existingActiveRegistration) {
+      return res.status(400).json({ 
+        error: "You already have an active registration in another evacuation center." 
+      });
     }
 
+    // Check if evacuee already has a pending registration in this specific center
+    const existingPendingInThisCenter = await EvacuationRegistration.findOne({
+      evacuee_id,
+      evacuation_center_id,
+      status: "Pending",
+      isActive: true
+    });
+
+    if (existingPendingInThisCenter) {
+      return res.status(400).json({ 
+        error: "You already have a pending registration in this evacuation center" 
+      });
+    }
+
+    // create registration
     await EvacuationRegistration.create({
       evacuee_id,
       evacuation_center_id,
@@ -43,7 +59,7 @@ exports.registerEvacuee = async (req, res) => {
       status: "Pending"
     });
 
-    // create evacuation registration notification to evacuation center
+    // evacuation registration notification to evacuation center
     try {
       await createNotification({
         title: 'New evacuation registration',

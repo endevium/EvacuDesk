@@ -10,11 +10,21 @@ const { emailSender } = require("../utils/emailSender");
 // evacuee signup
 exports.signupEvacuee = async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ error: "A valid ID picture is required" });
+    // Require ID picture
+    if (!req.file) {
+      return res.status(400).json({ error: "A valid ID picture is required" });
+    }
 
     const existing = await Evacuee.findOne({ email_address: req.body.email_address });
     if (existing) return res.status(400).json({ error: "The email already exists. Use a different one." });
 
+    // Create uploads directory if it doesn't exist
+    const uploadsDir = path.join(__dirname, '../uploads');
+    if (!fs.existsSync(uploadsDir)) {
+      fs.mkdirSync(uploadsDir, { recursive: true });
+    }
+
+    // Process the file (required now)
     const uploadPath = path.join("uploads", Date.now() + "-" + req.file.originalname);
     fs.writeFileSync(uploadPath, req.file.buffer);
 
@@ -30,7 +40,9 @@ exports.signupEvacuee = async (req, res) => {
     const otp = await generateOTP(evacuee._id, "Evacuee");
     await emailSender(evacuee.email_address, evacuee.first_name, otp, "verify");
 
-    res.status(201).json({ message: "Please verify your email address. We have sent an OTP to your email." });
+    res.status(201).json({ 
+      message: "Please verify your email address. We have sent an OTP to your email",
+    });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }

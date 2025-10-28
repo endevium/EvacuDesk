@@ -17,8 +17,22 @@ const EvacueeSchema = new mongoose.Schema({
     disabilities: { type: String },
     id_picture: { type: String, required: true },
     role: { type: String, enum: ['Evacuee'], default: 'Evacuee' },
+    // auto delete unverified gmail 
+    expiresAt: { 
+        type: Date, 
+        default: function() {
+            return this.is_verified ? null : new Date(Date.now() + 60 * 5000); 
+        }
+    }
 }, { timestamps: true });
 
+EvacueeSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+EvacueeSchema.pre('save', function(next) {
+    if (this.isModified('is_verified')) {
+        this.expiresAt = this.is_verified ? null : new Date(Date.now() + 60 * 1000);
+    }
+    next();
+});
 
 async function _cascadeDelete(next) {
     const doc = this;

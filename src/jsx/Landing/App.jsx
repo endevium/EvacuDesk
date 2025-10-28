@@ -1,4 +1,7 @@
+import '../../css/App.css'
 import { useState } from 'react'
+import { BrowserRouter as Router, Route, Routes, Link, useLocation } from 'react-router-dom'
+
 import bodyImage from '../../assets/body-image.png'
 import secondaryBodyImage from '../../assets/secondary-body-image.png'
 import raiseHands from '../../assets/raise-hands.png'
@@ -15,8 +18,6 @@ import emergencyResponse from '../../assets/emergency-response.png'
 import empowerment from '../../assets/empowerment.png'
 import support from '../../assets/support.png'
 import eighthImage from '../../assets/eighth-image.png'
-import { BrowserRouter as Router, Route, Routes, Link, useLocation } from 'react-router-dom'
-import '../../css/App.css'
 import Header from './Header'
 import Footer from './Footer'
 import About from '../About/About'
@@ -29,7 +30,19 @@ import Evacuee from '../Evacuee/Evacuee'
 import EvacuationCenter from '../EvacuationCenter/EvacuationCenter'
 import Admin from '../Admin/Admin'
 
+import useNotificationSetup from '../../Hooks/PushNotification'
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 function App() {
+  const user = getUserFromLocalStorage();
+
+  try {
+    useNotificationSetup(user);
+  } catch (err) {
+    console.error('error in useNotificationSetup:', err);
+  }
+
   return (
     <> 
       <Router>
@@ -47,6 +60,8 @@ function App() {
           <Route path='/admin' element={<Admin />}/>
         </Routes>
       </Router>
+
+      <ToastContainer />
     </>
   )
 }
@@ -218,7 +233,6 @@ function FourthBody() {
   )
 }
 
-
 function FifthBody() {
   return(
     <>
@@ -278,7 +292,6 @@ function FifthBody() {
   )
 }
 
-
 function SixthBody() {
   return(
     <>
@@ -311,7 +324,6 @@ function SixthBody() {
     </>
   )
 }
-
 
 function SeventhBody() {
   return(
@@ -376,7 +388,6 @@ function SeventhBody() {
   )
 }
 
-
 function EighthBody() {
   return(
     <>
@@ -393,6 +404,18 @@ function EighthBody() {
       </div>
     </>
   ) 
+}
+
+function getUserFromLocalStorage() {
+  const evacueeId = localStorage.getItem('evacueeId')
+  const evacuationCenterId = localStorage.getItem('evacuationCenterId')
+
+  if (evacueeId) {
+    return { _id: evacueeId, role: 'Evacuee' }
+  } else if (evacuationCenterId) {
+    return { _id: evacuationCenterId, role: 'EvacuationCenter' }
+  }
+  return null
 }
 
 export default App

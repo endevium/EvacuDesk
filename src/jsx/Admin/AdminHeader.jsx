@@ -15,7 +15,7 @@ function AdminHeader() {
                     </div>
                     <div className='profile-text'>
                         <h2>Admin</h2>
-                        <p>Admin</p>
+                        <p>ADMIN</p>
                     </div>
                 </div>
             </div>

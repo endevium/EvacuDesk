@@ -1,4 +1,4 @@
-import '../../css/evacuee_side.css'
+import '../../css/admin_side.css'
 import evacudesk from '../../assets/evacudesk-white.png'
 import homeActive from '../../assets/home-active.png'
 import evacuationCenterActive from '../../assets/evacuation-center-active.png'
@@ -20,24 +20,27 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 function AdminSideNav({ activeMenu, setActiveMenu }) {
+    const [showConfirmation, setShowConfirmation] = useState(false);
     const navigate = useNavigate();
 
     const menuItems = [
         { id: 'home', label: 'Home', activeIcon: home, icon: homeActive },
-        { id: 'manage-evacuees', label: 'Evacuation Centers', activeIcon: evacuationCenter, icon: evacuationCenterActive },
+        { id: 'create-evac', label: 'Evacuation Centers', activeIcon: evacuationCenter, icon: evacuationCenterActive },
         { id: 'announcements', label: 'Announcements', activeIcon: announcements, icon: announcementsActive },
-        { id: 'notifications', label: 'Notifications', activeIcon: notifications, icon: notificationsActive }
     ];
 
     const handleLogout = () => {
         localStorage.removeItem("adminToken");
-
-        navigate("/login");
+        navigate("/adl");
+        setShowConfirmation(false);
     };
+
+    const handleShowConfirmation = () => setShowConfirmation(true);
+    const handleCloseShowConfirmation = () => setShowConfirmation(false);
 
     return(
         <>
-            <div className='evac-side-nav'>
+            <div className='admin-side-nav'>
                 <div className='side-nav-body'>
                     <div className='logo'>
                         <img src={evacudesk}/>
@@ -61,7 +64,7 @@ function AdminSideNav({ activeMenu, setActiveMenu }) {
                         </div>
 
                         <div className='logout-root'>
-                            <div className='logout-item' onClick={handleLogout}>
+                            <div className='logout-item' onClick={handleShowConfirmation}>
                                 <img src={logout}/>
                                 <p>Log Out</p>
                             </div>
@@ -69,6 +72,21 @@ function AdminSideNav({ activeMenu, setActiveMenu }) {
                     </div>
                 </div>
             </div>
+
+            {showConfirmation && (
+                <div className="confirm-logout">
+                    <div className="confirm-logout-body">
+                        <div className="error-text">
+                            <h2>Confirm Logout</h2>
+                            <p>Are you sure you want to log out?</p>
+                        </div>
+                        <div className="buttons">
+                            <button className='yes-button' onClick={handleLogout}>Yes</button>
+                            <button className='cancel-button' onClick={handleCloseShowConfirmation}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     )
 }

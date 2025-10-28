@@ -1,24 +1,10 @@
-import { useEffect, useState, useRef, useMemo } from 'react';
-import { 
-    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
-    ResponsiveContainer, PieChart, Pie, Cell 
-} from 'recharts';
+import { useEffect, useState, useRef } from 'react';
 
-import homeActive from '../../assets/home-active.png'
-import evacuationCenterActive from '../../assets/evacuation-center-active.png'
 import requestActive from '../../assets/request-active.png'
-import announcementsActive from '../../assets/announcements-active.png'
-import notificationsActive from '../../assets/notification-active.png'
-import settingsActive from '../../assets/settings-active.png'
-import evacCenter from '../../assets/evac-center-placeholder.png'
 import close from '../../assets/close.png'
-import addCircle from '../../assets/add_circle.png'
 import check from '../../assets/check.png'
 import error from '../../assets/error.png'
 import requestBtn from '../../assets/request-button.png'
-import fulfilled from '../../assets/request_completed.png'
-import pending from '../../assets/pending.png'
-import denied from '../../assets/denied.png'
 
 function EvacueeRequest({ currentEvac, setActiveMenu }) {
     const [evacuationCenter, setEvacuationCenter] = useState("");
@@ -80,13 +66,13 @@ function EvacueeRequest({ currentEvac, setActiveMenu }) {
         }
 
         const payload = {
-            evacuee_id: evacueeId,
-            evacuation_center_id: evacuationCenter,
-            request_type: newRequest.type,
-            quantity: newRequest.quantity,
-            description: newRequest.description,
-            date: today,
-            status: 'Pending'
+          evacuee_id: evacueeId,
+          evacuation_center_id: typeof evacuationCenter === 'object' ? evacuationCenter._id : evacuationCenter,
+          request_type: newRequest.type,
+          quantity: newRequest.quantity,
+          description: newRequest.description,
+          date: today,
+          status: 'Pending'
         };
 
         console.log(payload)
@@ -141,10 +127,14 @@ function EvacueeRequest({ currentEvac, setActiveMenu }) {
     };
 
     useEffect(() => {
-        if (currentEvac && currentEvac.length > 0) {
-            const centerId = currentEvac[0].evacuation_center_id;
-            setEvacuationCenter(centerId);
-        }
+      if (currentEvac && currentEvac.evacuation_center_id) {
+          setEvacuationCenter(currentEvac.evacuation_center_id._id);
+      } else if (currentEvac && currentEvac.length > 0) {
+          const centerId = currentEvac[0].evacuation_center_id;
+          setEvacuationCenter(centerId);
+      } else {
+          setEvacuationCenter("");
+      }
     }, [currentEvac]);
 
     useEffect(() => {

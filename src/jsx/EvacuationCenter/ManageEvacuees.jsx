@@ -1,5 +1,6 @@
 import '../../css/evacuation-center.css'
 import { useState, useEffect, useRef } from 'react'
+import Select from "react-select"
 
 import homeActive from '../../assets/home-active.png'
 import evacuationCenterActive from '../../assets/evacuation-center-active.png'
@@ -19,14 +20,22 @@ import denied from '../../assets/denied.png'
 
 function ManageEvacuees() {
     const [showAdditionalDetails, setShowAdditionalDetails] = useState(false);
+    const [showAssignArea, setShowAssignArea] = useState(false);
     const [selectedEvacuee, setSelectedEvacuee] = useState(null);
     const [activeFilter, setActiveFilter] = useState("all");
     const [evacuees, setEvacuees] = useState([]);
+    const [selectedAreas, setSelectedAreas] = useState([]);
 
     const [showResponse, setShowResponse] = useState(false);
     const [responseMessage, setResponseMessage] = useState("");
     const [responseType, setResponseType] = useState("");
     const [exitAnim, setExitAnim] = useState(false);
+    const areas = [
+        { value: "1", label: "Area No. 1" },
+        { value: "2", label: "Area No. 2" },
+        { value: "3", label: "Area No. 3" },
+        { value: "4", label: "Area No. 4" },
+    ];
 
     const showTimeout = useRef(null);
     const exitTimeout = useRef(null);
@@ -163,6 +172,11 @@ function ManageEvacuees() {
         setSelectedEvacuee(null);
     };
 
+    const handleAreaChange = (e) => {
+        const values = Array.from(e.target.selectedOptions, opt => opt.value);
+        setSelectedAreas(values);
+    };
+
     const handleMarkPickedUp = (id) => {
         setEvacuees(prev =>
             prev.map(evacuee =>
@@ -170,6 +184,9 @@ function ManageEvacuees() {
             )
         );
     };
+
+    const handleShowAssignArea = () => setShowAssignArea(true);
+    const handleCloseAssignArea = () => setShowAssignArea(false);
     
     const filteredEvacuees = evacuees.filter(evacuee => {
         if (activeFilter === 'all') return true;
@@ -200,29 +217,8 @@ function ManageEvacuees() {
                     <img src={evacuationCenterActive}/>
                 </div>
                 <div className='page-label-text'>
-                    <p>Manage Evacuees</p>
+                    <p>Manage Evacuees (0/100)</p>
                 </div>
-            </div>
-
-            <div className='evacuation-centers-buttons'>
-                <button 
-                    className={activeFilter === 'all' ? 'active' : ''} 
-                    onClick={() => setActiveFilter('all')}
-                >
-                    All
-                </button>
-                <button 
-                    className={activeFilter === 'active' ? 'active' : ''} 
-                    onClick={() => setActiveFilter('active')}
-                >
-                    Active
-                </button>
-                <button 
-                    className={activeFilter === 'pickup' ? 'active' : ''} 
-                    onClick={() => setActiveFilter('pickup')}
-                >
-                    For Pick-up
-                </button>
             </div>
 
             <div className='page-content-manage-evacuees'>
@@ -258,25 +254,29 @@ function ManageEvacuees() {
                                     <td>{evacuee.familyMembers}</td>
                                     <td>{evacuee.status}</td>
                                     <td className='actions-cell'>
-                                        {evacuee.status === "For Pick-up" ? (
-                                            <button 
-                                                className='mark-picked-button' 
-                                                onClick={() => handleMarkPickedUp(evacuee.id)}
-                                            >
-                                                Update
-                                            </button>
-                                        ) : (
-                                            <button className={
-                                                evacuee.status === "Left"
-                                                    ? "disabled-button" 
-                                                    : "dismiss-button"
+                                        <button className={
+                                            evacuee.status === "Left"
+                                                ? "disabled-button" 
+                                                : "mark-picked-button"
                                             } 
-                                            onClick={() => dismissEvacuee(evacuee.id)}
+
                                             disabled={evacuee.status === "Left"}
-                                            >
-                                                Dismiss
-                                            </button>
-                                        )}
+                                            onClick={handleShowAssignArea}
+                                        >
+                                            Assign
+                                        </button>
+
+                                        <button className={
+                                            evacuee.status === "Left"
+                                                ? "disabled-button" 
+                                                : "dismiss-button"
+                                        } 
+                                        onClick={() => dismissEvacuee(evacuee.id)}
+                                        disabled={evacuee.status === "Left"}
+                                        >
+                                            Dismiss
+                                        </button>
+
                                         <button 
                                             className='details-button' 
                                             onClick={() => handleOpenShowDetails(evacuee)}
@@ -315,6 +315,43 @@ function ManageEvacuees() {
                                     View Picture
                                 </a>
                             </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showAssignArea && (
+                <div className='assign-area'>
+                    <div className='assign-area-body'>
+                        <div className="close-container">
+                            <button onClick={handleCloseAssignArea}>
+                                <img src={close} alt="close" />
+                            </button>
+                        </div>
+
+                        <div className='details'>
+                            <h2>Assign Area</h2>
+                            <label>Area</label>
+                            <Select
+                                isMulti
+                                className='select-input'
+                                classNamePrefix="select"
+                                options={areas}
+                                value={selectedAreas}
+                                onChange={setSelectedAreas}
+                            />
+
+                            <div className="buttons">
+                                <button
+                                    type="reset"
+                                    className="clear-button"
+                                >
+                                    Clear
+                                </button>
+                                <button type="submit" className="submit-button">
+                                    Assign
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

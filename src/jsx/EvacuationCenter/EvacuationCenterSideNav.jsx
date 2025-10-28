@@ -7,6 +7,7 @@ import requestActive from '../../assets/request-active.png'
 import announcementsActive from '../../assets/announcements-active.png'
 import notificationsActive from '../../assets/notification-active.png'
 import settingsActive from '../../assets/settings-active.png'
+import areaActive from '../../assets/area-active.png'
 import home from '../../assets/home.png'
 import evacuationCenter from '../../assets/evacuation-center.png'
 import users from '../../assets/users.png'
@@ -14,16 +15,19 @@ import request from '../../assets/request.png'
 import announcements from '../../assets/announcements.png'
 import notifications from '../../assets/notification.png'
 import settings from '../../assets/settings.png'
+import area from '../../assets/area.png'
 import logout from '../../assets/logout.png'
 
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 function EvacuationCenterSideNav({ activeMenu, setActiveMenu }) {
+    const [showConfirmation, setShowConfirmation] = useState(false);
     const navigate = useNavigate();
 
     const menuItems = [
         { id: 'home', label: 'Home', activeIcon: home, icon: homeActive },
+        { id: 'manage-areas', label: 'Manage Areas', activeIcon: area, icon: areaActive },
         { id: 'manage-evacuees', label: 'Manage Evacuees', activeIcon: evacuationCenter, icon: evacuationCenterActive },
         { id: 'manage-registrations', label: 'Manage Registrations', activeIcon: users, icon: usersActive },
         { id: 'manage-requests', label: 'Manage Requests', activeIcon: request, icon: requestActive },
@@ -37,7 +41,11 @@ function EvacuationCenterSideNav({ activeMenu, setActiveMenu }) {
         localStorage.removeItem("evacuationCenterId");
 
         navigate("/login");
+        setShowConfirmation(false);
     };
+
+    const handleShowConfirmation = () => setShowConfirmation(true);
+    const handleCloseShowConfirmation = () => setShowConfirmation(false);
 
     return(
         <>
@@ -65,7 +73,7 @@ function EvacuationCenterSideNav({ activeMenu, setActiveMenu }) {
                         </div>
 
                         <div className='logout-root'>
-                            <div className='logout-item'>
+                            <div className='logout-item' onClick={handleShowConfirmation}>
                                 <img src={logout}/>
                                 <p>Log Out</p>
                             </div>
@@ -73,6 +81,21 @@ function EvacuationCenterSideNav({ activeMenu, setActiveMenu }) {
                     </div>
                 </div>
             </div>
+
+            {showConfirmation && (
+                <div className="confirm-logout">
+                    <div className="confirm-logout-body">
+                        <div className="error-text">
+                            <h2>Confirm Logout</h2>
+                            <p>Are you sure you want to log out?</p>
+                        </div>
+                        <div className="buttons">
+                            <button className='yes-button' onClick={handleLogout}>Yes</button>
+                            <button className='cancel-button' onClick={handleCloseShowConfirmation}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     )
 }

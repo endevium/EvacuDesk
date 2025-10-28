@@ -9,6 +9,7 @@ import ManageRequests from './ManageRequests';
 import EvacuationCenterAnnouncements from './EvacuationCenterAnnouncements';
 import EvacuationCenterNotifications from './EvacuationCenterNotifications';
 import EvacuationCenterSettings from './EvacuationCenterSettings';
+import ManageAreas from './ManageAreas';
 import { useState } from 'react';
 
 function EvacuationCenter() {
@@ -17,15 +18,14 @@ function EvacuationCenter() {
         switch (activeMenu) {
         case 'home':
             return <EvacuationCenterHome />;
+        case 'manage-areas':
+            return <ManageAreas />;
         case 'manage-evacuees':
-            return <ManageEvacuees 
-            />;
+            return <ManageEvacuees />;
         case 'manage-registrations':
-            return <ManageRegistrations
-            />
+            return <ManageRegistrations />
         case 'manage-requests':
-            return <ManageRequests
-            />;
+            return <ManageRequests />;
         case 'announcements':
             return <EvacuationCenterAnnouncements />;
         case 'notifications':

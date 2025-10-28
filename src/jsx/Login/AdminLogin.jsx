@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 
 function AdminLogin() {
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [showResponse, setShowResponse] = useState(false);
     const [responseMessage, setResponseMessage] = useState("");
@@ -64,8 +65,11 @@ function AdminLogin() {
                     exitTimeout.current = setTimeout(() => {
                         setShowResponse(false);
                         setExitAnim(false);
+                        navigate("/admin")
                     }, 400);
                 }, 3000);
+
+                localStorage.setItem("adminToken", data.token);
             })
             .catch((error) => {
                 setLoading(false); 

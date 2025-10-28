@@ -1,8 +1,13 @@
 import '../../css/admin.css';
+import error from '../../assets/error.png'
 
 import AdminSideNav from "./AdminSideNav";
 import AdminHeader from "./AdminHeader";
 import AdminHome from './AdminHome';
+import AdminAnnouncements from './AdminAnnouncements';
+import AdminNotifications from './AdminNotifications';
+import CreateEvacuationCenter from './CreateEvacuationCenter';
+
 
 import { useState } from 'react';
 
@@ -12,6 +17,12 @@ function Admin() {
         switch (activeMenu) {
         case 'home':
             return <AdminHome />;
+        case 'create-evac':
+            return <CreateEvacuationCenter />;
+        case 'announcements':
+            return <AdminAnnouncements />;
+        case 'notifications':
+            return <AdminNotifications />;
         default:
             return <AdminHome />;
         }

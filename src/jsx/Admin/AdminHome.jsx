@@ -73,7 +73,7 @@ function AdminHome() {
                 </div>
             </div>
             <div className='page-content'>
-                <h2>Evacuation Center Overview</h2>
+                <h2>Overall Evacuation Center Overview</h2>
                 <div className='dashboard-mini-root'>
                 <div className="dashboard-mini-card">
                     <div className="dashboard-mini-icon">
@@ -102,7 +102,7 @@ function AdminHome() {
                 <br/>
                 <div className='charts'>
                     <div className='line-graph'>
-                        <h2>Requests Overview</h2>
+                        <h2>Overall Requests Overview</h2>
                         <div className='graph-root'>
                             <ResponsiveContainer width="95%" height="90%">
                                 <PieChart>
@@ -124,7 +124,7 @@ function AdminHome() {
                         </div>
                     </div>
                     <div className='pie-chart'>
-                        <h2>Center Occupancy vs Capacity</h2>
+                        <h2>Overall Center Occupancy</h2>
                         <div className='graph-root'>               
                             <ResponsiveContainer width="95%" height="90%">
                                 <PieChart>

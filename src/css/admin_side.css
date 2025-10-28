@@ -1,4 +1,4 @@
-.evac-side-nav {
+.admin-side-nav {
     width: 16rem;
     height: 100vh;
     background-color: #224539;
@@ -98,8 +98,8 @@
     object-position: center;
 }
 
-.logout-root {
-    margin-top: 25vh;
+.admin-side-nav .logout-root {
+    margin-top: 50vh;
 }
 
 .logout-item {
@@ -129,3 +129,4 @@
     object-fit: contain;
     object-position: center;
 }
+

@@ -7,21 +7,15 @@ import check from '../../assets/check.png'
 import error from '../../assets/error.png'
 import requestBtn from '../../assets/request-button.png'
 
-function EvacuationCenterAnnouncements() {
+function AdminAnnouncements() {
     const [showAnnouncement, setShowAnnouncement] = useState(false);
     const [bulletins, setBulletins] = useState([]);
     const [selectedBulletin, setSelectedBulletin] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showCreateAnnouncement, setShowCreateAnnouncement] = useState(false);
-    const id = localStorage.getItem("evacuationCenterId");
-    const evacuationCenterName = localStorage.getItem("centerName");
-    const token = localStorage.getItem("evacuationCenterToken");
+    const token = localStorage.getItem("adminToken");
 
-    const [title, setTitle] = useState("");
-    const [body, setBody] = useState("");
-    const [image, setImage] = useState(null);
-    const [previewImage, setPreviewImage] = useState(evacCenter);
-
+    // RESPONSE BODY
     const [showResponse, setShowResponse] = useState(false);
     const [responseMessage, setResponseMessage] = useState("");
     const [responseType, setResponseType] = useState("");
@@ -30,14 +24,6 @@ function EvacuationCenterAnnouncements() {
     const showTimeout = useRef(null);
     const exitTimeout = useRef(null);
 
-    const handleImageChange = (e) => {
-        const file = e.target.files && e.target.files[0];
-        if (!file) return;                
-        setImage(file);                  
-        const objectUrl = URL.createObjectURL(file);
-        setPreviewImage(objectUrl); 
-    };
-    
     const clearAllTimeouts = () => {
         if (showTimeout.current) {
         clearTimeout(showTimeout.current);
@@ -47,6 +33,29 @@ function EvacuationCenterAnnouncements() {
         clearTimeout(exitTimeout.current);
         exitTimeout.current = null;
         }
+    };
+
+    // CREATE ANNOUNCEMENT
+    const [title, setTitle] = useState("");
+    const [body, setBody] = useState("");
+    const [image, setImage] = useState(null);
+    const [previewImage, setPreviewImage] = useState(evacCenter);
+
+    const handleShowAnnouncement = (bulletin) => {
+        setSelectedBulletin(bulletin);
+        setShowAnnouncement(true);
+    };
+    const handleCloseAnnouncement = () => setShowAnnouncement(false);
+
+    const handleShowCreateAnnouncement = () => setShowCreateAnnouncement(true);
+    const handleCloseCreateAnnouncement = () => setShowCreateAnnouncement(false);
+
+    const handleImageChange = (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;                
+        setImage(file);                  
+        const objectUrl = URL.createObjectURL(file);
+        setPreviewImage(objectUrl); 
     };
 
     const handleClear = () => {
@@ -62,86 +71,12 @@ function EvacuationCenterAnnouncements() {
         }
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!title || !body || !image) {
-            alert("Please fill in all fields.");
-            return;
-        }
-        await createAnnouncement(title, body, image);
-    };
-
-    const createAnnouncement = async (title, body, image) => {
-        clearAllTimeouts();
-        setLoading(true);
-        try {
-            const formData = new FormData();
-            formData.append("title", title || "");
-            formData.append("body", body || "");
-            formData.append("evacuation_center_name", evacuationCenterName || "");
-
-            if (image) {
-                formData.append("image", image); 
-            }
-
-            const response = await fetch("http://localhost:3000/bulletin/", {
-                method: "POST",
-                headers: { 
-                    "Authorization": `Bearer ${token}`,
-                },
-                body: formData,
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || "Announcement creation failed");
-            }
-
-            setResponseMessage("Announcement created successfully!");
-            setResponseType("success");
-            setShowResponse(true);
-
-            showTimeout.current = setTimeout(() => {
-                setExitAnim(true);
-                exitTimeout.current = setTimeout(() => {
-                    setShowResponse(false);
-                    setExitAnim(false);
-                }, 400);
-            }, 4000);
-
-            handleCloseCreateAnnouncement();
-        } catch (error) {
-            setResponseMessage(error.message);
-            setResponseType("error");
-            setShowResponse(true);
-
-            showTimeout.current = setTimeout(() => {
-                setExitAnim(true);
-                exitTimeout.current = setTimeout(() => {
-                    setShowResponse(false);
-                    setExitAnim(false);
-                }, 400);
-            }, 4000);
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    const handleShowAnnouncement = (bulletin) => {
-        setSelectedBulletin(bulletin);
-        setShowAnnouncement(true);
-    };
-
-    const handleCloseAnnouncement = () => setShowAnnouncement(false);
-    const handleShowCreateAnnouncement = () => setShowCreateAnnouncement(true);
-    const handleCloseCreateAnnouncement = () => setShowCreateAnnouncement(false);
-
+    // FETCH BULLETINS
     useEffect(() => {
         const fetchBulletins = async () => {
             setLoading(true);
             try {
-                const res = await fetch(`http://localhost:3000/bulletin/center-name?center_name=${encodeURIComponent(evacuationCenterName)}`, {
+                const res = await fetch("http://localhost:3000/bulletin", {
                     method: "GET",
                     headers: {
                         "Authorization": `Bearer ${token}`
@@ -150,11 +85,13 @@ function EvacuationCenterAnnouncements() {
     
                 if (!res.ok) {
                     setBulletins([]);
+                    console.warn("No bulletins found.");
                     return;
                 }
-    
+
                 const data = await res.json();
                 setBulletins(data);
+
             } catch (error) {
                 console.error("Error fetching bulletins:", error);
                 setBulletins([]);
@@ -164,7 +101,7 @@ function EvacuationCenterAnnouncements() {
         };
     
         fetchBulletins();
-    }, [evacuationCenterName]);
+    }, []);
 
     useEffect(() => {
         return () => {
@@ -204,10 +141,6 @@ function EvacuationCenterAnnouncements() {
                 <div className="page-label-text">
                     <p>Announcements</p>
                 </div>
-                <button className="create-announcement-button" onClick={handleShowCreateAnnouncement}>
-                    <img src={requestBtn} alt="create" />
-                    Create Announcement
-                </button>
             </div>
 
             <div className='page-content-announcements'>
@@ -331,4 +264,4 @@ function EvacuationCenterAnnouncements() {
     );
 }
 
-export default EvacuationCenterAnnouncements
+export default AdminAnnouncements

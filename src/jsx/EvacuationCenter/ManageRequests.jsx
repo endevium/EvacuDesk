@@ -42,36 +42,33 @@ function ManageRequests() {
     const evacuationCenterId = localStorage.getItem("evacuationCenterId");
     const token = localStorage.getItem("evacuationCenterToken");
 
-    const filteredRequests = requests.filter(request => {
+    const filteredRequests = Array.isArray(requests)
+    ? requests.filter(request => {
         if (activeFilter === 'all') return true;
         if (activeFilter === 'pending') return request.status === 'Pending';
         if (activeFilter === 'declined') return request.status === 'Declined';
         return true;
-    });
-
-
+        })
+    : [];
 
     useEffect(() => {
         let interval;
 
         const fetchRequests = async () => {
-          try {
-            const response = await fetch(`http://localhost:3000/evacuee-request/center/${evacuationCenterId}`, {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-            });
-    
-            const data = await response.json();
-    
-            localStorage.setItem("evacueeRequests", JSON.stringify(data));
-    
-            setRequests(data);
-          } catch (error) {
-            console.error("Error fetching requests:", error);
-          }
+            try {
+                const response = await fetch(`http://localhost:3000/evacuee-request/center/${evacuationCenterId}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+        
+                const data = await response.json();
+                setRequests(data);
+            } catch (error) {
+                console.error("Error fetching requests:", error);
+            }
         };
     
         fetchRequests();
@@ -274,7 +271,7 @@ function ManageRequests() {
                                         onClick={() => fulfillRequest(request._id)}
                                         disabled={request.status === "Fulfilled" || request.status === "Rejected"}
                                     >
-                                        Fulfill
+                                        Approve
                                     </button>
                                     <button 
                                         className={

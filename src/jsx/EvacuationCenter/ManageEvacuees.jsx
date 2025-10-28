@@ -54,7 +54,7 @@ function ManageEvacuees() {
     const evacuationCenterId = localStorage.getItem("evacuationCenterId"); 
     const token = localStorage.getItem("evacuationCenterToken");
 
-    // Fetch evacuees
+    // get evacuees
     useEffect(() => {
         const fetchEvacuees = async () => {
             try {
@@ -70,9 +70,9 @@ function ManageEvacuees() {
 
                 if (data && Array.isArray(data.occupants)) {
                     const mappedEvacuees = data.occupants.map((occ) => {
-                        const evacuee = occ.evacuee;
+                        const evacuee = occ.evacuee_id; 
                         const fullName = `${evacuee.first_name} ${evacuee.last_name}`;
-                        const address = `${evacuee.barangay}, ${evacuee.city}, ${evacuee.province}`;
+                        const address = `${evacuee.barangay || "N/A"}, ${evacuee.city || "N/A"}, ${evacuee.province || "N/A"}`;
 
                         const age = evacuee.birthdate
                             ? Math.floor((new Date() - new Date(evacuee.birthdate)) / (365.25 * 24 * 60 * 60 * 1000))
@@ -89,9 +89,11 @@ function ManageEvacuees() {
                             phone: evacuee.phone_number || "N/A",
                             address,
                             medical: evacuee.disabilities || "None",
-                            idPicture: evacuee.id_picture ? `http://localhost:3000/${evacuee.id_picture}` : "https://via.placeholder.com/120",
+                            idPicture: evacuee.id_picture
+                                ? `http://localhost:3000/${evacuee.id_picture}`
+                                : "https://via.placeholder.com/120",
                             familyMembers: occ.number_of_family_members || 0,
-                            assigned_area: occ.assigned_area || null
+                            assigned_area: occ.assigned_area ? occ.assigned_area.area_number : null
                         };
                     });
 
@@ -110,7 +112,7 @@ function ManageEvacuees() {
         return () => clearInterval(interval);
     }, [evacuationCenterId]);
 
-    // Fetch areas for assignment
+    // get areas for assignment
     const fetchAreas = async () => {
         try {
             const res = await fetch(`http://localhost:3000/center-area/center/${evacuationCenterId}`, {
@@ -125,7 +127,6 @@ function ManageEvacuees() {
             }
             
             const data = await res.json();
-            // Format areas for React Select
             const formattedAreas = data.map(area => ({
                 value: area._id,
                 label: `${area.area_number} (${area.available_space} available of ${area.capacity})`,
@@ -139,9 +140,10 @@ function ManageEvacuees() {
 
     const dismissEvacuee = async (id) => {
         try {
-            const payload = {
-                status: "Left"
-            }
+            // setLoading(true);
+            clearAllTimeouts();
+
+            const payload = { status: "Left" };
 
             const res = await fetch(`http://localhost:3000/evacuation-center-occupant/status/${id}`, {
                 method: "PATCH",
@@ -157,11 +159,17 @@ function ManageEvacuees() {
             if (!res.ok) {
                 throw new Error(data.error || "Failed to dismiss evacuee");
             }
-      
+
+            setEvacuees(prev =>
+                prev.map(e =>
+                    e.id === id ? { ...e, status: "Left" } : e
+                )
+            );
+
             setResponseMessage("Evacuee dismissed successfully!");
             setResponseType("success");
             setShowResponse(true);
-      
+
             showTimeout.current = setTimeout(() => {
                 setExitAnim(true);
                 exitTimeout.current = setTimeout(() => {
@@ -171,10 +179,11 @@ function ManageEvacuees() {
             }, 3000);
 
         } catch (error) {
+            console.error("Error dismissing evacuee:", error);
             setResponseMessage(error.message || "Error dismissing evacuee");
             setResponseType("error");
             setShowResponse(true);
-      
+
             showTimeout.current = setTimeout(() => {
                 setExitAnim(true);
                 exitTimeout.current = setTimeout(() => {
@@ -258,7 +267,7 @@ function ManageEvacuees() {
 
     const handleShowAssignArea = (evacuee) => {
         setSelectedEvacuee(evacuee);
-        fetchAreas(); // Refresh available areas
+        fetchAreas();
         setShowAssignArea(true);
     };
 
@@ -397,7 +406,7 @@ function ManageEvacuees() {
                             <p><strong>Address:</strong> {selectedEvacuee.address}</p>
                             <p><strong>Number of Family Members:</strong> {selectedEvacuee.familyMembers}</p>
                             <p><strong>Medical Conditions:</strong> {selectedEvacuee.medical}</p>
-                            <p><strong>Assigned Area:</strong> {selectedEvacuee.assigned_area ? "Yes" : "No"}</p>
+                            <p><strong>Assigned Area:</strong> {selectedEvacuee.assigned_area || "Not Assigned"}</p>
                             <p>
                                 <strong>ID Picture:</strong>{' '}
                                 <a href={selectedEvacuee.idPicture} target="_blank" rel="noopener noreferrer">
@@ -408,7 +417,7 @@ function ManageEvacuees() {
                     </div>
                 </div>
             )}
-
+            
             {showAssignArea && selectedEvacuee && (
                 <div className='assign-area'>
                     <div className='assign-area-body'>

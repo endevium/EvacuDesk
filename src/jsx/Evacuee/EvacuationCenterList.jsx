@@ -196,12 +196,14 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
 
     const handleLeaveEvacuation = async () => {
         try {
-            const evacueeId = localStorage.getItem("evacueeId");
             const token = localStorage.getItem("evacueeToken");
-            if (!evacueeId) throw new Error("Evacuee ID not found.");
+            
+            if (!currentEvac || !currentEvac._id) {
+                throw new Error("No active evacuation found");
+            }
 
             const response = await fetch(
-                `http://localhost:3000/evacuation-center-occupant/status/${evacueeId}`,
+                `http://localhost:3000/evacuation-center-occupant/status/${currentEvac._id}`, 
                 {
                     method: "PATCH",
                     headers: {
@@ -219,6 +221,7 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
             
             showTimeout.current = setTimeout(() => {
                 handleCloseCurrentEvac();
+                window.location.reload();
             }, 4000);
         } catch (error) {
             console.error("Error leaving evacuation:", error);

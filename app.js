@@ -1,5 +1,6 @@
 require("dotenv").config(); 
-
+const fs = require("fs");
+const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/dbconnection");
@@ -9,6 +10,11 @@ const BlockedIPMiddleware = require("./middlewares/blockedIP");
 
 app.use(cors());
 app.use(express.json());
+
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
 app.use("/uploads", express.static("uploads"));
 
 connectDB();

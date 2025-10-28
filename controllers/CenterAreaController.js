@@ -164,6 +164,12 @@ exports.addOccupantToArea = async (req, res) => {
 
     await area.save();
 
+    await EvacuationCenterOccupants.findOneAndUpdate(
+      { evacuee_id, evacuation_center_id: area.evacuation_center_id },
+      { assigned_area: area._id }
+    );
+
+
     res.json({ message: "Occupant added to area successfully." });
   } catch (err) {
     console.error(err);

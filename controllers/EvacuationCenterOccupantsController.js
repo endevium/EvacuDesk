@@ -213,16 +213,26 @@ exports.updateOccupantStatus = async (req, res) => {
       // remove from evac center
       await EvacuationCenter.findByIdAndUpdate(
         occupant.evacuation_center_id,
-        { $inc: { taken_slots: -familyCount, $min: { taken_slots: 0 } } }
+        { $inc: { taken_slots: -familyCount } }
       );
 
-      // remove from center area
-      await CenterArea.findOneAndDelete({
-        evacuee_id: occupant.evacuee_id,
-        evacuation_center_id: occupant.evacuation_center_id,
-      });
+      // REMOVE FROM CENTER AREA - CORRECTED
+      // Find the area where this occupant exists and remove them from occupants array
+      await CenterArea.updateOne(
+        {
+          evacuation_center_id: occupant.evacuation_center_id,
+          "occupants.evacuee_id": occupant.evacuee_id
+        },
+        {
+          $pull: {
+            occupants: {
+              evacuee_id: occupant.evacuee_id
+            }
+          }
+        }
+      );
       
-      // update isActive status of evac reg to 
+      // update isActive status of evac reg to false
       await EvacuationRegistration.findOneAndUpdate(
         {
           evacuee_id: occupant.evacuee_id,
@@ -236,7 +246,6 @@ exports.updateOccupantStatus = async (req, res) => {
       
       occupant.date_left = new Date();
     }
-
 
     occupant.status = status;
     await occupant.save();

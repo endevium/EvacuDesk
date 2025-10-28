@@ -41,31 +41,33 @@ exports.getAllOccupants = async (req, res) => {
 };
 
 // get occupants by evacuation center id
+// get occupants by evacuation center id - NO VIRTUALS VERSION
 exports.getOccupantsByCenterId = async (req, res) => {
   try {
     const { id } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ error: "Invalid evacuation center ID" });
+    const center = await EvacuationCenter.findById(id);
+    if (!center) {
+      return res.status(404).json({ error: "Evacuation center not found" });
     }
 
-    const occupants = await EvacuationCenterOccupants.find({ evacuation_center_id: id })
-      .populate("evacuee_id")
-      .lean(); 
+    const occupants = await EvacuationCenterOccupants.find({
+      evacuation_center_id: id
+    })
+    .populate("evacuee_id", "first_name last_name")
+    .select('-__v'); 
 
-    const formattedOccupants = occupants.map(({ _id, evacuee_id, status, date_joined, date_left, number_of_family_members }) => {
-      if (evacuee_id) {
-        delete evacuee_id.password;
-        delete evacuee_id.createdAt;
-        delete evacuee_id.updatedAt;
-        delete evacuee_id.__v;
-      }
+    const plainOccupants = occupants.map(occ => ({
+      ...occ.toObject(),
+      assigned_area: occ.assigned_area ? { area_number: 'Area Info' } : null
+    }));
 
-      return { _id, evacuee: evacuee_id || {}, status, date_joined, date_left, number_of_family_members };
+    res.json({
+      evacuation_center_id: id,
+      occupants: plainOccupants
     });
-
-    res.status(200).json({ evacuation_center_id: id, occupants: formattedOccupants });
   } catch (err) {
+    console.error('❌ Error in getOccupantsByCenterId:', err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -202,7 +204,7 @@ exports.updateOccupantStatus = async (req, res) => {
       return res.status(400).json({ error: "Invalid status value" });
     }
 
-    const occupant = await EvacuationCenterOccupants.findOne({evacuee_id: id});
+    const occupant = await EvacuationCenterOccupants.findById(id);
     if (!occupant) {
       return res.status(404).json({ error: "Occupant not found" });
     }
@@ -216,8 +218,7 @@ exports.updateOccupantStatus = async (req, res) => {
         { $inc: { taken_slots: -familyCount } }
       );
 
-      // REMOVE FROM CENTER AREA - CORRECTED
-      // Find the area where this occupant exists and remove them from occupants array
+      // update occupant from occupant in area 
       await CenterArea.updateOne(
         {
           evacuation_center_id: occupant.evacuation_center_id,

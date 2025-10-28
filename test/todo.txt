@@ -33,3 +33,29 @@ https://bit.ly/49irGdF
 
 Web URL token for SUPPORT_DOC_URL
 https://bit.ly/supportdocss
+
+
+
+exports.getEvacueesByCenterId = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const center = await EvacuationCenter.findById(id);
+    if (!center) {
+      return res.status(404).json({ error: "Evacuation center not found" });
+    }
+
+    const occupants = await EvacuationCenterOccupants.find({
+      evacuation_center_id: id
+    })
+    .populate("evacuee_id", "first_name last_name email_address is_verified street_number barangay city province country phone_number sex birthdate disabilities id_picture role")
+    .populate("assigned_area", "area_number");
+
+    res.json({
+      evacuation_center_id: id,
+      occupants: occupants
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

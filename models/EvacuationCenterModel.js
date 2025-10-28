@@ -32,7 +32,8 @@ async function _cascadeDelete(next) {
     next(err);
   }
 }
+
 EvacuationCenterSchema.pre('remove', _cascadeDelete);
-+EvacuationCenterSchema.pre('deleteOne', { document: true, query: false }, _cascadeDelete);
+EvacuationCenterSchema.pre('deleteOne', { document: true, query: false }, _cascadeDelete); 
 
 module.exports = mongoose.model("EvacuationCenter", EvacuationCenterSchema, "evacuation_centers");

@@ -37,7 +37,7 @@ exports.registerEvacuee = async (req, res) => {
       });
     }
 
-    // Check if evacuee already has a pending registration in this specific center
+    // check if evacuee already has a pending registration in this specific center
     const existingPendingInThisCenter = await EvacuationRegistration.findOne({
       evacuee_id,
       evacuation_center_id,

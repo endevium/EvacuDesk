@@ -289,6 +289,7 @@ function EvacueeLogin({
     showTimeout,
     exitTimeout,
   }) {
+    const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [rememberMe, setRememberMe] = useState(false); 
@@ -377,7 +378,7 @@ function EvacueeLogin({
                         onChange={(e) => setRememberMe(e.target.checked)}
                     />
                     <label htmlFor="rememberMe">Remember Me</label>
-                    <span>Forgot Password?</span>
+                    <span onClick={() => navigate("/forgot-password")}>Forgot Password?</span>
                 </div>
                 <button onClick={handleLoginClick}>Login</button>
                 <p>
@@ -401,6 +402,7 @@ function StaffLogin({
     showTimeout,
     exitTimeout,
   }) {
+    const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [rememberMe, setRememberMe] = useState(false); 
@@ -489,7 +491,7 @@ function StaffLogin({
                         onChange={(e) => setRememberMe(e.target.checked)}
                     />
                     <label htmlFor="rememberMe">Remember Me</label>
-                    <span>Forgot Password?</span>
+
                 </div>
                 <button onClick={handleLoginClick}>Login</button>
                 <p>

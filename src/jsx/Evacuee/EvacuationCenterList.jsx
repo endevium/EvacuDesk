@@ -19,11 +19,14 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
     const [pendingEvac, setPendingEvacuation] = useState([]);
     const [centers, setCenters] = useState([]);
     const [familyMembers, setFamilyMembers] = useState([]);
+    const [areas, setAreas] = useState([]);
+    const [showAreas, setShowAreas] = useState(false);
     const [pendingCenters, setPendingCenters] = useState({});
     const [responseMessage, setResponseMessage] = useState("");
     const [responseType, setResponseType] = useState("success");
     const [activeFilter, setActiveFilter] = useState("all");
     const [numberOfFamilyMembers, setNumberOfFamilyMembers] = useState(0);
+    const evacueeId = localStorage.getItem("evacueeId");
     
     const [newMember, setNewMember] = useState({
         firstName: '', lastName: '', sex: '', birthdate: '', address: '', medical: ''
@@ -201,7 +204,7 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
             if (!evacueeId) throw new Error("Evacuee ID not found.");
 
             const response = await fetch(
-                `http://localhost:3000/evacuation-center-occupant/status/${evacueeId}`,
+                `http://localhost:3000/evacuation-center-occupant/status/${currentEvac._id}`,
                 {
                     method: "PATCH",
                     headers: {
@@ -293,6 +296,35 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
         if (!center?.image) return evacCenter;
         return `http://localhost:3000/${center.image}`;
     };
+
+    // fetch areas
+    const getAreas = async () => {
+        try {
+            const res = await fetch(`http://localhost:3000/center-area/center/${currentCenter._id}`, {
+                method: "GET",
+            })
+
+            if (!res.ok) {
+                setAreas([]);
+                throw new Error("Failed to fetch areas");
+            }
+            
+            const data = await res.json();
+            setAreas(data);
+        } catch (error) {
+            console.error("Error fetching areas:", error);
+        }
+    }
+
+    const handleShowAreas = () => {
+        getAreas();
+        setShowAreas(true);
+    }
+
+    const handleCloseShowAreas = () => {
+        setAreas([]);
+        setShowAreas(false);
+    }
 
     // Component render functions
     const renderResponsePopup = () => (
@@ -473,7 +505,6 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
                 <div className='evac-text'>
                     <h2>{selectedCenter?.name}</h2>
                     <p>Address: {selectedCenter?.street}, {selectedCenter?.barangay}, {selectedCenter?.city}, {selectedCenter?.province}</p>
-                    <p>Staff: {selectedCenter?.staff_name}</p>
                     <p>Contact No.: {selectedCenter?.staff_contact_number}</p>
                     <p>Capacity: {selectedCenter?.taken_slots}/{selectedCenter?.capacity}</p>
                 </div>
@@ -508,7 +539,6 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
                 <div className='evac-text'>
                     <h2>{selectedCenter?.name}</h2>
                     <p>Address: {selectedCenter?.street}, {selectedCenter?.barangay}, {selectedCenter?.city}, {selectedCenter?.province}</p>
-                    <p>Staff: {selectedCenter?.staff_name}</p>
                     <p>Contact No.: {selectedCenter?.staff_contact_number}</p>
                     <p>Capacity: {selectedCenter?.taken_slots}/{selectedCenter?.capacity}</p>
                     {currentEvac && (
@@ -517,6 +547,9 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
                     {currentEvac && (
                         <p>Family Members: {currentEvac.number_of_family_members}</p>
                     )}
+                    <p onClick={handleShowAreas}>Assigned Area: 
+                        <span>(View Areas)</span>
+                    </p>
                 </div>
             </div>
 
@@ -615,6 +648,43 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
         )
     );
 
+    const renderViewAreasModel = () => (
+        showAreas && (
+            <div className='view-areas'>
+                <div className='view-areas-body'>
+                    <div className='close-container'>
+                        <button onClick={handleCloseShowAreas}>
+                            <img src={close} alt='close' />
+                        </button>
+                    </div>
+
+                    <div className='view-area'>
+                        <h2>View Areas</h2>
+                        <div className='areas-root'>
+                            {areas.map(area => {
+                                const evacueeInside = area.occupants?.some(
+                                occ => occ.evacuee_id?._id === evacueeId
+                                );
+
+                                const areaClass = evacueeInside
+                                ? "current-area"
+                                : area.current_occupancy > 0
+                                ? "occupied-area"
+                                : "area";
+
+                                return (
+                                    <div key={area._id} className={areaClass}>
+                                        <p>{area.area_number}</p>
+                                    </div>
+                                );
+                            })}  
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    );
+
     return (
         <>  
             {renderResponsePopup()}
@@ -631,6 +701,7 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
             {renderEvacInfoModal()}
             {renderCurrentEvacModal()}
             {renderAddFamilyModal()}
+            {renderViewAreasModel()}
         </>
     );
 }

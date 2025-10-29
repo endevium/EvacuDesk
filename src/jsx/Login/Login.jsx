@@ -1,8 +1,11 @@
 import '../../css/login.css';
+import '../../css/ResetPassword.css'
 import evacudesk from '../../assets/logo-two.png';
 import backButton from '../../assets/back-button.png';
 import check from '../../assets/check.png';
 import error from '../../assets/error.png';
+import Eye from '../../assets/Eye.png';
+import Eyeoff from '../../assets/Eyeoff.png';
 import { useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 
@@ -13,6 +16,7 @@ function Login() {
     const [responseMessage, setResponseMessage] = useState("");
     const [responseType, setResponseType] = useState("");
     const [exitAnim, setExitAnim] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate()
 
     const loadingTimeout = useRef(null);
@@ -268,7 +272,7 @@ function ChooseLogin({ onRoleSelect }) {
                 <select className="role-select" id="role-select">
                     <option value="">Select Role</option>
                     <option value="evacuee">Evacuee</option>
-                    <option value="staff">Evacuation Center</option>
+                    <option value="staff">PDRRMO</option>
                 </select>
 
                 <button className="proceed-button" onClick={handleContinue}>
@@ -295,9 +299,11 @@ function EvacueeLogin({
     showTimeout,
     exitTimeout,
   }) {
+    const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [rememberMe, setRememberMe] = useState(false); 
+    const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
         const savedEmail = localStorage.getItem("evacuee_email");
@@ -367,12 +373,23 @@ function EvacueeLogin({
                 />
 
                 <label>Password</label>
-                <input
-                    type="password"
-                    placeholder="********"
+                <div className="password-wrapper">
+                    <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                />
+                    required
+                    className="password-input"
+                    />
+                    <button
+                    type="button"
+                    className="eye-btn"
+                    onClick={() => setShowPassword(!showPassword)}
+                    >
+                        {showPassword ? <img src= {Eyeoff} /> : <img src= {Eye} />}
+                    </button>
+                </div>
 
                 <div className="additionals">
                     <input
@@ -407,9 +424,11 @@ function StaffLogin({
     showTimeout,
     exitTimeout,
   }) {
+    const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [rememberMe, setRememberMe] = useState(false); 
+    const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
         const savedEmail = localStorage.getItem("staff_email");
@@ -479,12 +498,23 @@ function StaffLogin({
                 />
 
                 <label>Password</label>
-                <input
-                    type="password"
-                    placeholder="********"
+                <div className="password-wrapper">
+                    <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                />
+                    required
+                    className="password-input"
+                    />
+                    <button
+                    type="button"
+                    className="eye-btn"
+                    onClick={() => setShowPassword(!showPassword)}
+                    >
+                        {showPassword ? <img src= {Eyeoff} /> : <img src= {Eye} />}
+                    </button>
+                </div>
 
                 <div className="additionals">
                     <input

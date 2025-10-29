@@ -1,5 +1,6 @@
 import '../../css/admin.css'
 import { useMemo, useState, useEffect } from 'react';
+import { jsPDF } from "jspdf";
 import { 
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
     ResponsiveContainer, PieChart, Pie, Cell 
@@ -39,7 +40,6 @@ function AdminHome() {
         fetchDashboard();
     }, []);
 
-
     const requestsPie = useMemo(() => {
         if (!dashboardData) return [];
         return [
@@ -62,6 +62,38 @@ function AdminHome() {
     const centerOccupancyColors = ["#45AD7F", "#E0E0E0"];
     const requestColors = ["#45AD7F", "#224539", '#E0E0E0' ];
 
+    const handleGenerateReport = () => {
+        if (!dashboardData) return alert("No data to generate report.");
+
+        const doc = new jsPDF();
+
+        // Report Header
+        doc.setFontSize(18);
+        doc.text("EvacuDesk: Admin Dashboard Report", 20, 20);
+        doc.setFontSize(12);
+        doc.text(`Overall Centers`, 20, 30);
+        doc.text(`Generated on: ${new Date().toLocaleString()}`, 20, 37);
+
+        // Divider
+        doc.line(20, 40, 190, 40);
+
+        // Dashboard Summary
+        doc.setFontSize(14);
+        doc.text("Summary", 20, 50);
+        doc.setFontSize(12);
+        doc.text(`(Overall) Fulfilled Requests: ${dashboardData.Fulfilled}`, 20, 60);
+        doc.text(`(Overall) Pending Requests: ${dashboardData.Pending}`, 20, 67);
+        doc.text(`(Overall) Declined Requests: ${dashboardData.Declined}`, 20, 74);
+        doc.text(`(Overall) Occupied Slots: ${dashboardData.OccupiedSlots}`, 20, 84);
+        doc.text(`(Overall) Available Slots: ${dashboardData.UnoccupiedSlots}`, 20, 91);
+
+        // Footer
+        doc.setFontSize(10);
+        doc.text("EvacuDesk - Generated Automatically", 20, 280);
+
+        doc.save(`Evacuation_Report_Admin.pdf`);
+    };
+
     return(
         <>
             <div className='page-label'>
@@ -71,7 +103,11 @@ function AdminHome() {
                 <div className='page-label-text'>
                     <p>Home</p>
                 </div>
+                <button className="create-report-button" onClick={handleGenerateReport}>
+                    Generate Report
+                </button>
             </div>
+
             <div className='page-content'>
                 <h2>Overall Evacuation Center Overview</h2>
                 <div className='dashboard-mini-root'>

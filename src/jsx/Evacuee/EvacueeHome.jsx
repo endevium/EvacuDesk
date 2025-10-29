@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
+import { jsPDF } from "jspdf";
 import { 
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
     ResponsiveContainer, PieChart, Pie, Cell 
@@ -59,6 +60,42 @@ function EvacueeHome() {
     
     const pieColors = ['#45AD7F', '#E0E0E0'];
 
+    const handleGenerateReport = () => {
+        if (!dashboardData) return alert("No data to generate report.");
+        const requestsSummary = Object.entries(dashboardData.RequestsPerWeek || {})
+            .map(([week, count]) => `${week}: ${count}`)
+            .join(", ");
+
+        const doc = new jsPDF();
+
+        // Report Header
+        doc.setFontSize(18);
+        doc.text("EvacuDesk: Evacuee Dashboard Report", 20, 20);
+        doc.setFontSize(12);
+        doc.text(`Evacuee`, 20, 30);
+        doc.text(`Generated on: ${new Date().toLocaleString()}`, 20, 37);
+
+        // Divider
+        doc.line(20, 40, 190, 40);
+
+        // Dashboard Summary
+        doc.setFontSize(14);
+        doc.text("Summary", 20, 50);
+        doc.setFontSize(12);
+        doc.text(`Fulfilled Requests: ${dashboardData.Fulfilled}`, 20, 60);
+        doc.text(`Pending Requests: ${dashboardData.Pending}`, 20, 67);
+        doc.text(`Declined Requests: ${dashboardData.Declined}`, 20, 74);
+        doc.text(`Requests per Week: ${requestsSummary}`, 20, 84);
+        doc.text(`Occupied Slots: ${dashboardData.OccupiedSlots}`, 20, 94);
+        doc.text(`Available Slots: ${dashboardData.UnoccupiedSlots}`, 20, 104);
+
+        // Footer
+        doc.setFontSize(10);
+        doc.text("EvacuDesk - Generated Automatically", 20, 280);
+
+        doc.save(`Evacuee_${evacueeId}_Report.pdf`);
+    };
+
     return(
         <>
             <div className='page-label'>
@@ -68,6 +105,9 @@ function EvacueeHome() {
                 <div className='page-label-text'>
                     <p>Home</p>
                 </div>
+                <button className="request-button" onClick={handleGenerateReport}>
+                    Generate Report
+                </button>
             </div>
             <div className='page-content'>
                 <h2>Requests Overview</h2>

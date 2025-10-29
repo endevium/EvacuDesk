@@ -1,0 +1,262 @@
+/* --- BACK BUTTON --- */
+.reset-form {
+    margin: 15px 25px;
+}
+
+.back-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.back-btn img.icon {
+    width: 28px;
+    height: 28px;
+    transition: transform 0.2s ease;
+}
+
+.back-btn:hover img.icon {
+    transform: scale(1.1);
+}
+
+/* --- MAIN CONTENT --- */
+.account-setting-main-content {
+    margin-top: 15px;
+    background-color: #f9fafb;
+    height:  550px;
+    overflow-y: scroll;
+    padding: 30px 50px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    font-family: Inter;
+}
+
+/* --- SECTION HEADERS --- */
+.setting-header h2 {
+    font-size: 24px;
+    color: #224539;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e6e6e6;
+    padding-bottom: 10px;
+}
+
+.setting-section {
+    margin-top: 25px;
+}
+
+.setting-section h3 {
+    font-size: 1.2rem;
+    color: #224539;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.section-subtitle {
+    color: #888;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+/* --- PROFILE CARD --- */
+.profile-card {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 0 6px #000000(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+.profile-avatar {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.profile-avatar img {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #ddd;
+}
+
+.profile-details h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.profile-details p {
+    color: #777;
+    margin-bottom: 10px;
+}
+
+.profile-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.upload-btn,
+.delete-btn {
+    background-color: #eef2ff;
+    color: #000000;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    font-size: 0.85rem;
+}
+
+.upload-btn:hover {
+    background-color: #dbeafe;
+}
+
+.delete-btn {
+    background-color: #224539;
+    color: #fdfdfd;
+}
+
+.delete-btn:hover {
+    background-color: #45AD7F;
+}
+
+/* --- FORM STYLES --- */
+.form-row {
+    padding: 10px 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 20px;
+}
+
+.form-field {
+    padding: 10px 10px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.form-field label {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.form-field input {
+    padding: 10px 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    background-color: #fff;
+    transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-field input:focus {
+    outline: none;
+    border-color: #224539;
+    box-shadow: 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* Disabled input */
+.form-field input:disabled {
+    background-color: #f1f5f9;
+    cursor: not-allowed;
+    color: #777;
+}
+
+/* Edit/Save Button beside Email */
+.edit-save-btn {
+    padding: 0px 30px;
+    background-color: #224539;
+    color: white;
+    border: none;
+    border-radius: 10px 10px ;
+    cursor: pointer;
+    height: 30px;
+    font-size: 0.9em;
+}
+
+
+
+.edit-save-btn:hover {
+    background-color: #45AD7F;
+}
+
+/* --- DIVIDER --- */
+.divider {
+    height: 1px;
+    background-color: #e5e7eb;
+    margin: 25px 0;
+}
+
+/* --- PASSWORD FIELD --- */
+.password-field-wrapper {
+    max-width: 300px;
+
+}
+
+.password-input-dots {
+    font-size: 2em;
+    letter-spacing: 5px;
+    padding: 5px 10px;
+}
+
+/* --- ACCOUNT SECURITY --- */
+.account-security-actions {
+    display: flex;
+    gap: 15px;
+}
+
+.security-logout-btn,
+.security-delete-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.security-logout-btn {
+    background-color: #f3f4f6;
+    color: #111827;
+}
+
+.security-logout-btn:hover {
+    background-color: #e5e7eb;
+}
+
+.security-delete-btn {
+    background-color: #224539;
+    color: white;
+}
+
+.security-delete-btn:hover {
+    background-color: #45AD7F;
+}
+
+/* --- RESPONSIVE DESIGN --- */
+@media (max-width: 768px) {
+    .account-setting-main-content {
+        padding: 20px;
+    }
+
+    .form-row {
+        flex-direction: column;
+    }
+
+    .profile-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .profile-avatar {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+}

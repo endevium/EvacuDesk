@@ -33,7 +33,6 @@ function EvacuationCenterSideNav({ activeMenu, setActiveMenu }) {
         { id: 'manage-requests', label: 'Manage Requests', activeIcon: request, icon: requestActive },
         { id: 'announcements', label: 'Announcements', activeIcon: announcements, icon: announcementsActive },
         { id: 'notifications', label: 'Notifications', activeIcon: notifications, icon: notificationsActive },
-        { id: 'settings', label: 'Settings', activeIcon: settings, icon: settingsActive },
     ];
 
     const handleLogout = () => {
@@ -49,7 +48,7 @@ function EvacuationCenterSideNav({ activeMenu, setActiveMenu }) {
 
     return(
         <>
-            <div className='evac-side-nav'>
+            <div className='staff-side-nav'>
                 <div className='side-nav-body'>
                     <div className='logo'>
                         <img src={evacudesk}/>

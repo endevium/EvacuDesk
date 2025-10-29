@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
+import { jsPDF } from "jspdf";
 import { 
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
     ResponsiveContainer, PieChart, Pie, Cell 
@@ -44,9 +45,9 @@ function EvacuationCenterHome() {
     const requestsPie = useMemo(() => {
         if (!dashboardData) return [];
         return [
-        { name: "Fulfilled", value: dashboardData.Fulfilled },
-        { name: "Pending", value: dashboardData.Pending },
-        { name: "Declined", value: dashboardData.Declined },
+        { name: "Fulfilled", value: dashboardData.Fulfilled || 0 },
+        { name: "Pending", value: dashboardData.Pending || 0 },
+        { name: "Declined", value: dashboardData.Declined || 0 },
         ];
     }, [dashboardData]);
 
@@ -63,6 +64,39 @@ function EvacuationCenterHome() {
     const centerOccupancyColors = ["#45AD7F", "#E0E0E0"];
     const requestColors = ["#45AD7F", "#224539", '#E0E0E0' ];
 
+    // Generate Dashboard Report
+    const handleGenerateReport = () => {
+        if (!dashboardData) return alert("No data to generate report.");
+
+        const doc = new jsPDF();
+
+        // Report Header
+        doc.setFontSize(18);
+        doc.text("EvacuDesk: Evacuation Center Dashboard Report", 20, 20);
+        doc.setFontSize(12);
+        doc.text(`Evacuation Center`, 20, 30);
+        doc.text(`Generated on: ${new Date().toLocaleString()}`, 20, 37);
+
+        // Divider
+        doc.line(20, 40, 190, 40);
+
+        // Dashboard Summary
+        doc.setFontSize(14);
+        doc.text("Summary", 20, 50);
+        doc.setFontSize(12);
+        doc.text(`Fulfilled Requests: ${dashboardData.Fulfilled}`, 20, 60);
+        doc.text(`Pending Requests: ${dashboardData.Pending}`, 20, 67);
+        doc.text(`Declined Requests: ${dashboardData.Declined}`, 20, 74);
+        doc.text(`Occupied Slots: ${dashboardData.OccupiedSlots}`, 20, 84);
+        doc.text(`Available Slots: ${dashboardData.UnoccupiedSlots}`, 20, 91);
+
+        // Footer
+        doc.setFontSize(10);
+        doc.text("EvacuDesk - Generated Automatically", 20, 280);
+
+        doc.save(`Evacuation_Center_${evacuationCenterId}_Report.pdf`);
+    };
+
     return(
         <>
             <div className='page-label'>
@@ -72,6 +106,9 @@ function EvacuationCenterHome() {
                 <div className='page-label-text'>
                     <p>Home</p>
                 </div>
+                <button className="create-report-button" onClick={handleGenerateReport}>
+                    Generate Report
+                </button>
             </div>
             <div className='page-content'>
                 <h2>Evacuation Center Overview</h2>
@@ -105,15 +142,10 @@ function EvacuationCenterHome() {
                     <div className='line-graph'>
                         <h2>Requests Overview</h2>
                         <div className='graph-root'>
-                            <ResponsiveContainer width="95%" height="90%">
+                            {requestsPie.length > 0 ? (
+                                <ResponsiveContainer width="95%" height="90%">
                                 <PieChart>
-                                    <Pie
-                                    data={requestsPie}
-                                    cx="50%"
-                                    cy="50%"
-                                    outerRadius={100}
-                                    dataKey="value"
-                                    >
+                                    <Pie data={requestsPie} cx="50%" cy="50%" outerRadius={100} dataKey="value">
                                     {requestsPie.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={requestColors[index % requestColors.length]} />
                                     ))}
@@ -121,7 +153,10 @@ function EvacuationCenterHome() {
                                     <Tooltip />
                                     <Legend />
                                 </PieChart>
-                            </ResponsiveContainer>
+                                </ResponsiveContainer>
+                            ) : (
+                                <p style={{ textAlign: "center", color: "#888" }}>No data available</p>
+                            )}
                         </div>
                     </div>
                     <div className='pie-chart'>

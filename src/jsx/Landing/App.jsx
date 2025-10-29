@@ -29,6 +29,7 @@ import Register from '../Register/Register'
 import Evacuee from '../Evacuee/Evacuee'
 import EvacuationCenter from '../EvacuationCenter/EvacuationCenter'
 import Admin from '../Admin/Admin'
+import ForgotPassword from '../ForgotPassword/ForgotPassword'
 
 import useNotificationSetup from '../../Hooks/PushNotification'
 import { ToastContainer } from 'react-toastify';
@@ -52,6 +53,7 @@ function App() {
           <Route path='/news' element={<News />}/>
           <Route path='/contact' element={<Contact />}/>
           <Route path='/login' element={<Login />}/>
+          <Route path='/forgot-password' element={<ForgotPassword />}/>
           <Route path='/adl' element={<AdminLogin />}/>
           <Route path='/register' element={<Register />}/>
 

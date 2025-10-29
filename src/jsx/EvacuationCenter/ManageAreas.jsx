@@ -254,7 +254,7 @@ function ManageAreas() {
 
             {showDetails && selectedArea && (
                 <div className="additional-details">
-                    <div className="additional-details-body">
+                    <div className="additional-details-body-areas">
                         <div className="close-container" onClick={handleCloseDetails}>
                             <img src={close} alt="close" />
                         </div>
@@ -274,7 +274,7 @@ function ManageAreas() {
                                     </span>
                                 </p>
                             </div>
-
+                            
                             {/* Occupants List */}
                             <div className="detail-section">
                                 <h3>Current Occupants</h3>
@@ -288,7 +288,6 @@ function ManageAreas() {
                                             {occupant.evacuee_id?.medical_conditions && (
                                                 <p><strong>Medical Conditions:</strong> {occupant.evacuee_id.medical_conditions}</p>
                                             )}
-                                            <hr />
                                         </div>
                                     ))
                                 ) : (
@@ -343,7 +342,7 @@ function ManageAreas() {
                                     className="submit-button"
                                     onClick={createArea}
                                 >
-                                    Create Area
+                                    Create
                                 </button>
                             </div>
                         </div>

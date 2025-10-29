@@ -26,8 +26,7 @@ function EvacueeSideNav({ activeMenu, setActiveMenu }) {
         { id: 'evacuation-center', label: 'Evacuation Center', activeIcon: evacuationCenter, icon: evacuationCenterActive },
         { id: 'request', label: 'Request', activeIcon: request, icon: requestActive },
         { id: 'announcements', label: 'Announcements', activeIcon: announcements, icon: announcementsActive },
-        { id: 'notifications', label: 'Notifications', activeIcon: notifications, icon: notificationsActive },
-        { id: 'settings', label: 'Settings', activeIcon: settings, icon: settingsActive },
+        { id: 'notifications', label: 'Notifications', activeIcon: notifications, icon: notificationsActive }
     ];
 
     const handleLogout = () => {

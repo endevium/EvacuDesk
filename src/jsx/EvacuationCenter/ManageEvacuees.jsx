@@ -2,30 +2,21 @@ import '../../css/evacuation-center.css'
 import { useState, useEffect, useRef } from 'react'
 import Select from "react-select"
 
-import homeActive from '../../assets/home-active.png'
 import evacuationCenterActive from '../../assets/evacuation-center-active.png'
-import requestActive from '../../assets/request-active.png'
-import announcementsActive from '../../assets/announcements-active.png'
-import notificationsActive from '../../assets/notification-active.png'
-import settingsActive from '../../assets/settings-active.png'
-import evacCenter from '../../assets/evac-center-placeholder.png'
 import close from '../../assets/close.png'
-import addCircle from '../../assets/add_circle.png'
 import check from '../../assets/check.png'
 import error from '../../assets/error.png'
-import requestBtn from '../../assets/request-button.png'
-import fulfilled from '../../assets/request_completed.png'
-import pending from '../../assets/pending.png'
-import denied from '../../assets/denied.png'
 
 function ManageEvacuees() {
     const [showAdditionalDetails, setShowAdditionalDetails] = useState(false);
     const [showAssignArea, setShowAssignArea] = useState(false);
+    const [showConfirmation, setShowConfirmation] = useState(false);
     const [selectedEvacuee, setSelectedEvacuee] = useState(null);
     const [activeFilter, setActiveFilter] = useState("all");
     const [evacuees, setEvacuees] = useState([]);
     const [areas, setAreas] = useState([]);
     const [selectedArea, setSelectedArea] = useState(null);
+    const [evacueeId, setEvacueeId] = useState("");
     const [loading, setLoading] = useState(false);
 
     const [showResponse, setShowResponse] = useState(false);
@@ -70,9 +61,9 @@ function ManageEvacuees() {
 
                 if (data && Array.isArray(data.occupants)) {
                     const mappedEvacuees = data.occupants.map((occ) => {
-                        const evacuee = occ.evacuee;
+                        const evacuee = occ.evacuee_id;
                         const fullName = `${evacuee.first_name} ${evacuee.last_name}`;
-                        const address = `${evacuee.barangay}, ${evacuee.city}, ${evacuee.province}`;
+                        const address = `${evacuee.barangay || "N/A"}, ${evacuee.city || "N/A"}, ${evacuee.province || "N/A"}`;
 
                         const age = evacuee.birthdate
                             ? Math.floor((new Date() - new Date(evacuee.birthdate)) / (365.25 * 24 * 60 * 60 * 1000))
@@ -91,7 +82,7 @@ function ManageEvacuees() {
                             medical: evacuee.disabilities || "None",
                             idPicture: evacuee.id_picture ? `http://localhost:3000/${evacuee.id_picture}` : "https://via.placeholder.com/120",
                             familyMembers: occ.number_of_family_members || 0,
-                            assigned_area: occ.assigned_area || null
+                            assigned_area: occ.assigned_area ? occ.assigned_area.area_number : null
                         };
                     });
 
@@ -137,13 +128,15 @@ function ManageEvacuees() {
         }
     };
 
-    const dismissEvacuee = async (id) => {
+    const dismissEvacuee = async () => {
         try {
+            clearAllTimeouts();
+
             const payload = {
                 status: "Left"
             }
 
-            const res = await fetch(`http://localhost:3000/evacuation-center-occupant/status/${id}`, {
+            const res = await fetch(`http://localhost:3000/evacuation-center-occupant/status/${evacueeId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -157,6 +150,12 @@ function ManageEvacuees() {
             if (!res.ok) {
                 throw new Error(data.error || "Failed to dismiss evacuee");
             }
+
+            setEvacuees(prev =>
+                prev.map(e =>
+                    e.id === id ? { ...e, status: "Left" } : e
+                )
+            );
       
             setResponseMessage("Evacuee dismissed successfully!");
             setResponseType("success");
@@ -167,6 +166,7 @@ function ManageEvacuees() {
                 exitTimeout.current = setTimeout(() => {
                     setShowResponse(false);
                     setExitAnim(false);
+                    setEvacueeId("");
                 }, 400);
             }, 3000);
 
@@ -268,6 +268,12 @@ function ManageEvacuees() {
         setSelectedEvacuee(null);
     };
 
+    const handleShowConfirmation = (id) => {
+        setEvacueeId(id);
+        setShowConfirmation(true);
+    }
+    const handleCloseShowConfirmation = () => setShowConfirmation(false);
+
     const filteredEvacuees = evacuees.filter(evacuee => {
         if (activeFilter === 'all') return true;
         if (activeFilter === 'active') return evacuee.status === 'Active';
@@ -319,7 +325,6 @@ function ManageEvacuees() {
                                 <th>Age</th>
                                 <th>Family</th>
                                 <th>Status</th>
-                                <th>Assigned Area</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -339,8 +344,7 @@ function ManageEvacuees() {
                                     <td>{evacuee.sex}</td>
                                     <td>{evacuee.age}</td>
                                     <td>{evacuee.familyMembers}</td>
-                                    <td>{evacuee.status}</td>
-                                    <td>{evacuee.assigned_area ? "Assigned" : "Not Assigned"}</td>
+                                    <td>{evacuee.assigned_area ? "Assigned" : evacuee.status}</td>
                                     <td className='actions-cell'>
                                         <button 
                                             className={
@@ -359,7 +363,7 @@ function ManageEvacuees() {
                                                 ? "disabled-button" 
                                                 : "dismiss-button"
                                         } 
-                                        onClick={() => dismissEvacuee(evacuee.id)}
+                                        onClick={() => handleShowConfirmation(evacuee.id)}
                                         disabled={evacuee.status === "Left"}
                                         >
                                             Dismiss
@@ -382,7 +386,7 @@ function ManageEvacuees() {
 
             {showAdditionalDetails && selectedEvacuee && (
                 <div className='additional-details'>
-                    <div className='additional-details-body'>
+                    <div className='additional-details-body-evacuees'>
                         <div className="close-container">
                             <button onClick={handleCloseShowDetails}>
                                 <img src={close} alt="close" />
@@ -419,7 +423,7 @@ function ManageEvacuees() {
                         </div>
 
                         <div className='details'>
-                            <h2>Assign Area to {selectedEvacuee.name}</h2>
+                            <h2>Assign Area</h2>
                             <p><strong>Family Members:</strong> {selectedEvacuee.familyMembers}</p>
                             
                             <label>Select Area</label>
@@ -440,23 +444,39 @@ function ManageEvacuees() {
                                 </div>
                             )}
 
-                            <div className="buttons">
-                                <button
-                                    type="button"
-                                    className="clear-button"
-                                    onClick={handleCloseAssignArea}
-                                >
-                                    Cancel
-                                </button>
-                                <button 
-                                    type="button" 
-                                    className="submit-button"
-                                    onClick={assignToArea}
-                                    disabled={!selectedArea || loading}
-                                >
-                                    {loading ? "Assigning..." : "Assign to Area"}
-                                </button>
-                            </div>
+                        </div>
+
+                        <div className="buttons">
+                            <button
+                                type="button"
+                                className="clear-button"
+                                onClick={handleCloseAssignArea}
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                type="button" 
+                                className="submit-button"
+                                onClick={assignToArea}
+                                disabled={!selectedArea || loading}
+                            >
+                                {loading ? "Assigning..." : "Assign"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showConfirmation && (
+                <div className="confirm-logout">
+                    <div className="confirm-logout-body">
+                        <div className="error-text">
+                            <h2>Confirm Dismiss</h2>
+                            <p>Are you sure you want to dismiss this evacuee?</p>
+                        </div>
+                        <div className="buttons">
+                            <button className='yes-button' onClick={dismissEvacuee}>Yes</button>
+                            <button className='cancel-button' onClick={handleCloseShowConfirmation}>Cancel</button>
                         </div>
                     </div>
                 </div>

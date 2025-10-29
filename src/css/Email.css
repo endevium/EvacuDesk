@@ -1,0 +1,140 @@
+.reset-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+    background-image: url('../assets/about-two-background.png');
+    background-size: cover;
+}
+
+.reset-card {
+    display: flex;
+    border: 1px #acacac solid;
+    background-color: white;
+    border-radius: 25px;
+    width: 70vw;
+    height: 80vh;
+}
+
+.reset-image {
+    width: 35vw;
+    height: 80vh;
+    border-right: 0.5px #acacac solid;
+    background-image: url('../assets/login-image.png');
+    background-size: cover;
+    border-top-left-radius: 25px;
+    border-bottom-left-radius: 25px;
+}
+
+.reset-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.reset-form {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.reset-form form {
+    /* Ensure the form takes full width of the container */
+    display: flex;
+    flex-direction: column;
+}
+
+.reset-form h2 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.reset-form p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.reset-form label {
+    font-size: 14px;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.reset-form input[type="email"] {
+    width: 50%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #224539;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box 15px;
+}
+
+.reset-form input[type="email"]:focus {
+    border-color: #224539;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.continue-btn {
+    background-color: #224539;
+    color: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 100px;
+}
+
+.continue-btn:hover {
+    background-color: #145a31;
+}
+
+.back-btn {
+    display: flex;
+    flex-direction: row;
+    margin-top: 10px;
+    margin-left: 10px;
+    width: 100px;
+    height: 100px;
+}
+
+.back-btn .icon {
+    border: 0;
+    background-color: white;
+    cursor: pointer;
+    width: 100px;
+    height: 100px;
+}
+
+@media (max-width: 768px) {
+    .reset-card {
+        flex-direction: column;
+        max-width: 450px;
+    }
+
+    .reset-image {
+        display: none;
+    }
+
+    .reset-form {
+        padding: 30px 20px;
+    }
+    
+    .back-btn {
+        margin-bottom: 20px;
+    }
+}

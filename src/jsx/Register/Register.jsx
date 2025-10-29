@@ -1,11 +1,13 @@
 import '../../css/register.css'
+import '../../css/Verification.css'
 import evacudesk from '../../assets/logo-two.png';
 import backButton from '../../assets/back-button.png';
 import check from '../../assets/check.png';
 import error from '../../assets/error.png';
+import Eye from '../../assets/Eye.png';
+import Eyeoff from '../../assets/Eyeoff.png';
 import { useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
-
 
 function Register() {
     const [role, setRole] = useState("");
@@ -16,6 +18,7 @@ function Register() {
     const [exitAnim, setExitAnim] = useState(false);
     const [evacueeStep, setEvacueeStep] = useState(1);
     const [staffStep, setStaffStep] = useState(1);
+    const [otp, setOtp] = useState("");
 
     const [evacueeForm, setEvacueeForm] = useState({
         email_address: "",
@@ -194,6 +197,20 @@ function Register() {
                                 {evacueeStep === 4 && (
                                     <EvacueeRegisterFour
                                         onBack={handleEvacueeBack}
+                                        onNext={() => setEvacueeStep(5)}
+                                        formData={evacueeForm}
+                                        setFormData={setEvacueeForm}
+                                        setResponseMessage={setResponseMessage}
+                                        setResponseType={setResponseType}
+                                        setShowResponse={setShowResponse}
+                                        setExitAnim={setExitAnim}
+                                        showTimeout={showTimeout}
+                                        exitTimeout={exitTimeout}
+                                    />
+                                )}
+                                {evacueeStep === 5 && (
+                                    <EvacueeVerification
+                                        onBack={handleEvacueeBack}
                                         formData={evacueeForm}
                                         setFormData={setEvacueeForm}
                                         setResponseMessage={setResponseMessage}
@@ -321,6 +338,8 @@ function EvacueeRegisterOne({
 }) {
     const navigate = useNavigate();
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const handleChange = (e) => {
         const { id, value } = e.target;
@@ -383,24 +402,43 @@ function EvacueeRegisterOne({
                     />
 
                     <label htmlFor='password'>Password</label>
-                    <input
-                        type="password"
-                        id="password"
-                        placeholder='********'
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                    />
+                    <div className="password-wrapper">
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            id="password" // <-- Add this line!
+                            placeholder="********"
+                            value={formData.password}
+                            onChange={handleChange}
+                            required
+                            className="password-input"
+                        />
+                        <button
+                        type="button"
+                        className="eye-btn"
+                        onClick={() => setShowPassword(!showPassword)}
+                        >
+                            {showPassword ? <img src= {Eyeoff} /> : <img src= {Eye} />}
+                        </button>
+                    </div>
 
                     <label htmlFor='confirmPassword'>Confirm Password</label>
-                    <input
-                        type="password"
-                        id="confirmPassword"
-                        placeholder='********'
+                    <div className="password-wrapper">
+                        <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="********"
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
-                    />
+                        className="password-input"
+                        />
+                        <button
+                        type="button"
+                        className="eye-btn"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        >
+                            {showConfirmPassword ? <img src= {Eyeoff} /> : <img src= {Eye} />}
+                        </button>
+                    </div>
 
                     <br/>
                     <button type="submit">Next</button>
@@ -620,6 +658,7 @@ function EvacueeRegisterThree({
 
 function EvacueeRegisterFour({
     onBack,             
+    onNext,
     formData,
     setFormData,
     setResponseMessage,
@@ -683,7 +722,7 @@ function EvacueeRegisterFour({
             .then((data) => {
                 localStorage.setItem("evacueeId", data.id);
 
-                setLoading(false);
+                setLoading(true);
                 setResponseMessage("Registration successful!");
                 setResponseType("success");
                 setShowResponse(true);
@@ -693,7 +732,7 @@ function EvacueeRegisterFour({
                     exitTimeout.current = setTimeout(() => {
                         setShowResponse(false);
                         setExitAnim(false);
-                        navigate("/login");
+                        onNext();
                     }, 400);
                 }, 3000);
             })
@@ -770,6 +809,141 @@ function EvacueeRegisterFour({
     )
 }
 
+function EvacueeVerification({
+    onBack,             
+    formData,
+    setFormData,
+    setResponseMessage,
+    setResponseType,
+    setShowResponse,
+    setExitAnim,
+    showTimeout,
+    exitTimeout
+}) {
+    const navigate = useNavigate();
+    const [code, setCode] = useState(new Array(6).fill(""));
+    const [loading, setLoading] = useState(false);
+
+    const handleChange = (element, index) => {
+        if (isNaN(element.value)) return false;
+        let newCode = [...code];
+        newCode[index] = element.value;
+        setCode(newCode);
+
+        if (element.nextSibling && element.value !== "") {
+            element.nextSibling.focus();
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const otp = code.join("");
+        if (otp.length !== 6) return;
+
+        setLoading(true);
+        setShowResponse(false);
+
+        try {
+            const res = await fetch("http://localhost:3000/auth/verify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email_address: formData.email_address,
+                    code: otp,
+                    role: "Evacuee",
+                    purpose: "verify"
+                })
+            });
+            const data = await res.json();
+            setLoading(false);
+
+            if (res.ok) {
+                setResponseType("success");
+                setResponseMessage(data.message || "Account verified!");
+                setShowResponse(true);
+
+                showTimeout.current = setTimeout(() => {
+                    setExitAnim(true);
+                    exitTimeout.current = setTimeout(() => {
+                        setShowResponse(false);
+                        setExitAnim(false);
+                        navigate("/login");
+                    }, 400);
+                }, 3000);
+            } else {
+                setResponseType("error");
+                setResponseMessage(data.error || "Invalid OTP.");
+                setShowResponse(true);
+
+                showTimeout.current = setTimeout(() => {
+                    setExitAnim(true);
+                    exitTimeout.current = setTimeout(() => {
+                        setShowResponse(false);
+                        setExitAnim(false);
+                    }, 400);
+                }, 3000);
+            }
+        } catch (err) {
+            setLoading(false);
+            setResponseType("error");
+            setResponseMessage("Network error.");
+            setShowResponse(true);
+
+            showTimeout.current = setTimeout(() => {
+                setExitAnim(true);
+                exitTimeout.current = setTimeout(() => {
+                    setShowResponse(false);
+                    setExitAnim(false);
+                }, 400);
+            }, 3000);
+        }
+    };
+
+    return (
+        <>
+            <div className="back-button-container">
+                <button onClick={onBack}>
+                    <img src={backButton} />
+                </button>
+            </div>
+            
+            <div className="register-left-text">
+                <br/>
+                <br/>
+                <br/>
+                <br/>
+                <br/>
+                <br/>
+                <br/>
+                <br/>
+                <h2>Verification Code</h2>
+                <p>Please enter the verification code sent to your email.</p>
+                <form onSubmit={handleSubmit} className="code-inputs">
+                    <div className="otp-inputs">
+                        {code.map((data, index) => (
+                            <input
+                                key={index}
+                                type="text"
+                                maxLength="1"
+                                value={data}
+                                onChange={(e) => handleChange(e.target, index)}
+                                onFocus={(e) => e.target.select()}
+                                className="otp-input"
+                                disabled={loading}
+                            />
+                        ))}
+                    </div>
+                    <br/>
+                    <br/>
+                    <br/>
+                    <button type="submit" className="continue-button" disabled={loading}>
+                        {loading ? "Verifying..." : "Continue"}
+                    </button>
+                </form>
+            </div>
+        </>
+    );
+}
 
 function StaffRegisterOne({
     onBack,
@@ -1049,7 +1223,7 @@ function StaffRegisterThree({
             .then((data) => {
                 localStorage.setItem("staffId", data.id);
 
-                setLoading(false);
+                setLoading(true);
                 setResponseMessage("Your account is now under review. Please wait until your account has been reviewed.");
                 setResponseType("success");
                 setShowResponse(true);

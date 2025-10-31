@@ -1,14 +1,9 @@
 const mongoose = require("mongoose");
+const asyncHandler = require("../utils/asyncHandler");
 
 // db connection
-const connectDB = async () => {
-  try {
+const connectDB = asyncHandler (async () => {
     await mongoose.connect("mongodb://localhost:27017/evacudesk_db");
-  } 
-  catch (err) {
-    console.error("Connection failed", err);
-    process.exit(1);
-  }
-};
+});
 
 module.exports = connectDB;

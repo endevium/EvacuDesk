@@ -12,7 +12,7 @@ const EvacuationCenterSchema = new mongoose.Schema({
   city: { type: String, required: true },
   barangay: { type: String, required: true },
   street: { type: String },
-  status: { type: String, enum: ["Open", "Closed"]},
+  status: { type: String, enum: ["Available", "Full"]},
   type: { type: String, enum: ['School', 'Gymnasium'], default: "Room", required: true},
   area_type: { type: String, enum: ['Room', 'Tent', 'Zone'], default: "Room", required: true},
   capacity: { type: Number, required: true, min: 0 },
@@ -21,6 +21,15 @@ const EvacuationCenterSchema = new mongoose.Schema({
   is_verified: { type: Boolean, default: false },
   role: { type: String, enum: ['EvacuationCenter'], default: 'EvacuationCenter' },
 }, { timestamps: true }); 
+
+EvacuationCenterSchema.pre("save", function (next) {
+  if (this.taken_slots >= this.capacity) {
+    this.status = "Full";
+  } else {
+    this.status = "Available";
+  }
+  next();
+});
 
 async function _cascadeDelete(next) {
   const doc = this;

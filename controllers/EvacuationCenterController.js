@@ -8,6 +8,8 @@ const UserToken = require("../models/UserTokenModel");
 const Evacuee = require("../models/EvacueeModel");
 const { capitalizeWords, capitalizeFirstLetter } = require("../utils/capitalize");
 const asyncHandler = require("../utils/asyncHandler");
+const { createStockRecord } = require('./StocksController');
+const { isPasswordPwned } = require("../utils/pwnedPasswords");
 
 // create evacuation center
 exports.createEvacuationCenter = asyncHandler(async (req, res) => {
@@ -48,9 +50,7 @@ exports.createEvacuationCenter = asyncHandler(async (req, res) => {
 
   // common password
   if (await isPasswordPwned(password)) {
-    return res.status(400).json({
-      error: "This password has appeared in a data breach. Please choose a stronger password."
-    });
+    return res.status(400).json({ error: "This password has appeared in a data breach. Please choose a stronger password."});
   }
 
   const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -58,7 +58,7 @@ exports.createEvacuationCenter = asyncHandler(async (req, res) => {
   const uploadPath = path.join("uploads", Date.now() + "-" + req.file.originalname);
   fs.writeFileSync(uploadPath, req.file.buffer);
 
-  await EvacuationCenter.create({
+  const center = await EvacuationCenter.create({
     ...req.body,
     name: capitalizeWords(req.body.name),
     region: capitalizeFirstLetter(req.body.region),
@@ -69,6 +69,11 @@ exports.createEvacuationCenter = asyncHandler(async (req, res) => {
     image: uploadPath.replace(/\\/g, "/"),
     password: hashedPassword,
     is_verified: true,
+  });
+
+  await createStockRecord({
+    source: 'EvacuationCenter',
+    evacuation_center_id: center._id
   });
   
   res.status(201).json({ message: "Evacuation center created successfully" });

@@ -21,7 +21,7 @@ app.use("/uploads", express.static("uploads"));
 connectDB();
 
 // app.use(BlockedIPMiddleware);
-// app.use(arcjetMiddleware);
+app.use(arcjetMiddleware);
 
 // main starting routes
 app.use("/", require("./routes/HoneyRoute"));
@@ -37,7 +37,8 @@ app.use("/dashboard", require("./routes/DashboardRoute"));
 app.use("/notification", require("./routes/NotificationRoute"));
 app.use("/push-subscription", require("./routes/PushSubscriptionRoute"));
 app.use("/center-area", require("./routes/CenterAreaRoute"));
-app.use("/distribution-records", require("./routes/DistributionRecordsRoute"));
+app.use("/distribution-record", require("./routes/DistributionRecordsRoute"));
+app.use("/stock", require("./routes/StocksRoute"))
 
 app.use(errorHandler);
 

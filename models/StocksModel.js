@@ -1,24 +1,44 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const stockSchema = new mongoose.Schema({
-    item_type: { type: String, required: true, enum: ['Food Pack', 'Water Pack', 'Medicine Pack', 'Hygiene Pack', 'Clothing Pack', 'Bedding Pack', 'Infant Pack']},
-    quantity: { type: Number, required: true, min: 0 },
-    source: { type: String, required: true, enum: ['Admin', 'EvacuationCenter'] },
-    location_id: { type: Schema.Types.ObjectId, refPath: 'source', required: true },
-    status: { type: String, enum: ['Available', 'Low Stock', 'Out of Stock'], default: 'Available' }
+const StockSchema = new Schema({
+  source: { type: String, required: true, enum: ['Admin', 'EvacuationCenter'] },
+  evacuation_center_id: { type: Schema.Types.ObjectId, refPath: 'source', required: true },
+  stocks: {
+    FoodPack: { type: Number, default: 0 },
+    WaterPack: { type: Number, default: 0 },
+    MedicinePack: { type: Number, default: 0 },
+    HygienePack: { type: Number, default: 0 },
+    ClothingPack: { type: Number, default: 0 },
+    BeddingPack: { type: Number, default: 0 },
+    InfantPack: { type: Number, default: 0 }
+  },
+  status: {
+    FoodPack: { type: String, default: 'Available' },
+    WaterPack: { type: String, default: 'Available' },
+    MedicinePack: { type: String, default: 'Available' },
+    HygienePack: { type: String, default: 'Available' },
+    ClothingPack: { type: String, default: 'Available' },
+    BeddingPack: { type: String, default: 'Available' },
+    InfantPack: { type: String, default: 'Available' }
+  },
+  last_updated: { type: Date, default: Date.now }
 }, { timestamps: true });
 
-// stock status update by quantity
-stockSchema.pre('save', function (next) {
-  if (this.quantity === 0) {
-    this.status = 'Out of Stock';
-  } else if (this.quantity <= 50) {
-    this.status = 'Low Stock';
-  } else {
-    this.status = 'Available';
+// update stock status by quantity
+StockSchema.pre('save', function (next) {
+  const stockItems = this.stocks || {};
+  const status = {};
+
+  for (const [item, qty] of Object.entries(stockItems)) {
+    if (qty === 0) status[item] = 'Out of Stock';
+    else if (qty <= 50) status[item] = 'Low Stock';
+    else status[item] = 'Available';
   }
+
+  this.status = status;
+  this.last_updated = new Date();
   next();
 });
 
-module.exports = mongoose.model('Stock', stockSchema);
+module.exports = mongoose.model('Stocks', StockSchema, 'stock_records');

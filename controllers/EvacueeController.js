@@ -42,39 +42,45 @@ exports.getExistingEmail = asyncHandler(async (req, res) =>{
 
 // evacuee signup
 exports.signupEvacuee = asyncHandler(async (req, res) => {
-  if (!req.files || !req.files['id_picture'] || !req.files['profile_picture']) {
-    return res.status(400).json({ error: "Both ID picture and profile picture are required" });
+  if (!req.files || !req.files['id_picture']) {
+    return res.status(400).json({ error: "ID picture is required" });
   }
 
   const idFile = req.files['id_picture'][0];
-  const profileFile = req.files['profile_picture'][0];
+  const profileFile = req.files['profile_picture'] ? req.files['profile_picture'][0] : null;
 
   const { email_address, password, first_name, last_name } = req.body;
 
-  const nameRegex = /^[a-zA-Z\s]{2,15}$/;
-  if (!first_name || !nameRegex.test(first_name.trim())) {
-    return res.status(400).json({ error: "First name too short or contains special characters" });
-  }
-  if (!last_name || !nameRegex.test(last_name.trim())) {
-    return res.status(400).json({ error: "Last name too short or contains special characters" });
+  // const nameRegex = /^[a-zA-Z\s]{2,15}$/;
+  // if (!first_name || !nameRegex.test(first_name.trim())) {
+  //   return res.status(400).json({ error: "First name too short or contains special characters" });
+  // }
+  // if (!last_name || !nameRegex.test(last_name.trim())) {
+  //   return res.status(400).json({ error: "Last name too short or contains special characters" });
+  // }
+
+  // email exists
+  const [existingEvacuee, existingCenter] = await Promise.all([
+    Evacuee.findOne({ email_address }),
+    EvacuationCenter.findOne({ email_address })
+  ]);
+
+  if (existingEvacuee || existingCenter) {
+    return res.status(400).json({ error: "The email already exists. Use a different email." });
   }
 
-  const maxFileSize = 10 * 1024 * 1024; 
-  if (idFile.size > maxFileSize || profileFile.size > maxFileSize) {
-    return res.status(400).json({ error: "File size too large. Maximum allowed size is 10MB" });
-  }
-
-  // save files
+  // id aand profile picture
   const idUploadPath = path.join("uploads", Date.now() + "-id-" + idFile.originalname);
   fs.writeFileSync(idUploadPath, idFile.buffer);
-  const profileUploadPath = path.join("uploads", Date.now() + "-profile-" + profileFile.originalname);
-  fs.writeFileSync(profileUploadPath, profileFile.buffer);
+  let profileUploadPath = null;
+  if (profileFile) {
+    profileUploadPath = path.join("uploads", Date.now() + "-profile-" + profileFile.originalname);
+    fs.writeFileSync(profileUploadPath, profileFile.buffer);
+  }
 
-  // common password
+  // common password check
   if (await isPasswordPwned(password)) {
-    return res.status(400).json({
-      error: "This password has appeared in a data breach. Please choose a stronger password."
-    });
+    return res.status(400).json({ error: "This password has appeared in a data breach. Please choose a stronger password." });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -86,7 +92,7 @@ exports.signupEvacuee = asyncHandler(async (req, res) => {
     email_address: email_address.toLowerCase(),
     password: hashedPassword,
     id_picture: idUploadPath.replace(/\\/g, "/"),
-    profile_picture: profileUploadPath.replace(/\\/g, "/"),
+    profile_picture: profileUploadPath ? profileUploadPath.replace(/\\/g, "/") : null,
     is_verified: false
   });
 
@@ -97,7 +103,6 @@ exports.signupEvacuee = asyncHandler(async (req, res) => {
     message: "Please verify your email address. We have sent an OTP to your email",
   });
 });
-
 
 // evacuee login
 exports.loginEvacuee = asyncHandler(async (req, res) => {

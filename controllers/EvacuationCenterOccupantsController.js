@@ -116,7 +116,7 @@ exports.updateOccupantStatus = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
 
-  if (!status || !["Active", "Left"].includes(status)) {
+  if (!status || !["Active", "Returned"].includes(status)) {
     return res.status(400).json({ error: "Invalid status value" });
   }
 
@@ -125,7 +125,7 @@ exports.updateOccupantStatus = asyncHandler(async (req, res) => {
     return res.status(404).json({ error: "Occupant not found" });
   }
 
-  if (status === "Left" && occupant.status !== "Left") {
+  if (status === "Returned" && occupant.status !== "Returned") {
     const familyCount = occupant.number_of_family_members || 1; 
 
     // remove from evac center
@@ -161,7 +161,7 @@ exports.updateOccupantStatus = asyncHandler(async (req, res) => {
       }
     );
     
-    occupant.date_left = new Date();
+    occupant.date_returned = new Date();
   }
 
   occupant.status = status;

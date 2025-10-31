@@ -29,7 +29,7 @@ exports.createBulletin = asyncHandler(async (req, res) => {
   // create bulletin notification to evacuees
   try {
     await createNotification({
-      title: `Bulletin News: ${title}`,
+      title: `Announcement: ${title}`,
       body: body,
       recipient_id: req.query.center_id || null,
       recipient_role: 'Evacuee',

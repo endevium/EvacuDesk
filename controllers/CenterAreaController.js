@@ -7,10 +7,10 @@ const asyncHandler = require("../utils/asyncHandler");
 
 // create center area
 exports.createCenterArea = asyncHandler(async (req, res) => {
-  const { evacuation_center_id, capacity } = req.body;
+  const { evacuation_center_id, capacity, area_name, size } = req.body;
 
-  if (!evacuation_center_id || !capacity) {
-    return res.status(400).json({ error: "Evacuation center ID and capacity are required" });
+  if (!evacuation_center_id) {
+    return res.status(400).json({ error: "Missing evacuation_center_id" });
   }
 
   const evacCenter = await EvacuationCenter.findById(evacuation_center_id);
@@ -18,31 +18,55 @@ exports.createCenterArea = asyncHandler(async (req, res) => {
     return res.status(404).json({ error: "Evacuation center not found." });
   }
 
-  // auto increment area_number by highest number
-  const lastArea = await CenterArea.findOne(
-    { evacuation_center_id },
-    { area_number: 1 },
-    { sort: { area_number: -1 } }
-  );
-  
-  let nextAreaNumber = 1;
-  if (lastArea && lastArea.area_number) {
-    const match = lastArea.area_number.match(/\d+/);
-    if (match) {
-      nextAreaNumber = parseInt(match[0]) + 1;
-    }
+  let finalAreaName;
+  let areaData = { evacuation_center_id, occupants: [] };
+
+  switch(evacCenter.area_type) {
+    case "Room":
+      if (!area_name || !capacity) {
+        return res.status(400).json({ error: "Missing required fields" });
+      }
+
+      finalAreaName = area_name;
+      areaData.capacity = capacity;
+      break;
+
+    case "Tent":
+      const lastArea = await CenterArea.findOne({ evacuation_center_id }).sort({ createdAt: -1 });
+      let nextNumber = 1;
+      if (lastArea && lastArea.area_name) {
+        const match = lastArea.area_name.match(/\d+/);
+        if (match) nextNumber = parseInt(match[0]) + 1;
+      }
+      finalAreaName = `Tent ${nextNumber}`;
+
+      if (!size || !["Small", "Medium", "Large"].includes(size)) {
+        return res.status(400).json({ error: "Tent size must be Small, Medium, or Large" });
+      }
+      areaData.size = size;
+      break;
+
+    case "Zone":
+      const zoneOptions = ["Bleachers", "Stage", "Gym Floor"];
+      if (!area_name || !zoneOptions.includes(area_name)) {
+        return res.status(400).json({ error: `Area name must be one of ${zoneOptions.join(", ")}` });
+      }
+      if (!capacity) return res.status(400).json({ error: "Missing required fields." });
+
+      finalAreaName = area_name;
+      areaData.capacity = capacity;
+      break;
+
+    default:
+      return res.status(400).json({ error: "Invalid request" });
   }
 
-  const areaNumber = `Area ${nextAreaNumber}`;
-  
-  await CenterArea.create({
-    area_number: areaNumber,
-    evacuation_center_id,
-    capacity,
-    occupants: [] 
-  });
+  areaData.area_name = finalAreaName;
+  areaData.area_type = evacCenter.area_type; 
 
-  res.status(201).json({ message: "Center area created successfully.", area_number: areaNumber });
+  await CenterArea.create(areaData);
+
+  res.status(201).json({ message: "Center area created successfully." });
 });
 
 // get all center areas by center id
@@ -120,16 +144,19 @@ exports.addOccupantToArea = asyncHandler(async (req, res) => {
   });
 
   if (alreadyAssigned) {
-    return res.status(400).json({ error: "This evacuee is already assigned to another area in this center." });
+    return res.status(400).json({ error: "This evacuee is already assigned to an area" });
   }
 
   // check if area has enough capacity
-  const currentOccupancy = area.occupants.reduce((total, occupant) => total + occupant.number_of_family_members, 0);
-  const newTotalOccupancy = currentOccupancy + number_of_family_members;
+  let maxCapacity = area.capacity; // Room/Zone
+  if (area.size) {
+    const sizeCapacityMap = { Small: 5, Medium: 10, Large: 15 };
+    maxCapacity = sizeCapacityMap[area.size];
+  }
 
-  if (newTotalOccupancy > area.capacity) {
+  if (newTotalOccupancy > maxCapacity) {
     return res.status(400).json({ 
-      error: `Area cannot accommodate ${number_of_family_members} more people. Only ${area.capacity - currentOccupancy} spaces available.` 
+      error: `Area cannot accommodate ${number_of_family_members} more people. Only ${maxCapacity - currentOccupancy} spaces available.` 
     });
   }
 

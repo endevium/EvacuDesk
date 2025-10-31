@@ -3,40 +3,101 @@ const UserToken = require("../models/UserTokenModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const fs = require("fs");
+const EvacuationCenter = require("../models/EvacuationCenterModel");
 const path = require("path");
 const { generateOTP } = require("../utils/otpGeneration");
 const { emailSender } = require("../utils/emailSender");
 const asyncHandler = require("../utils/asyncHandler");
+const { isPasswordPwned } = require("../utils/pwnedPasswords")
+
+// center recommendation
+exports.getCenterRecommendation = asyncHandler(async (req, res) => {
+  const evacuee = await Evacuee.findById(req.params.id);
+  if (!evacuee) {
+    return res.status(404).json({ error: "Evacuee not found" });
+  }
+
+  const center = await EvacuationCenter.findOne({ barangay: evacuee.barangay }).select("-password -email_address -__v -is_verified -role -createdAt -updatedAt");
+  if (!center) {
+    return res.status(404).json({ error: "No evacuation center found in your barangay" });
+  }
+
+  res.json(center);
+});
+
+// email exists
+exports.getExistingEmail = asyncHandler(async (req, res) =>{
+  const { email_address } = req.body;
+
+  const [existingEvacuee, existingCenter] = await Promise.all([
+    Evacuee.findOne({ email_address }),
+    EvacuationCenter.findOne({ email_address })
+  ]);
+  if (existingEvacuee || existingCenter) {
+    return res.status(400).json({ error: "The email already exists. Use a different email." });
+  } 
+
+  return res.status(200).json({ message: "Email is available." });
+})
 
 // evacuee signup
 exports.signupEvacuee = asyncHandler(async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: "A valid ID picture is required" });
+  if (!req.files || !req.files['id_picture'] || !req.files['profile_picture']) {
+    return res.status(400).json({ error: "Both ID picture and profile picture are required" });
   }
 
-  const existing = await Evacuee.findOne({ email_address: req.body.email_address });
-  if (existing) return res.status(400).json({ error: "The email already exists. Use a different one." });
+  const idFile = req.files['id_picture'][0];
+  const profileFile = req.files['profile_picture'][0];
 
-  // id
-  const uploadPath = path.join("uploads", Date.now() + "-" + req.file.originalname);
-  fs.writeFileSync(uploadPath, req.file.buffer);
+  const { email_address, password, first_name, last_name } = req.body;
 
-  const hashedPassword = await bcrypt.hash(req.body.password, 10);
+  const nameRegex = /^[a-zA-Z\s]{2,15}$/;
+  if (!first_name || !nameRegex.test(first_name.trim())) {
+    return res.status(400).json({ error: "First name too short or contains special characters" });
+  }
+  if (!last_name || !nameRegex.test(last_name.trim())) {
+    return res.status(400).json({ error: "Last name too short or contains special characters" });
+  }
+
+  const maxFileSize = 10 * 1024 * 1024; 
+  if (idFile.size > maxFileSize || profileFile.size > maxFileSize) {
+    return res.status(400).json({ error: "File size too large. Maximum allowed size is 10MB" });
+  }
+
+  // save files
+  const idUploadPath = path.join("uploads", Date.now() + "-id-" + idFile.originalname);
+  fs.writeFileSync(idUploadPath, idFile.buffer);
+  const profileUploadPath = path.join("uploads", Date.now() + "-profile-" + profileFile.originalname);
+  fs.writeFileSync(profileUploadPath, profileFile.buffer);
+
+  // common password
+  if (await isPasswordPwned(password)) {
+    return res.status(400).json({
+      error: "This password has appeared in a data breach. Please choose a stronger password."
+    });
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   const evacuee = await Evacuee.create({
     ...req.body,
+    first_name: first_name.trim(),
+    last_name: last_name.trim(),
+    email_address: email_address.toLowerCase(),
     password: hashedPassword,
-    id_picture: uploadPath.replace(/\\/g, "/"),
+    id_picture: idUploadPath.replace(/\\/g, "/"),
+    profile_picture: profileUploadPath.replace(/\\/g, "/"),
     is_verified: false
   });
 
   const otp = await generateOTP(evacuee._id, "Evacuee");
   await emailSender(evacuee.email_address, evacuee.first_name, otp, "verify");
 
-  res.status(201).json({ 
+  res.status(201).json({
     message: "Please verify your email address. We have sent an OTP to your email",
   });
 });
+
 
 // evacuee login
 exports.loginEvacuee = asyncHandler(async (req, res) => {
@@ -88,12 +149,36 @@ exports.updateEvacuee = asyncHandler(async (req, res) => {
     return res.status(400).json({ error: "Invalid request" });
   }
 
+  if (req.file) {
+    const profileFile = req.file;
+
+    // file size
+    const maxFileSize = 10 * 1024 * 1024;
+    if (profileFile.size > maxFileSize) {
+      return res.status(400).json({ error: "File size too large" });
+    }
+
+    // save
+    const uploadPath = path.join("uploads", Date.now() + "-profile-" + profileFile.originalname);
+    fs.writeFileSync(uploadPath, profileFile.buffer);
+
+    req.body.profile_picture = uploadPath.replace(/\\/g, "/");
+
+    // delete old profile picture
+    const evacueeOld = await Evacuee.findById(req.params.id);
+    if (evacueeOld && evacueeOld.profile_picture) {
+      fs.unlink(evacueeOld.profile_picture, (err) => {
+        if (err) console.error("Failed to delete old profile picture:", err);
+      });
+    }
+  }
+
   const evacuee = await Evacuee.findByIdAndUpdate(
     req.params.id,
     { $set: req.body },
     { new: true, runValidators: true }
   );
-  
+
   if (!evacuee) {
     return res.status(404).json({ error: "Evacuee not found" });
   }
@@ -156,3 +241,4 @@ exports.deleteEvacueeById = asyncHandler(async (req, res) => {
 
   res.json({ message: "Evacuee deleted successfully" });
 });
+

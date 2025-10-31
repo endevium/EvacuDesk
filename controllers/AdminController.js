@@ -3,6 +3,7 @@ const UserToken = require("../models/UserTokenModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const asyncHandler = require("../utils/asyncHandler");
+const { isPasswordPwned } = require("../utils/pwnedPasswords")
 
 // admin login
 exports.loginAdmin = asyncHandler(async (req, res) => {
@@ -44,8 +45,16 @@ exports.updatePassword = asyncHandler(async (req, res) => {
     return res.status(400).json({ error: "Current password is incorrect" });
   }
 
+  // current = new password
   if (currentPassword === newPassword) {
     return res.status(400).json({ error: "You are already using this password. Use a different password" });
+  }
+
+  // common password
+  if (await isPasswordPwned(password)) {
+    return res.status(400).json({ 
+      error: "This password has appeared in a data breach. Please choose a stronger password."
+    });
   }
 
   const salt = await bcrypt.genSalt(10);

@@ -16,6 +16,7 @@ const EvacueeSchema = new mongoose.Schema({
     birthdate: { type: Date, required: true },
     disabilities: { type: String },
     id_picture: { type: String, required: true },
+    profile_picture: { type: String, required: true },
     role: { type: String, enum: ['Evacuee'], default: 'Evacuee' },
     // auto delete unverified gmail 
 //     expiresAt: { 

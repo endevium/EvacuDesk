@@ -1,13 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const CenterAreaController = require("../controllers/CenterAreaController");
+const RoomController = require("../controllers/CenterAreaController");
 
-router.post("/", CenterAreaController.createCenterArea);
-router.get("/", CenterAreaController.getCenterAreas);
-router.get("/:id", CenterAreaController.getCenterAreaById);
-router.patch("/:id/add-occupant", CenterAreaController.addOccupantToArea);
-router.patch("/:id/remove-occupant/:occupantId", CenterAreaController.removeOccupantFromArea);
-router.get("/center/:id", CenterAreaController.getCenterAreasByCenterId);
-router.delete("/:id", CenterAreaController.deleteCenterArea);
+router.post("/", RoomController.createCenterArea);
+router.get("/", RoomController.getCenterAreas);
+router.get("/:id", RoomController.getCenterAreaById);
+router.patch("/:id/add-occupant", RoomController.addOccupantToArea);
+router.patch("/:id/remove-occupant/:occupantId", RoomController.removeOccupantFromArea);
+router.get("/center/:id", RoomController.getCenterAreasByCenterId);
+router.delete("/:id", RoomController.deleteCenterArea);
 
 module.exports = router;

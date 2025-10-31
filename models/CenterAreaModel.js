@@ -1,9 +1,11 @@
 const mongoose = require("mongoose");
 
 const CenterAreaSchema = new mongoose.Schema({ 
-    area_number: { type: String, required: true },
+    area_type: { type: String, enum: ["Tent", "Room", "Zone"]},
+    area_name: { type: String, required: true },
     evacuation_center_id: { type: mongoose.Schema.Types.ObjectId, ref: "EvacuationCenter", required: true },
-    capacity: { type: Number, required: true, min: 1 },
+    capacity: { type: Number, min: 5 },
+    size: { type: String, enum: ["Small", "Medium", "Large"] },
     occupants: [{
         evacuee_id: { type: mongoose.Schema.Types.ObjectId, ref: "Evacuee", required: true },
         number_of_family_members: { type: Number, required: true, min: 1 },

@@ -10,7 +10,7 @@ router.get('/active', EvacuationCenterOccupantsController.getActiveOccupants);
 router.get('/active/evacuee/:id', EvacuationCenterOccupantsController.getActiveOccupantById)
 // router.post('/', ...AdminAndEvacuationCenter, EvacuationCenterOccupantsController.addOccupant);
 // router.patch('/:id', ...AdminAndEvacuationCenter, EvacuationCenterOccupantsController.updateOccupantDetails);
-router.patch('/status/:id', ...AllUsers, EvacuationCenterOccupantsController.updateOccupantStatus);
+router.patch('/status/:id', ...AdminAndEvacuationCenter, EvacuationCenterOccupantsController.updateOccupantStatus);
 router.delete('/:id', ...AdminAndEvacuationCenter, EvacuationCenterOccupantsController.deleteOccupantById);
 
 module.exports =router;

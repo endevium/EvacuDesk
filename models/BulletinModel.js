@@ -5,7 +5,6 @@ const BulletinBoardSchema = new mongoose.Schema({
   body: { type: String, required: true },
   image: { type: String, default: null },
   evacuation_center_name: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now }
-});
+}, { timestamp: true });
 
 module.exports = mongoose.model("BulletinBoard", BulletinBoardSchema, "bulletin_boards");

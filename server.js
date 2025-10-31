@@ -2,7 +2,7 @@ const app = require("./app");
 const http = require("http");
 const { Server } = require("socket.io");
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 const server = http.createServer(app);
 
 const io = new Server(server, {
@@ -24,7 +24,7 @@ io.on("connection", (socket) => {
       if (!payload) return;
       if (typeof payload === 'string') {
         userId = payload;
-      } else if (typeof payload === 'object') {
+      } else if (typeof payload === 'object') {     
         userId = payload.userId || null;
         role = payload.role || null;
       }

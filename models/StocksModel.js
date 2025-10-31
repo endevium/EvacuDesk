@@ -5,13 +5,13 @@ const StockSchema = new Schema({
   source: { type: String, required: true, enum: ['Admin', 'EvacuationCenter'] },
   evacuation_center_id: { type: Schema.Types.ObjectId, refPath: 'source', required: true },
   stocks: {
-    FoodPack: { type: Number, default: 0 },
-    WaterPack: { type: Number, default: 0 },
-    MedicinePack: { type: Number, default: 0 },
-    HygienePack: { type: Number, default: 0 },
-    ClothingPack: { type: Number, default: 0 },
-    BeddingPack: { type: Number, default: 0 },
-    InfantPack: { type: Number, default: 0 }
+    FoodPack: { type: Number, default: 0, min: 0 },
+    WaterPack: { type: Number, default: 0, min: 0 },
+    MedicinePack: { type: Number, default: 0, min: 0 },
+    HygienePack: { type: Number, default: 0, min: 0 },
+    ClothingPack: { type: Number, default: 0, min: 0 },
+    BeddingPack: { type: Number, default: 0, min: 0 },
+    InfantPack: { type: Number, default: 0, min: 0 }
   },
   status: {
     FoodPack: { type: String, default: 'Available' },
@@ -21,9 +21,7 @@ const StockSchema = new Schema({
     ClothingPack: { type: String, default: 'Available' },
     BeddingPack: { type: String, default: 'Available' },
     InfantPack: { type: String, default: 'Available' }
-  },
-  last_updated: { type: Date, default: Date.now }
-}, { timestamps: true });
+  }}, { timestamps: true });
 
 // update stock status by quantity
 StockSchema.pre('save', function (next) {

@@ -31,7 +31,6 @@ function priorityAlgorithm({ pwd = 0, pregnant = 0, infants = 0, seniors = 0, ch
   return 5;
 }
 
-
 // create new registration
 exports.registerEvacuee = asyncHandler(async (req, res) => {
   const {

@@ -2,7 +2,7 @@ const CenterArea = require("../models/CenterAreaModel");
 const EvacuationCenter = require("../models/EvacuationCenterModel");
 const EvacuationCenterOccupants = require("../models/EvacuationCenterOccupantsModel"); 
 const Evacuee = require("../models/EvacueeModel");
-const Request = require("../models/EvacueeRequestModel");
+const Request = require("../models/StockRequestModel");
 const asyncHandler = require("../utils/asyncHandler");
 
 // create center area

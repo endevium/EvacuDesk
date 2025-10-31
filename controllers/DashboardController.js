@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
-const EvacueeRequest = require('../models/EvacueeRequestModel');
+const EvacueeRequest = require('../models/StockRequestModel');
 const EvacuationCenter = require('../models/EvacuationCenterModel');
 const EvacuationCenterOccupantsModel = require('../models/EvacuationCenterOccupantsModel');
 const asyncHandler = require('../utils/asyncHandler');
+const Stock = require('../models/StocksModel');
 
 // evacuee dashboard
 exports.getEvacueeDashboard = asyncHandler(async (req, res) => { 
@@ -76,6 +77,12 @@ exports.getEvacuationCenterDashboard = asyncHandler(async (req, res) => {
         status: 'Active' 
     });
 
+    // get stock of the center
+    const centerStock = await Stock.findOne({
+        evacuation_center_id: centerId,
+        source: 'EvacuationCenter'
+    });
+
     const totalOccupants = occupants.reduce((sum, occ) => sum + (occ.number_of_family_members || 1), 0);
 
     // requests
@@ -147,12 +154,15 @@ exports.getEvacuationCenterDashboard = asyncHandler(async (req, res) => {
         Declined,
         "RequestsPerWeek": RequestsPerWeek,
         OccupiedSlots,
-        UnoccupiedSlots
+        UnoccupiedSlots,
+        Stocks: centerStock ? centerStock.stocks : {}
     });
 });
 
 // admin dashboard
 exports.getAdminDashboard = asyncHandler(async (req, res) => {
+    // main stock
+    const adminStock = await Stock.findOne({ source: 'Admin' });
     // evacuation center 
     const centers = await EvacuationCenter.find({});
     const totalCapacity = centers.reduce((sum, c) => sum + (c.capacity || 0), 0);
@@ -226,6 +236,7 @@ exports.getAdminDashboard = asyncHandler(async (req, res) => {
         Declined,
         "RequestsPerWeek": RequestsPerWeek,
         OccupiedSlots,
-        UnoccupiedSlots
+        UnoccupiedSlots,
+        Stocks: adminStock ? adminStock.stocks : {}
     });
 });

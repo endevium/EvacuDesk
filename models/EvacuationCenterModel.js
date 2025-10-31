@@ -38,6 +38,7 @@ async function _cascadeDelete(next) {
     await mongoose.model('EvacuationCenterOccupants').deleteMany({ evacuation_center_id: doc._id });
     await mongoose.model('EvacuationRegistration').deleteMany({ evacuation_center_id: doc._id });
     await mongoose.model('CenterArea').deleteMany({ evacuation_center_id: doc._id });
+    await mongoose.model('Stocks').deleteMany({ evacuation_center_id: doc._id });
     next();
   } catch (err) {
     next(err);

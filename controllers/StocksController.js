@@ -42,12 +42,12 @@ exports.createStock = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: result.message });
   }
 
-  res.status(201).json({ message: 'Stock record created successfully', stock: result.stock });
+  res.status(201).json({ message: 'Stock record created successfully' });
 });
 
 // get all stock of all evac center
 exports.getAllStocks = asyncHandler(async (req, res) => {
-  const stocks = await Stock.find().populate('evacuation_center_id');
+  const stocks = await Stock.find().populate({ path: 'evacuation_center_id', select: '-password -email_address -__v -role -createdAt -updatedAt' });
   res.status(200).json(stocks);
 });
 
@@ -63,77 +63,54 @@ exports.getStockByEvacCenterId = asyncHandler(async (req, res) => {
   res.status(200).json(stock);
 });
 
-// update stock quantity by category
+// update stock quantity (Admin-only)
 exports.updateStock = asyncHandler(async (req, res) => {
-  const { evacuation_center_id, itemType, amount, action } = req.body;
+  const { evacuation_center_id, action, ...rest } = req.body;
 
-  if (
-    !itemType ||
-    !['Food Pack', 'Water Pack', 'Medicine Pack', 'Hygiene Pack', 'Clothing Pack', 'Bedding Pack', 'Infant Pack'].includes(itemType)
-  ) {
-    return res.status(400).json({ message: 'Invalid item type' });
+  if (!rest || Object.keys(rest).length === 0) {
+    return res.status(400).json({ message: 'No stock items provided' });
   }
 
-  const stock = await Stock.findOne({ evacuation_center_id });
-  if (!stock) {
-    return res.status(404).json({ message: 'Stock not found' });
-  }
+  const validItems = ['FoodPack', 'WaterPack', 'MedicinePack', 'HygienePack', 'ClothingPack', 'BeddingPack', 'InfantPack'];
 
-  if (action === 'add') {
-    stock.stocks[itemType] += amount;
-  } else if (action === 'subtract') {
-    if (stock.stocks[itemType] < amount) {
-      return res.status(400).json({ message: `Insufficient ${itemType} stock.` });
-    }
-    // reduce
-    stock.stocks[itemType] -= amount;
-  } else {
-    return res.status(400).json({ message: 'Invalid operation' });
-  }
-
-  await stock.save();
-  res.status(200).json({ message: `${itemType} stock updated successfully` });
-});
-
-// distribute stock to evacuation center
-exports.distributeStock = asyncHandler(async (req, res) => {
-  const { evacCenterId, itemType, amount } = req.body;
-
-  if (
-    !itemType ||
-    !['Food Pack', 'Water Pack', 'Medicine Pack', 'Hygiene Pack', 'Clothing Pack', 'Bedding Pack', 'Infant Pack'].includes(itemType)
-  ) {
-    return res.status(400).json({ message: 'Invalid item type' });
-  }
-
-  // main stock
+  // admin main stock
   const adminStock = await Stock.findOne({ source: 'Admin' });
-  if (!adminStock) {
-    return res.status(404).json({ message: 'Main stock not found' });
+  if (!adminStock) return res.status(404).json({ message: 'Admin stock not found' });
+
+  // center stock record
+  let centerStock = await Stock.findOne({ source: 'EvacuationCenter', evacuation_center_id });
+  if (!centerStock) {
+    centerStock = new Stock({ source: 'EvacuationCenter', evacuation_center_id, stocks: {} });
   }
 
-  // available stock quantity
-  if (adminStock.stocks[itemType] < amount) {
-    return res.status(400).json({ message: `Not enough ${itemType} stock` });
+  for (const [itemType, amount] of Object.entries(rest)) {
+    if (!validItems.includes(itemType)) {
+      return res.status(400).json({ message: `Invalid item type: ${itemType}` });
+    }
+
+    const key = itemType.replace(/\s/g, '');
+
+    if (action === 'add') {
+      if (adminStock.stocks[key] < amount) {
+        return res.status(400).json({ message: `Not enough ${itemType} in Admin stock` });
+      }
+      // subtract from admin stock & add to evac center stock
+      adminStock.stocks[key] -= amount;
+      centerStock.stocks[key] = (centerStock.stocks[key] || 0) + amount;
+    } else if (action === 'subtract') {
+      if (!centerStock.stocks[key] || centerStock.stocks[key] < amount) {
+        return res.status(400).json({ message: `Insufficient ${itemType} stock at center` });
+      }
+      centerStock.stocks[key] -= amount;
+      adminStock.stocks[key] = (adminStock.stocks[key] || 0) + amount;
+    } else {
+      return res.status(400).json({ message: 'Invalid action. Use "add" or "subtract".' });
+    }
   }
 
-  // reduce from main stock
-  adminStock.stocks[itemType] -= amount;
   await adminStock.save();
-
-  let evacStock = await Stock.findOne({ source: 'EvacuationCenter', evacuation_center_id: evacCenterId });
-  if (!evacStock) {
-    evacStock = new Stock({
-      source: 'EvacuationCenter',
-      evacuation_center_id: evacCenterId,
-      stocks: {}
-    });
-  }
-
-  evacStock.stocks[itemType] = (evacStock.stocks[itemType] || 0) + amount;
-  await evacStock.save();
-
-  res.status(200).json({ message: `Successfully distributed ${amount} ${itemType} to evacuation center` });
+  await centerStock.save();
+  res.status(200).json({ message: 'Stocks updated successfully' });
 });
 
 // // delete stock record

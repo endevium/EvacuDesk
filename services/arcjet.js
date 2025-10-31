@@ -6,13 +6,27 @@ const HoneypotLog = require("../models/HoneypotLogs");
 const aj = arcjet({
   key: process.env.ARCJET_KEY,
   rules: [
-    shield({ mode: "LIVE" }),
+    // core rule
+    shield({
+      mode: "LIVE",     
+      blockLowScore: true,   
+      riskThreshold: 50    
+    }),
+
+    // // bot detection
     // detectBot({
     //   mode: "LIVE",
-    //   allow: ["CATEGORY:SEARCH_ENGINE"],
-    //   blockSpoofed: true,
+    //   allow: ["CATEGORY:SEARCH_ENGINE"], 
+    //   blockSpoofed: true            
     // }),
-    // tokenBucket({ mode: "LIVE", refillRate: 5, interval: 10, capacity: 10 })
+
+    // // rate limit rule
+    // tokenBucket({
+    //   mode: "LIVE",
+    //   refillRate: 5,
+    //   interval: 10, 
+    //   capacity: 10 
+    // })
   ],
 });
 

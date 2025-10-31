@@ -1,11 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const DistributionRecordsController = require('../controllers/DistributionRecordsController');
+const DistributionController = require('../controllers/DistributionRecordsController');
 
-router.post('/', DistributionRecordsController.createDistributionRecord);
-router.get('/', DistributionRecordsController.getAllDistributionRecords);
-router.get('/:id', DistributionRecordsController.getDistributionRecordById);
-// router.patch('/:id', DistributionRecordsController.updateDistributionRecord);
-router.delete('/:id', DistributionRecordsController.deleteDistributionRecord);
+router.post('/', DistributionController.distributeSupplies);
+router.get('/center/:id', DistributionController.getCenterDistributions);
+router.get('/evacuee/:id', DistributionController.getEvacueeDistributions);
 
 module.exports = router;

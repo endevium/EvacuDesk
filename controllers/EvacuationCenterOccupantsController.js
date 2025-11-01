@@ -8,8 +8,8 @@ const asyncHandler = require('../utils/asyncHandler');
 // get all occupants
 exports.getAllOccupants = asyncHandler(async (req, res) => {
   const occupants = await EvacuationCenterOccupants.find()
-  //   .populate("evacuation_center_id")
-  //   .populate("evacuee_id");
+    // .populate("evacuation_center_id")
+    .populate("evacuee_id");
   res.json(occupants);
 });
 
@@ -25,17 +25,21 @@ exports.getOccupantsByCenterId = asyncHandler(async (req, res) => {
   const occupants = await EvacuationCenterOccupants.find({
     evacuation_center_id: id
   })
-  .populate("evacuee_id", "first_name last_name")
-  .select('-__v'); 
+    .populate("evacuee_id", "first_name last_name sex birthdate phone_number street barangay city province disabilities id_picture")
+    .populate("assigned_area", "area_name")
+    .select("-__v");
 
-  const plainOccupants = occupants.map(occ => ({
-    ...occ.toObject(),
-    assigned_area: occ.assigned_area ? { area_number: 'Area Info' } : null
+  const formatted = occupants.map(occ => ({
+    _id: occ._id,
+    evacuee: occ.evacuee_id || {},
+    number_of_family_members: occ.number_of_family_members,
+    status: occ.status,
+    assigned_area: occ.assigned_area ? occ.assigned_area.area_name : null
   }));
 
   res.json({
     evacuation_center_id: id,
-    occupants: plainOccupants
+    occupants: formatted
   });
 });
 
@@ -135,18 +139,16 @@ exports.updateOccupantStatus = asyncHandler(async (req, res) => {
     );
 
     // update occupant from occupant in area 
-    await CenterArea.updateOne(
+    const updatedArea = await CenterArea.findOneAndUpdate(
       {
         evacuation_center_id: occupant.evacuation_center_id,
         "occupants.evacuee_id": occupant.evacuee_id
       },
       {
-        $pull: {
-          occupants: {
-            evacuee_id: occupant.evacuee_id
-          }
-        }
-      }
+        $pull: { occupants: { evacuee_id: occupant.evacuee_id } },
+        $set: { status: "Unoccupied" } 
+      },
+      { new: true }
     );
     
     // update isActive status of evac reg to false
@@ -170,10 +172,10 @@ exports.updateOccupantStatus = asyncHandler(async (req, res) => {
   res.json({ message: "Occupant status updated successfully" });
 });
 
-// delete occupant
-exports.deleteOccupantById = asyncHandler(async (req, res) => {
-  const occupant = await EvacuationCenterOccupants.findByIdAndDelete(req.params.id);
-  if (!occupant) return res.status(404).json({ error: "Occupant not found" });
+// // delete occupant
+// exports.deleteOccupantById = asyncHandler(async (req, res) => {
+//   const occupant = await EvacuationCenterOccupants.findByIdAndDelete(req.params.id);
+//   if (!occupant) return res.status(404).json({ error: "Occupant not found" });
 
-  res.json({ message: "Occupant deleted successfully" });
-});
+//   res.json({ message: "Occupant deleted successfully" });
+// });

@@ -10,6 +10,7 @@ const { capitalizeWords, capitalizeFirstLetter } = require("../utils/capitalize"
 const asyncHandler = require("../utils/asyncHandler");
 const { createStockRecord } = require('./StocksController');
 const { isPasswordPwned } = require("../utils/pwnedPasswords");
+const ioService = require("../services/io"); 
 
 // create evacuation center
 exports.createEvacuationCenter = asyncHandler(async (req, res) => {
@@ -40,7 +41,6 @@ exports.createEvacuationCenter = asyncHandler(async (req, res) => {
   if (existingCenterName) {
     return res.status(400).json({ error: "There is already an evacuation center with that name" });
   }
-
 
   // existing email
   const [existingEvacuee, existingCenter] = await Promise.all([
@@ -80,6 +80,7 @@ exports.createEvacuationCenter = asyncHandler(async (req, res) => {
   });
   
   res.status(201).json({ message: "Evacuation center created successfully" });
+  ioService.getIO().emit("evacuationCenterUpdated", { action: "create" });
 });
 
 // login evacuation center

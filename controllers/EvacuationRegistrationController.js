@@ -175,7 +175,7 @@ exports.getRegistrationByCenterId = asyncHandler(async (req, res) => {
   }
 
   const registrations = await EvacuationRegistration.find({ evacuation_center_id: id })
-    .populate("evacuee_id", "first_name last_name sex birthdate phone_number street_number barangay city province disabilities")
+    .populate("evacuee_id", "first_name last_name sex birthdate phone_number street_number barangay city province disabilities id_picture")
     .populate("evacuation_center_id", "name address");
 
   res.status(200).json(registrations);
@@ -193,7 +193,7 @@ exports.getNotApprovedRegistrationByCenterId = asyncHandler(async (req, res) => 
     evacuation_center_id: id,
     status: { $ne: "Approved" },
   })
-    .populate("evacuee_id", "first_name last_name sex birthdate phone_number street_number barangay city province disabilities")
+    .populate("evacuee_id", "first_name last_name sex birthdate phone_number street_number barangay city province disabilities id_picture")
     .populate("evacuation_center_id", "name address");
 
   res.status(200).json(registrations);

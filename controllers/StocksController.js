@@ -90,6 +90,20 @@ exports.updateStock = asyncHandler(async (req, res) => {
 
     const key = itemType.replace(/\s/g, '');
 
+    // mdrrmo restock
+    if (action === 'restock') {
+      for (const [itemType, amount] of Object.entries(rest)) {
+        if (!validItems.includes(itemType)) {
+          return res.status(400).json({ message: `Invalid item type: ${itemType}` });
+        }
+        adminStock.stocks[itemType] = (adminStock.stocks[itemType] || 0) + amount;
+      }
+
+      await adminStock.save();
+      return res.status(200).json({ message: 'Stock updated successfully' });
+    }
+
+    // restock stock
     if (action === 'add') {
       if (adminStock.stocks[key] < amount) {
         return res.status(400).json({ message: `Not enough ${itemType} in Admin stock` });

@@ -3,15 +3,23 @@ const Evacuee = require('../models/EvacueeModel');
 const EvacuationCenter = require('../models/EvacuationCenterModel');
 const asyncHandler = require('../utils/asyncHandler');
 const Stock = require('../models/StocksModel');
+const EvacuationCenterOccupants = require('../models/EvacuationCenterOccupantsModel');
 
-// distribute supplies to evacuee
 exports.distributeSupplies = asyncHandler(async (req, res) => {
-    const { evacuee_id, evacuation_center_id, stocks, distributed_by } = req.body;
+    const { evacuee_id, stocks } = req.body;
 
-    const evacueeExist = await Evacuee.findById(evacuee_id);
-    if (!evacueeExist) {
-      return res.status(400).json({ message: "Evacuee not found"})
+    // check if evacuee is active in any center
+    const activeOccupant = await EvacuationCenterOccupants.findOne({
+        evacuee_id,
+        status: 'Active'
+    });
+
+    if (!activeOccupant) {
+        return res.status(400).json({ message: "Family record not found or evacuee is not active" });
     }
+
+    // get the evacuation center id from the occupant
+    const evacuation_center_id = activeOccupant.evacuation_center_id;
 
     const centerExist = await EvacuationCenter.findById(evacuation_center_id);
     if (!centerExist) {
@@ -51,13 +59,21 @@ exports.distributeSupplies = asyncHandler(async (req, res) => {
         evacuee_id,
         evacuation_center_id,
         stocks,
-        distributed_by,
         status: 'Distributed'
     });
 
     await distribution.save();
 
     res.status(201).json({ message: 'Supplies distributed successfully' });
+});
+
+// get all distribution records
+exports.getAllDistributionRecords = asyncHandler(async (req, res) => {
+    const distributions = await DistributionRecord.find()
+        .populate('evacuee_id', 'first_name last_name street_number barangay phone_number')
+        .populate('evacuation_center_id', '-password -email_address');
+
+    res.status(200).json(distributions);
 });
 
 // get distribution records for an evacuation center

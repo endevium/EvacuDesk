@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import backButton from '../../assets/back-button.png';
 import evacudesk from '../../assets/logo-two.png';
 
-function Email({ onSubmit }) {
+function Email({ onSubmit, setStep }) {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
 
   const handleSubmit = (e) => {
@@ -15,7 +17,7 @@ function Email({ onSubmit }) {
   return (
     <>
       <div className="back-button-container">
-          <button>
+          <button onClick={() => navigate("/login")}>
               <img src={backButton} />
           </button>
       </div>

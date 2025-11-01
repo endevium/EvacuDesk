@@ -17,6 +17,12 @@
     align-items: center;
 }
 
+.required {
+    color: red;
+    margin-left: 4px;
+    font-weight: bold;
+}
+
 .contact-body h2 {
     font-size: 32px;
 }
@@ -101,6 +107,11 @@
     transition: transform 0.3s ease;
 }
 
+.contact-form input[type="email"], .contact-form input[type="tel"] {
+    width: 97%;
+    height: 32px;
+}
+
 .contact-form input:hover {
     transform: scale(1.05);
 }
@@ -109,8 +120,11 @@
     font-family: Inter;
     height: 100px;
     font-size: 16px;
-    max-width: 99%;
+    max-width: 97%;
+    min-height: 150px;
     max-height: 150px;
+    border: 1px #ccc solid;
+    border-radius: 10px;
     transition: transform 0.3s ease;
 }
 

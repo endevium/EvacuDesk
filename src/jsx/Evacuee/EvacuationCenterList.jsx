@@ -18,6 +18,7 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
     const [selectedCenter, setSelectedCenter] = useState(null);
     const [pendingEvac, setPendingEvacuation] = useState([]);
     const [centers, setCenters] = useState([]);
+    const [recommendedCenters, setRecommendedCenters] = useState([]);
     const [familyMembers, setFamilyMembers] = useState([]);
     const [areas, setAreas] = useState([]);
     const [showAreas, setShowAreas] = useState(false);
@@ -25,12 +26,22 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
     const [responseMessage, setResponseMessage] = useState("");
     const [responseType, setResponseType] = useState("success");
     const [activeFilter, setActiveFilter] = useState("all");
-    const [numberOfFamilyMembers, setNumberOfFamilyMembers] = useState(0);
     const evacueeId = localStorage.getItem("evacueeId");
     
     const [newMember, setNewMember] = useState({
         firstName: '', lastName: '', sex: '', birthdate: '', address: '', medical: ''
     });
+
+    const [numberOfFamilyMembers, setNumberOfFamilyMembers] = useState({
+        infants: 0,
+        children: 0,
+        teens: 0,
+        adults: 0,
+        seniors: 0,
+        pregnant: 0,
+        pwd: 0,
+    });
+    const [needPickup, setNeedPickup] = useState("");
 
     // Refs
     const loadingTimeout = useRef(null);
@@ -169,10 +180,30 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
             const token = localStorage.getItem("evacueeToken");
             if (!evacueeId) throw new Error("Evacuee ID not found.");
 
+            const totalMembers = Object.values(numberOfFamilyMembers).reduce((a, b) => a + b, 0);
+
+            if (totalMembers === 0) {
+                showResponseMessage("Please enter at least one family member.", "error");
+                return;
+            }
+
+            if (needPickup === "") {
+                showResponseMessage("Please select whether you need pickup assistance.", "error");
+                return;
+            }
+
             const payload = {
                 evacuee_id: evacueeId,
                 evacuation_center_id: selectedCenter._id,
-                number_of_family_members: numberOfFamilyMembers
+                number_of_family_members: totalMembers,
+                infants: numberOfFamilyMembers.infants,
+                childrens: numberOfFamilyMembers.children,
+                teens: numberOfFamilyMembers.teens,
+                adults: numberOfFamilyMembers.adults,
+                seniors: numberOfFamilyMembers.seniors,
+                pregnant: numberOfFamilyMembers.pregnant,
+                pwd: numberOfFamilyMembers.pwd,
+                for_pickup: needPickup,
             };
 
             const response = await fetch("http://localhost:3000/evacuation-registration/", {
@@ -229,14 +260,18 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
         }
     };
 
-    const handleDecreaseNumber = () => {
-        if (numberOfFamilyMembers > 0) {
-            setNumberOfFamilyMembers(prev => prev - 1);
-        }
+    const handleIncreaseNumber = (type) => {
+        setNumberOfFamilyMembers((prev) => ({
+          ...prev,
+          [type]: prev[type] + 1,
+        }));
     };
-
-    const handleIncreaseNumber = () => {
-        setNumberOfFamilyMembers(prev => prev + 1);
+      
+    const handleDecreaseNumber = (type) => {
+        setNumberOfFamilyMembers((prev) => ({
+            ...prev,
+            [type]: prev[type] > 0 ? prev[type] - 1 : 0,
+        }));
     };
 
     // Data fetching for centers and pending registrations
@@ -245,13 +280,37 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
             try {
                 const response = await fetch('http://localhost:3000/evacuation-center/');
                 const data = await response.json();
-                setCenters(data);
+
+                setCenters(Array.isArray(data) ? data : []);
             } catch (error) {
                 console.error('Error fetching centers:', error);
             } finally {
                 setLoading(false);
             }
         };
+
+        const fetchRecommendedCenters = async () => {
+            try {
+                const evacueeId = localStorage.getItem("evacueeId");
+                const token = localStorage.getItem("evacueeToken");
+
+                const response = await fetch(`http://localhost:3000/evacuee/recommended-center/${evacueeId}`, {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+                
+                console.log(data);
+                setRecommendedCenters(Array.isArray(data) ? data : []);
+            } catch (error) {
+                console.error('Error fetching recommended centers: ', error);
+                setRecommendedCenters([]);
+            } finally {
+                setLoading(false);
+            }
+        }
 
         const fetchPending = async () => {
             try {
@@ -288,6 +347,7 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
         };
 
         fetchCenters();
+        fetchRecommendedCenters();
         fetchPending();
     }, []);
 
@@ -360,7 +420,7 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
             {Object.entries(FILTERS).map(([key, value]) => (
                 <button 
                     key={value}
-                    className={activeFilter === value ? 'active' : ''} 
+                    className={activeFilter === value ? 'active-filter' : ''} 
                     onClick={() => setActiveFilter(value)}
                 >
                     {key.charAt(0) + key.slice(1).toLowerCase()}
@@ -425,7 +485,6 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
                                 <div className='evacuation-center-details'>
                                     <h2>{center.name}</h2>
                                     <p>{center.street}, {center.barangay}, {center.city}, {center.province}</p>
-                                    <p><span>{center.taken_slots}/{center.capacity}</span></p>
                                 </div>
                                 <br />
                                 <div className='view-button'>
@@ -443,37 +502,70 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
 
     const renderAvailableCenters = () => (
         <div>
-            <h2>Available Centers</h2>
-            <div className='evacuation-centers-root'>
-                {loading ? (
-                    <p>Loading evacuation centers...</p>
-                ) : centers.length === 0 ? (
-                    <p>No evacuation centers found.</p>
+            <h2>Recommended Centers</h2>
+            {loading ? (
+                <p>Loading recommended evacuation centers...</p>
+                ) : recommendedCenters.length === 0 ? (
+                <p className='no-current-evac'>No recommended centers found.</p>
                 ) : (
-                    centers.map(center => (
-                        <div key={center._id} className='evacuation-center-card'>
-                            <div className='evacuation-center-image'>
-                                <img
-                                    src={getImageUrl(center)}
-                                    alt={center.name}
-                                    onError={(e) => { e.target.src = evacCenter; }}
-                                />
-                            </div>
-                            <div className='evacuation-center-details'>
-                                <h2>{center.name}</h2>
-                                <p>{center.street}, {center.barangay}, {center.city}, {center.province}</p>
-                                <p><span>{center.taken_slots}/{center.capacity}</span></p>
-                            </div>
-                            <br/>
-                            <div className='evacuation-button'>
-                                <button onClick={() => handleOpenEvacInfo(center)}>
-                                    Register
-                                </button>
-                            </div>
+                <div className='evacuation-centers-root'>
+                    {recommendedCenters.map(center => (
+                    <div key={center._id} className='evacuation-center-card'>
+                        <div className='evacuation-center-image'>
+                        <img
+                            src={getImageUrl(center)}
+                            alt={center.name}
+                            onError={(e) => { e.target.src = evacCenter; }}
+                        />
                         </div>
-                    ))
+                        <div className='evacuation-center-details'>
+                        <h2>{center.name}</h2>
+                        <p>{center.street}, {center.barangay}, {center.city}, {center.province}</p>
+                        <p><span>{center.taken_slots}/{center.capacity}</span></p>
+                        </div>
+                        <br/>
+                        <div className='evacuation-button'>
+                        <button onClick={() => handleOpenEvacInfo(center)}>
+                            Register
+                        </button>
+                        </div>
+                    </div>
+                    ))}
+                </div>
+            )}
+
+
+            <h2>Available Centers</h2>
+            {loading ? (
+                <p>Loading evacuation centers...</p>
+                ) : centers.length === 0 ? (
+                <p className='no-current-evac'>No evacuation centers found.</p>
+                ) : (
+                <div className='evacuation-centers-root'>
+                    {centers.map(center => (
+                    <div key={center._id} className='evacuation-center-card'>
+                        <div className='evacuation-center-image'>
+                        <img
+                            src={getImageUrl(center)}
+                            alt={center.name}
+                            onError={(e) => { e.target.src = evacCenter; }}
+                        />
+                        </div>
+                        <div className='evacuation-center-details'>
+                        <h2>{center.name}</h2>
+                        <p>{center.street}, {center.barangay}, {center.city}, {center.province}</p>
+                        <p><span>{center.taken_slots}/{center.capacity}</span></p>
+                        </div>
+                        <br/>
+                        <div className='evacuation-button'>
+                        <button onClick={() => handleOpenEvacInfo(center)}>
+                            Register
+                        </button>
+                        </div>
+                    </div>
+                    ))}
+                </div>
                 )}
-            </div>
         </div>
     );
 
@@ -508,16 +600,49 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
                     <p>Contact No.: {selectedCenter?.staff_contact_number}</p>
                     <p>Capacity: {selectedCenter?.taken_slots}/{selectedCenter?.capacity}</p>
                 </div>
-            </div>
 
-            <div className='family-members-section'>
+                <div className='family-members-section'>
                 <h2>Number of Family Members</h2>
                 <div className='family-members-table-root'>
-                    <button onClick={handleDecreaseNumber}>-</button>
-                    <h2>{numberOfFamilyMembers}</h2>
-                    <button onClick={handleIncreaseNumber}>+</button>
+                    {Object.entries(numberOfFamilyMembers).map(([key, value]) => (
+                        <div key={key} className='family-member'>
+                            <p>{key.charAt(0).toUpperCase() + key.slice(1)}</p>
+                            <button onClick={() => handleDecreaseNumber(key)}>-</button>
+                            <h2>{value}</h2>
+                            <button onClick={() => handleIncreaseNumber(key)}>+</button>
+                        </div>
+                    ))}
+                </div>
+
+                <br />
+
+                <div className='family-members-section'>
+                    <h2>Need Pickup?</h2>
+                    <div className='radio-buttons'>
+                        <label>
+                        <input
+                            type="radio"
+                            name="needPickup"
+                            value="Yes"
+                            onChange={() => setNeedPickup("Yes")}
+                        />
+                        Yes
+                        </label>
+                        <label>
+                        <input
+                            type="radio"
+                            name="needPickup"
+                            value="No"
+                            onChange={() => setNeedPickup("No")}
+                        />
+                        No
+                        </label>
+                    </div>
                 </div>
             </div>
+            </div>
+
+            
 
             <div className='buttons'>
                 <button className='cancel-button' onClick={handleCloseEvacInfo}>Cancel</button>
@@ -545,17 +670,18 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
                         <p>Registration Date: {new Date(currentEvac.date_joined).toLocaleDateString()}</p>
                     )}
                     {currentEvac && (
-                        <p>Family Members: {currentEvac.number_of_family_members}</p>
+                        <>
+                            <p>Number of Family Members: {currentEvac.number_of_family_members}</p>
+                            <p>Infants: {currentEvac.infants}</p>
+                            <p>Children: {currentEvac.childrens}</p>
+                            <p>Teens: {currentEvac.teens}</p>
+                            <p>Adults: {currentEvac.adults}</p>
+                            <p>Seniors: {currentEvac.seniors}</p>
+                            <p>PWD: {currentEvac.pwd}</p>
+                        </>
                     )}
-                    <p onClick={handleShowAreas}>Assigned Area: 
-                        <span>(View Areas)</span>
-                    </p>
+                    <p onClick={handleShowAreas}>Assigned Area: </p>
                 </div>
-            </div>
-
-            <div className='buttons'>
-                <button className='cancel-button' onClick={handleCloseCurrentEvac}>Cancel</button>
-                <button className='leave-button' onClick={handleLeaveEvacuation}>Leave</button>
             </div>
         </>
     );

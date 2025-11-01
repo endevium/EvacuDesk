@@ -14,6 +14,7 @@ function AdminLogin() {
     const [responseType, setResponseType] = useState("");
     const [exitAnim, setExitAnim] = useState(false);
 
+    // Timeouts
     const loadingTimeout = useRef(null);
     const showTimeout = useRef(null);
     const exitTimeout = useRef(null);
@@ -30,6 +31,7 @@ function AdminLogin() {
         };
     }, []);
 
+    // Admin login functionality
     const handleAdminLogin = (username, password) => {
         setLoading(true);
         clearAllTimeouts();
@@ -45,7 +47,8 @@ function AdminLogin() {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(payload), 
-        })
+        })  
+        // Get response
             .then(async (response) => {
                 const data = await response.json();
                 if (!response.ok) {
@@ -54,11 +57,15 @@ function AdminLogin() {
                 }
                 return data;
             })
+            // Get data from successful login
             .then((data) => {
                 setLoading(false);
                 setResponseMessage("Login successful!");
                 setResponseType("success");
                 setShowResponse(true);
+
+                // Store token
+                localStorage.setItem("adminToken", data.token);
 
                 showTimeout.current = setTimeout(() => {
                     setExitAnim(true);
@@ -68,9 +75,8 @@ function AdminLogin() {
                         navigate("/admin")
                     }, 400);
                 }, 3000);
-
-                localStorage.setItem("adminToken", data.token);
             })
+            // Error handling
             .catch((error) => {
                 setLoading(false); 
                 setResponseMessage(error.message || "An error occurred");
@@ -141,12 +147,14 @@ function AdminBody({
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
+    // Input validation
     const validateInputs = () => {
         if (!username) return "Username is required";
         if (!password) return "Password is required";
         return null;
     };
 
+    // Login button functionality
     const handleLoginClick = () => {
         const errorMessage = validateInputs();
     

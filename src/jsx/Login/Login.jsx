@@ -11,17 +11,18 @@ import { useState, useRef, useEffect } from "react";
 
 function Login() {
     const [role, setRole] = useState("");
+    const navigate = useNavigate();
+
+    // Timeouts
     const [loading, setLoading] = useState(false);
     const [showResponse, setShowResponse] = useState(false);
     const [responseMessage, setResponseMessage] = useState("");
     const [responseType, setResponseType] = useState("");
     const [exitAnim, setExitAnim] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
-    const navigate = useNavigate()
-
     const loadingTimeout = useRef(null);
     const showTimeout = useRef(null);
     const exitTimeout = useRef(null);
+
 
     const clearAllTimeouts = () => {
         if (loadingTimeout.current) { clearTimeout(loadingTimeout.current); loadingTimeout.current = null; }
@@ -35,6 +36,7 @@ function Login() {
         };
     }, []);
 
+    // Role selection functionality
     const handleRoleSelection = (selectedRole) => {
         setLoading(true);
         clearAllTimeouts();
@@ -54,6 +56,7 @@ function Login() {
         }, 1000);
     };
 
+    // Login button functionality
     const handleEvacueeLogin = (email_address, password) => {
         setLoading(true);
         clearAllTimeouts();
@@ -70,6 +73,7 @@ function Login() {
             },
             body: JSON.stringify(payload), 
         })
+            // Get response
             .then(async (response) => {
                 const data = await response.json();
                 if (!response.ok) {
@@ -78,12 +82,11 @@ function Login() {
                 }
                 return data;
             })
+            // Get data from successful response
             .then((data) => {
+                // Store evacuee ID and token
                 localStorage.setItem("evacueeId", data.id);
                 localStorage.setItem("evacueeToken", data.token);
-
-                const token = localStorage.getItem("evacueeToken");
-                console.log(token);
 
                 setLoading(false);
                 setResponseMessage("Login successful!");
@@ -103,6 +106,7 @@ function Login() {
                 }, 2000);
 
             })
+            // Get error message
             .catch((error) => {
                 setLoading(false); 
                 setResponseMessage(error.message || "An error occurred");
@@ -119,6 +123,7 @@ function Login() {
             });
     };
 
+    // Staff login functionality
     const handleStaffLogin = (email_address, password) => {
         setLoading(true);
         clearAllTimeouts();
@@ -135,6 +140,7 @@ function Login() {
             },
             body: JSON.stringify(payload), 
         })
+            // Get response
             .then(async (response) => {
                 const data = await response.json();
                 if (!response.ok) {
@@ -143,6 +149,7 @@ function Login() {
                 }
                 return data;
             })
+            // Store evacuation center ID and token
             .then((data) => {
                 localStorage.setItem("evacuationCenterId", data.id);
                 localStorage.setItem("evacuationCenterToken", data.token);
@@ -160,13 +167,13 @@ function Login() {
                     }, 400);
                 }, 3000);
 
+                // After successful login, redirect to evacuation center
                 setTimeout(() => {
                     navigate("/evacuation-center");
                 }, 2000);
             })
+            // Get error message
             .catch((error) => {
-                
-
                 setLoading(false); 
                 setResponseMessage(error.message || "An error occurred");
                 setResponseType("error");
@@ -182,6 +189,8 @@ function Login() {
             });
     };
 
+
+    // Back button functionality
     const handleBackToChooseLogin = () => {
         setLoading(true);
         clearAllTimeouts();
@@ -249,6 +258,7 @@ function Login() {
 function ChooseLogin({ onRoleSelect }) {
     const navigate = useNavigate();
 
+    // Continue button functionality
     const handleContinue = () => {
         const selectedRole = document.getElementById("role-select").value;
         if (selectedRole) {
@@ -263,6 +273,10 @@ function ChooseLogin({ onRoleSelect }) {
                     <img src={backButton} />
                 </button>
             </div>
+            <br />
+            <br />
+            <br />
+            <br />
             <div className="login-right-image">
                 <img src={evacudesk} />
             </div>
@@ -272,7 +286,7 @@ function ChooseLogin({ onRoleSelect }) {
                 <select className="role-select" id="role-select">
                     <option value="">Select Role</option>
                     <option value="evacuee">Evacuee</option>
-                    <option value="staff">PDRRMO</option>
+                    <option value="staff">Evacuation Center Staff</option>
                 </select>
 
                 <button className="proceed-button" onClick={handleContinue}>
@@ -305,6 +319,7 @@ function EvacueeLogin({
     const [rememberMe, setRememberMe] = useState(false); 
     const [showPassword, setShowPassword] = useState(false);
 
+    // Remember me functionality
     useEffect(() => {
         const savedEmail = localStorage.getItem("evacuee_email");
         const savedPassword = localStorage.getItem("evacuee_password");
@@ -315,6 +330,7 @@ function EvacueeLogin({
         }
     }, []);
 
+    // Input validation
     const validateInputs = () => {
         if (!email) return "Email is required";
         if (!/\S+@\S+\.\S+/.test(email)) return "Invalid email format";
@@ -322,6 +338,7 @@ function EvacueeLogin({
         return null;
     };
 
+    // Login button functionality
     const handleLoginClick = () => {
         const errorMessage = validateInputs();
     
@@ -357,6 +374,7 @@ function EvacueeLogin({
                     <img src={backButton} />
                 </button>
             </div>
+            <br />
             <div className="login-right-image">
                 <img src={evacudesk} />
             </div>
@@ -400,7 +418,7 @@ function EvacueeLogin({
                         onChange={(e) => setRememberMe(e.target.checked)}
                     />
                     <label htmlFor="rememberMe">Remember Me</label>
-                    <span>Forgot Password?</span>
+                    <span onClick={() => navigate("/forgot-password")}>Forgot Password?</span>
                 </div>
                 <button onClick={handleLoginClick}>Login</button>
                 <p>
@@ -430,6 +448,7 @@ function StaffLogin({
     const [rememberMe, setRememberMe] = useState(false); 
     const [showPassword, setShowPassword] = useState(false);
 
+    // Remember me functionality
     useEffect(() => {
         const savedEmail = localStorage.getItem("staff_email");
         const savedPassword = localStorage.getItem("staff_password");
@@ -440,9 +459,11 @@ function StaffLogin({
         }
     }, []);
 
+    // Input validation
     const validateInputs = () => {
-        if (!email) return "Email is required";
-        if (!/\S+@\S+\.\S+/.test(email)) return "Invalid email format";
+        if (!email) return "Email is required"; 
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(email)) return "Please enter a valid email address";
         if (!password) return "Password is required";
         return null;
     };
@@ -482,11 +503,12 @@ function StaffLogin({
                     <img src={backButton} />
                 </button>
             </div>
+            <br />
             <div className="login-right-image">
                 <img src={evacudesk} />
             </div>
             <div className="login-right-text">
-                <h2>Center Login</h2>
+                <h2>Staff Login</h2>
                 <p>Welcome back! Let’s keep communities safe together.</p>
 
                 <label>Email</label>
@@ -525,15 +547,9 @@ function StaffLogin({
                         onChange={(e) => setRememberMe(e.target.checked)}
                     />
                     <label htmlFor="rememberMe">Remember Me</label>
-                    <span>Forgot Password?</span>
+                    <span onClick={() => navigate("/forgot-password")}>Forgot Password?</span>
                 </div>
                 <button onClick={handleLoginClick}>Login</button>
-                <p>
-                    Don't have an account yet?{" "}
-                    <span onClick={() => navigate("/register")} className="register-text">
-                        Register
-                    </span>
-                </p>
             </div>
         </>
     );

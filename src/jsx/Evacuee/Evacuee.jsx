@@ -1,5 +1,6 @@
 import '../../css/evacuee.css';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import EvacueeSideNav from './EvacueeSideNav';
 import EvacueeHeader from './EvacueeHeader';
@@ -11,9 +12,17 @@ import EvacueeNotifications from './EvacueeNotifications';
 import EvacueeSettings from './EvacueeSettings';
 
 function Evacuee() {
+    const navigate = useNavigate();
     const [activeMenu, setActiveMenu] = useState('home'); 
     const [currentEvac, setCurrentEvacuation] = useState(null);
     const [currentCenter, setCurrentCenter] = useState(null);
+
+    //useEffect(() => {
+        //const evacueeId = localStorage.getItem("evacueeId");
+        //if (!evacueeId) {
+            //navigate("/login");
+        //}
+    //}, [navigate]);
 
     useEffect(() => {
         const fetchActiveEvacuation = async () => {

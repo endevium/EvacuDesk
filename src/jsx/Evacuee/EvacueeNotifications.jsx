@@ -59,10 +59,6 @@ function EvacueeNotifications() {
             </div>
 
             <div className='page-content-notifications'>
-                <div className='notification-buttons'>
-                    <button>All</button>
-                    <button>Unread</button>
-                </div>
                 <div className='notifications-root'>
                     {notifications.length === 0 ? (
                         <p className='no-current-evac'>No notifications found.</p>

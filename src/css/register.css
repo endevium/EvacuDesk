@@ -15,6 +15,7 @@
     border-radius: 25px;
     width: 70vw;
     height: 80vh;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
 }
 
 .register-body .register-right {
@@ -116,8 +117,20 @@
     cursor: pointer;
 }
 
-.register-body .register-left-text input[type="text"], input[type="email"], input[type="password"], 
-input[type="phone"], input[type="date"], input[type="tel"], input[type="file"] {
+.register-body .register-left-text .required {
+    color: red;
+    margin-left: 4px;
+    font-weight: 400;
+    font-size: 14px;
+    cursor: default;
+}
+
+.register-body .register-left-text input[type="text"], 
+.register-body .register-left-text input[type="email"], input[type="password"], 
+.register-body .register-left-text input[type="phone"],
+.register-body .register-left-text input[type="date"],
+.register-body .register-left-text input[type="tel"],
+.register-body .register-left-text input[type="file"] {
     width: 25vw;
     height: 35px;
     margin-top: 5px;
@@ -136,6 +149,18 @@ input[type="phone"], input[type="date"], input[type="tel"], input[type="file"] {
     box-sizing: border-box;
 }
 
+.register-body .register-left-text .readonly-field {
+    font-size: 14px;
+    border-radius: 6px;
+    width: 25vw;
+    height: 35px;
+    padding: 4px;
+    width: 100%;
+    box-sizing: border-box;
+    background-color:rgb(233, 233, 233);
+    cursor: not-allowed;
+}
+
 .register-body .register-left-text input[type="file"]::file-selector-button {
     background-color: #45AD7F;
     color: white;
@@ -149,7 +174,7 @@ input[type="phone"], input[type="date"], input[type="tel"], input[type="file"] {
 .register-body .register-left-text select {
     margin-bottom: 15px;
     border-radius: 10px;
-    width: 25vw;
+    width: 25.5vw;
     height: 35px;
 }
 

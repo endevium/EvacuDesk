@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 
 function Register() {
+    const navigate = useNavigate();
     const [role, setRole] = useState("");
     const [loading, setLoading] = useState(false);
     const [showResponse, setShowResponse] = useState(false);
@@ -18,7 +19,9 @@ function Register() {
     const [exitAnim, setExitAnim] = useState(false);
     const [evacueeStep, setEvacueeStep] = useState(1);
     const [staffStep, setStaffStep] = useState(1);
-    const [otp, setOtp] = useState("");
+    const loadingTimeout = useRef(null);
+    const showTimeout = useRef(null);
+    const exitTimeout = useRef(null);
 
     const [evacueeForm, setEvacueeForm] = useState({
         email_address: "",
@@ -50,43 +53,20 @@ function Register() {
         id_picture: null
     });
 
-    const loadingTimeout = useRef(null);
-    const showTimeout = useRef(null);
-    const exitTimeout = useRef(null);
-
+    // Timeouts
     const clearAllTimeouts = () => {
         if (loadingTimeout.current) { clearTimeout(loadingTimeout.current); loadingTimeout.current = null; }
         if (showTimeout.current) { clearTimeout(showTimeout.current); showTimeout.current = null; }
         if (exitTimeout.current) { clearTimeout(exitTimeout.current); exitTimeout.current = null; }
     };
-
+    
     useEffect(() => {
         return () => {
             clearAllTimeouts();
         };
     }, []);
 
-    const handleRoleSelection = (selectedRole) => {
-        setLoading(true);
-        clearAllTimeouts();
-
-        loadingTimeout.current = setTimeout(() => {
-            setRole(selectedRole);
-            setEvacueeStep(1);
-            setStaffStep(1);
-            setLoading(false);
-
-            setShowResponse(false);
-            showTimeout.current = setTimeout(() => {
-                setExitAnim(true);
-                exitTimeout.current = setTimeout(() => {
-                    setShowResponse(false);
-                    setExitAnim(false);
-                }, 400);
-            }, 3000);
-        }, 1000);
-    };
-
+    // Back Button functionality
     const handleEvacueeBack = () => {
         if (evacueeStep > 1) {
             setLoading(true);
@@ -150,11 +130,10 @@ function Register() {
                                 <div className="spinner" />
                             </div>
                         )}
-                        {!loading && role === "evacuee" && (
+                        {!loading && (
                             <>
                                 {evacueeStep === 1 && (
                                     <EvacueeRegisterOne
-                                        onBack={handleEvacueeBack}
                                         onNext={() => setEvacueeStep(2)}
                                         formData={evacueeForm}
                                         setFormData={setEvacueeForm}
@@ -206,6 +185,7 @@ function Register() {
                                         setExitAnim={setExitAnim}
                                         showTimeout={showTimeout}
                                         exitTimeout={exitTimeout}
+                                        setLoading={setLoading}
                                     />
                                 )}
                                 {evacueeStep === 5 && (
@@ -269,7 +249,6 @@ function Register() {
                                 )}
                             </>
                         )}
-                        {!loading && role === "" && <ChooseRegister onRoleSelect={handleRoleSelection} />}
                     </div>
                     <div className='register-right'></div>
                 </div>
@@ -278,54 +257,7 @@ function Register() {
     )
 }
 
-function ChooseRegister({ onRoleSelect }) {
-    const navigate = useNavigate();
-
-    const handleContinue = () => {
-        const selectedRole = document.getElementById("role-select").value;
-        if (selectedRole) {
-            onRoleSelect(selectedRole);
-        }
-    };
-
-    return (
-        <>
-            <div className="back-button-container">
-                <button onClick={() => navigate("/")}>
-                    <img src={backButton} />
-                </button>
-            </div>
-            <br/>
-            <br/>
-            <br/>
-
-            <div className="register-left-image">
-                <img src={evacudesk} />
-            </div>
-            <div className="register-left-text">
-                <h2>Register</h2>
-                <p>Please select your role.</p>
-                <select className="role-select" id="role-select">
-                    <option value="">Select Role</option>
-                    <option value="evacuee">Evacuee</option>
-                </select>
-
-                <button className="proceed-button" onClick={handleContinue}>
-                    Continue
-                </button>
-                <p>
-                    Already have an account?{" "}
-                    <span onClick={() => navigate("/login")} className="register-text">
-                        Login
-                    </span>
-                </p>
-            </div>
-        </>
-    );
-}
-
 function EvacueeRegisterOne({
-    onBack,
     onNext,               
     formData,
     setFormData,
@@ -341,6 +273,7 @@ function EvacueeRegisterOne({
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+    // Input fields change
     const handleChange = (e) => {
         const { id, value } = e.target;
         setFormData((prev) => ({
@@ -349,8 +282,26 @@ function EvacueeRegisterOne({
         }));
     };
 
+    // Form submission functionality
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        if (/\s/.test(formData.password)) {
+            setResponseMessage("Password must not contain spaces.");
+            setResponseType("error");
+            setShowResponse(true);
+    
+            clearTimeout(showTimeout.current);
+            showTimeout.current = setTimeout(() => {
+                setExitAnim(true);
+                exitTimeout.current = setTimeout(() => {
+                    setShowResponse(false);
+                    setExitAnim(false);
+                }, 400);
+            }, 3000);
+    
+            return;
+        }
 
         if (formData.password !== confirmPassword) {
             setResponseMessage("Passwords do not match.");
@@ -375,7 +326,7 @@ function EvacueeRegisterOne({
     return(
         <>
             <div className="back-button-container">
-                <button onClick={onBack}>
+                <button onClick={() => navigate("/")}>
                     <img src={backButton} />
                 </button>
             </div>
@@ -391,7 +342,7 @@ function EvacueeRegisterOne({
                 <p>Please fill up the following details.</p>
 
                 <form onSubmit={handleSubmit}>
-                <label htmlFor='email_address'>Email</label>
+                <label htmlFor='email_address'>Email <span className="required">*</span></label>
                     <input
                         type="email"
                         id="email_address"
@@ -401,16 +352,17 @@ function EvacueeRegisterOne({
                         required
                     />
 
-                    <label htmlFor='password'>Password</label>
+                    <label htmlFor='password'>Password <span className="required">*</span></label>
                     <div className="password-wrapper">
                         <input
                             type={showPassword ? "text" : "password"}
-                            id="password" // <-- Add this line!
+                            id="password"
                             placeholder="********"
                             value={formData.password}
                             onChange={handleChange}
                             required
                             className="password-input"
+                            minLength={8}
                         />
                         <button
                         type="button"
@@ -421,7 +373,7 @@ function EvacueeRegisterOne({
                         </button>
                     </div>
 
-                    <label htmlFor='confirmPassword'>Confirm Password</label>
+                    <label htmlFor='confirmPassword'>Confirm Password <span className="required">*</span></label>
                     <div className="password-wrapper">
                         <input
                         type={showConfirmPassword ? "text" : "password"}
@@ -430,6 +382,7 @@ function EvacueeRegisterOne({
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
                         className="password-input"
+                        minLength={8}
                         />
                         <button
                         type="button"
@@ -467,17 +420,73 @@ function EvacueeRegisterTwo({
     showTimeout,
     exitTimeout
 }) {
+    // Input fields on change
     const handleChange = (e) => {
         const { id, value } = e.target;
+
         setFormData((prev) => ({
             ...prev,
             [id]: value
         }));
     };
 
+    // Form submission functionality
     const handleSubmit = (e) => {
         e.preventDefault();
 
+        // First name validation
+        if (!/^[A-Za-zÀ-ÿ\s'-]+$/.test(formData.first_name)) {
+            setResponseMessage("First name can only contain letters, spaces, hyphens, or apostrophes.");
+            setResponseType("error");
+            setShowResponse(true);
+    
+            clearTimeout(showTimeout.current);
+            showTimeout.current = setTimeout(() => {
+                setExitAnim(true);
+                exitTimeout.current = setTimeout(() => {
+                    setShowResponse(false);
+                    setExitAnim(false);
+                }, 400);
+            }, 3000);
+        
+            return;
+        }
+
+        // Last name validation
+        if (!/^[A-Za-zÀ-ÿ\s'-]+$/.test(formData.last_name)) {
+            setResponseMessage("Last name can only contain letters, spaces, hyphens, or apostrophes.");
+            setResponseType("error");
+            setShowResponse(true);
+    
+            clearTimeout(showTimeout.current);
+            showTimeout.current = setTimeout(() => {
+                setExitAnim(true);
+                exitTimeout.current = setTimeout(() => {
+                    setShowResponse(false);
+                    setExitAnim(false);
+                }, 400);
+            }, 3000);
+        
+            return;
+        }
+
+        // Phone number validation
+        if (!/^09\d{9}$/.test(formData.phone_number)) {
+            setResponseMessage("Phone number must start with 09 and be 11 digits long.");
+            setResponseType("error");
+            setShowResponse(true);
+        
+            clearTimeout(showTimeout.current);
+            showTimeout.current = setTimeout(() => {
+              setExitAnim(true);
+              exitTimeout.current = setTimeout(() => {
+                setShowResponse(false);
+                setExitAnim(false);
+              }, 400);
+            }, 3000);
+
+            return;
+        }
         onNext();
     };
     return(
@@ -499,7 +508,7 @@ function EvacueeRegisterTwo({
 
 
                 <form onSubmit={handleSubmit}>
-                <label htmlFor='first_name'>First Name</label>
+                <label htmlFor='first_name'>First Name <span className="required">*</span></label>
                     <input
                         type="text"
                         id="first_name"
@@ -509,7 +518,7 @@ function EvacueeRegisterTwo({
                         required
                     />
 
-                    <label htmlFor='last_name'>Last Name</label>
+                    <label htmlFor='last_name'>Last Name <span className="required">*</span></label>
                     <input
                         type="text"
                         id="last_name"
@@ -519,7 +528,7 @@ function EvacueeRegisterTwo({
                         required
                     />
 
-                    <label htmlFor='sex'>Sex</label>
+                    <label htmlFor='sex'>Sex <span className="required">*</span></label>
                     <select
                         id="sex"
                         value={formData.sex}
@@ -531,7 +540,7 @@ function EvacueeRegisterTwo({
                         <option value="Female">Female</option>
                     </select>
 
-                    <label htmlFor="birthdate">Birthday</label>
+                    <label htmlFor="birthdate">Birthday <span className="required">*</span></label>
                     <input
                         type="date"
                         id="birthdate"
@@ -542,7 +551,7 @@ function EvacueeRegisterTwo({
                         className="birthday-input"
                     />
 
-                    <label htmlFor="phone_number">Phone Number</label>
+                    <label htmlFor="phone_number">Phone Number <span className="required">*</span></label>
                     <input
                         type="tel"
                         id="phone_number"
@@ -573,6 +582,7 @@ function EvacueeRegisterThree({
     showTimeout,
     exitTimeout
 }) {
+    // Input fields onChange
     const handleChange = (e) => {
         const { id, value } = e.target;
         setFormData((prev) => ({
@@ -581,6 +591,7 @@ function EvacueeRegisterThree({
         }));
     };
 
+    // Form submission functionality
     const handleSubmit = (e) => {
         e.preventDefault();
 
@@ -607,7 +618,7 @@ function EvacueeRegisterThree({
                 <br/>
 
                 <form onSubmit={handleSubmit}>
-                    <label htmlFor='street_number'>Street</label>
+                    <label htmlFor='street_number'>Street Number <span className="required">*</span></label>
                     <input
                         type="text"
                         id="street_number"
@@ -617,34 +628,68 @@ function EvacueeRegisterThree({
                         required
                     />
 
-                    <label htmlFor='barangay'>Barangay</label>
-                    <input
-                        type="text"
+                    <label htmlFor="barangay">Barangay <span className="required">*</span></label>
+                    <select
                         id="barangay"
-                        placeholder='Commonwealth'
                         value={formData.barangay}
                         onChange={handleChange}
                         required
-                    />
+                    >
+                        <option value="">Select Barangay</option>
+                        {[
+                        "Barangay I",
+                        "Barangay II",
+                        "Barangay IV",
+                        "Bacayao Norte",
+                        "Bacayao Sur",
+                        "Barangay Pogo Chico",
+                        "Barangay Pogo Grande",
+                        "Bonuan Binloc",
+                        "Bonuan Boquig",
+                        "Bonuan Gueset",
+                        "Calmay",
+                        "Carael",
+                        "Caranglaan",
+                        "Herrero-Perez",
+                        "Lasip Chico",
+                        "Lasip Grande",
+                        "Lomboy",
+                        "Lucao",
+                        "Malued",
+                        "Mamalingling",
+                        "Mangin",
+                        "Mayombo",
+                        "Pantal",
+                        "Poblacion Oeste",
+                        "Pogo Chico",
+                        "Pogo Grande",
+                        "Salapingao",
+                        "Tambac",
+                        "Tapuac",
+                        "Tebeng",
+                        ].map((brgy) => (
+                        <option key={brgy} value={brgy}>
+                            {brgy}
+                        </option>
+                        ))}
+                    </select>
 
-                    <label htmlFor='city'>City</label>
+                    <label htmlFor="city">City / Municipality <span className="required">*</span></label>
                     <input
                         type="text"
                         id="city"
-                        placeholder='Manila'
-                        value={formData.city}
-                        onChange={handleChange}
-                        required
+                        value="Dagupan City"
+                        readOnly
+                        className="readonly-field"
                     />
 
-                    <label htmlFor='barangay'>Province</label>
+                    <label htmlFor="province">Province <span className="required">*</span></label>
                     <input
                         type="text"
                         id="province"
-                        placeholder='Metro Manila'
-                        value={formData.province}
-                        onChange={handleChange}
-                        required
+                        value="Pangasinan"
+                        readOnly
+                        className="readonly-field"
                     />
 
                     <br/>
@@ -666,11 +711,10 @@ function EvacueeRegisterFour({
     setShowResponse,
     setExitAnim,
     showTimeout,
-    exitTimeout
+    exitTimeout,
+    setLoading
 }) {
-    const navigate = useNavigate();
-
-    const [loading, setLoading] = useState(false); 
+    // Timeouts
     const clearAllTimeouts = () => {
         if (showTimeout.current) {
             clearTimeout(showTimeout.current);
@@ -682,6 +726,7 @@ function EvacueeRegisterFour({
         }
     };
 
+    // Input fields onChange
     const handleChange = (e) => {
         const { id, value } = e.target;
         setFormData((prev) => ({
@@ -690,6 +735,7 @@ function EvacueeRegisterFour({
         }));
     };
 
+    // Submission functionality w/ API integration
     const handleEvacueeRegister = (e) => {
         e.preventDefault();
         setLoading(true);
@@ -702,15 +748,17 @@ function EvacueeRegisterFour({
             }
         }
 
+        // Automatically append the country
         formDataToSend.append("country", "Philippines");
         formDataToSend.forEach((value, key) => {
             console.log(key, value);
-          });
+        });
     
         fetch("http://localhost:3000/evacuee/signup", {
             method: "POST",
             body: formDataToSend, 
-        })
+        })  
+            // Get response
             .then(async (response) => {
                 const data = await response.json();
                 console.log(data);
@@ -719,6 +767,7 @@ function EvacueeRegisterFour({
                 }
                 return data;
             })
+            // Get data from successful response
             .then((data) => {
                 localStorage.setItem("evacueeId", data.id);
 
@@ -736,6 +785,7 @@ function EvacueeRegisterFour({
                     }, 400);
                 }, 3000);
             })
+            // Show error message
             .catch((error) => {
                 setLoading(false);
                 setResponseMessage(error.message || "An error occurred");
@@ -774,19 +824,16 @@ function EvacueeRegisterFour({
                 <br/>
 
                 <form onSubmit={handleEvacueeRegister}>
-                    <label htmlFor='disabilities'>Medical Needs</label>
-                    <select
+                    <label htmlFor='disabilities'>Special Notes or Medical Conditions</label>
+                    <input
+                        type="text"
                         id="disabilities"
                         value={formData.disabilities}
+                        placeholder="Please indicate N/A if none"
                         onChange={handleChange}
-                        required
-                    >
-                        <option value="">Select Option</option>
-                        <option value="Arthritis">Arthritis</option>
-                        <option value="Injuries">Injuries</option>
-                    </select>
+                    />
 
-                    <label htmlFor='id_picture'>ID Picture</label>
+                    <label htmlFor='id_picture'>ID Picture <span className="required">*</span></label>
                     <input
                         type="file"
                         id="id_picture"
@@ -824,6 +871,7 @@ function EvacueeVerification({
     const [code, setCode] = useState(new Array(6).fill(""));
     const [loading, setLoading] = useState(false);
 
+    // Input fields onChange
     const handleChange = (element, index) => {
         if (isNaN(element.value)) return false;
         let newCode = [...code];
@@ -835,6 +883,7 @@ function EvacueeVerification({
         }
     };
 
+    // OTP submission functionality
     const handleSubmit = async (e) => {
         e.preventDefault();
         const otp = code.join("");
@@ -945,7 +994,7 @@ function EvacueeVerification({
     );
 }
 
-function StaffRegisterOne({
+{/*function StaffRegisterOne({
     onBack,
     onNext,               
     formData,
@@ -1328,6 +1377,6 @@ function StaffRegisterThree({
             </div>
         </>
     )
-}
+}*/}
 
 export default Register

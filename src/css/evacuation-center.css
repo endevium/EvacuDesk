@@ -96,6 +96,7 @@
     margin-top: 15px;
     padding: 5px;
     padding-left: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.20);
 }
 
 .ec .ec-body .page-content h2 {

@@ -55,6 +55,7 @@
     margin-top: 15px;
     padding: 5px;
     padding-left: 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.20);
 }
 
 .evacuee .evacuee-body .page-content h2 {
@@ -66,7 +67,7 @@
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
-    gap: 30px;
+    gap: 15px;
 }
 
 .dashboard-mini-root .dashboard-mini-card {
@@ -157,14 +158,15 @@
     padding-bottom: 10px;
 }
 
-.evacuee .evacuee-body .evacuation-centers-buttons button {
+.evacuee .evacuee-body .evacuation-centers-buttons .active-filter {
     width: 100px;
     height: 35px;
     border: 0;
     border-radius: 15px;
-    color:#555;
+    color:white;
     font-size: 13px;
     cursor: pointer;
+    background-color: #45AD7F;
 }
 
 .no-current-evac {
@@ -288,6 +290,8 @@
 
 .evacuation-center-info .evacuation-center-info-body .info {
     width: 100%;
+    max-height: 500px;
+    overflow-y: scroll;
     display: flex;
     flex-direction: column;
     gap: 1rem;
@@ -295,7 +299,7 @@
 }
 
 .evacuation-center-info .evacuation-center-info-body h2 {
-    color:#224539;
+    color:#45AD7F;
 }
 
 .evacuation-center-info .evacuation-center-info-body .info .evac-img {
@@ -331,6 +335,7 @@
 .evacuation-center-info .evacuation-center-info-body .family-members-section {
     width: 97%;
     padding-left: 5px;
+    margin-top: -15px;
 }
 
 .evacuation-center-info .evacuation-center-info-body .family-members-section .add-button {
@@ -350,12 +355,44 @@
 }
 
 .evacuation-center-info .evacuation-center-info-body .family-members-section .family-members-table-root {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.evacuation-center-info .evacuation-center-info-body .family-members-section .family-members-table-root .family-member {
+    width: 100%;
     height: 35px;
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
     align-items: center;
+    font-family: Inter;
+    margin-bottom: 15px;
 }
+
+.evacuation-center-info .evacuation-center-info-body .family-members-section .radio-buttons {
+    display: flex;
+    flex-direction: column;
+    font-family: Inter;
+    margin-bottom: 15px;
+    margin-left: 15px;
+}
+
+.evacuation-center-info .evacuation-center-info-body .family-members-section .radio-buttons input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    font-family: Inter;
+    margin-bottom: 15px;
+    margin-left: 15px;
+    margin-right: 10px;
+}
+
+.evacuation-center-info .evacuation-center-info-body .family-members-section .family-members-table-root .family-member p {
+    width: 55%;
+}
+
 
 .evacuation-center-info .evacuation-center-info-body .family-members-section .family-members-table-root button {
     height: 30px;
@@ -396,7 +433,7 @@
 .evacuation-center-info .evacuation-center-info-body .buttons {
     width: 97%;
     height: 50px;
-    gap: 15px;
+    gap: 20px;
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
@@ -406,7 +443,7 @@
 }
 
 .evacuation-center-info .evacuation-center-info-body .buttons button {
-    width: 140px;
+    width: 230px;
     height: 40px;
     border: 0;
     border-radius: 10px;
@@ -538,7 +575,7 @@
 }
 
 .add-family .add-family-body .buttons button {
-    width: 115px;
+    width: 150px;
     height: 37px;
     border: 0;
     border-radius: 10px;
@@ -669,6 +706,7 @@
     height:45px;
     gap: 5px;
     cursor: pointer;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
 }
 
 .evacuee .evacuee-body .page-label .request-button img {

@@ -32,7 +32,8 @@ function EvacueeHeader() {
         };
 
         fetchEvacueeData();
-    })
+    });
+    
     return(
         <>
             <div className='evacuee-header'>
@@ -41,7 +42,6 @@ function EvacueeHeader() {
                 </div>
                 <div className='profile-header'>
                     <div className='profile-picture'>
-                        <img src={profilePlaceholder}/>
                     </div>
                     <div className='profile-text'>
                         <h2>{`${firstName} ${lastName}`}</h2>

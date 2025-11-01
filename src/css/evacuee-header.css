@@ -6,6 +6,7 @@
     width: 100%;
     font-family: Inter;
     align-items: center;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
 }
 
 .evacuee-header .evacuee-text {

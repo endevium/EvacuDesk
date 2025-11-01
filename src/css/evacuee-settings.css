@@ -23,7 +23,7 @@
 .account-setting-main-content {
     margin-top: 15px;
     background-color: #f9fafb;
-    height:  550px;
+    height:  480px;
     overflow-y: scroll;
     padding: 30px 50px;
     border-radius: 10px;
@@ -125,7 +125,6 @@
 
 /* --- FORM STYLES --- */
 .form-row {
-    padding: 10px 10px;
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
@@ -133,10 +132,9 @@
 }
 
 .form-field {
-    padding: 10px 10px;
     display: flex;
     flex-direction: column;
-    flex: 1;
+    width: 365px;
 }
 
 .form-field label {
@@ -147,12 +145,27 @@
 }
 
 .form-field input {
-    padding: 10px 10px;
     border: 1px solid #ccc;
     border-radius: 8px;
     font-size: 0.95rem;
     background-color: #fff;
     transition: border 0.2s ease, box-shadow 0.2s ease;
+    width: 96%;
+    height: 32px;
+    margin-top: 5px;
+    border: 0.5px #acacac solid;
+}
+
+.form-field select {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    background-color: #fff;
+    transition: border 0.2s ease, box-shadow 0.2s ease;
+    width: 98.5%;
+    height: 36px;
+    margin-top: 5px;
+    border: 0.5px #acacac solid;
 }
 
 .form-field input:focus {

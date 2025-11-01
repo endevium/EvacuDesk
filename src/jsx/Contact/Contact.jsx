@@ -123,19 +123,16 @@ function ContactBody() {
               <form className="contact-form" ref={formRef} onSubmit={handleSubmit}>
                 <h2>Send Us a Message</h2>
   
-                <label htmlFor="first-name">First Name</label>
+                <label htmlFor="first-name">First Name <span className="required">*</span></label>
                 <input type="text" placeholder="John" id="first-name" required />
   
-                <label htmlFor="last-name">Last Name</label>
+                <label htmlFor="last-name">Last Name <span className="required">*</span></label>
                 <input type="text" placeholder="Doe" id="last-name" required />
   
-                <label htmlFor="email">Email</label>
+                <label htmlFor="email">Email <span className="required">*</span></label>
                 <input type="email" placeholder="john.doe@example.com" id="email" required />
   
-                <label htmlFor="phone">Phone Number</label>
-                <input type="tel" placeholder="09123456789" id="phone" required />
-  
-                <label htmlFor="concern">Concerns</label>
+                <label htmlFor="concern">Concerns <span className="required">*</span></label>
                 <textarea id="concern" required/>
   
                 <button type="submit" disabled={loading}>Send</button>

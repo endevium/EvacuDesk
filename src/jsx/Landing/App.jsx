@@ -30,6 +30,8 @@ import Evacuee from '../Evacuee/Evacuee'
 import EvacuationCenter from '../EvacuationCenter/EvacuationCenter'
 import Admin from '../Admin/Admin'
 import ForgotPassword from '../ForgotPassword/ForgotPassword'
+import StaffForgotPassword from '../ForgotPassword/StaffForgotPassword'
+import EvacueeChangePassword from '../Evacuee/EvacueeChangePassword'
 
 import useNotificationSetup from '../../Hooks/PushNotification'
 import { ToastContainer } from 'react-toastify';
@@ -54,6 +56,8 @@ function App() {
           <Route path='/contact' element={<Contact />}/>
           <Route path='/login' element={<Login />}/>
           <Route path='/forgot-password' element={<ForgotPassword />}/>
+          <Route path='/staff-forgot-password' element={<StaffForgotPassword />}/>
+          <Route path='/change-password' element={<EvacueeChangePassword />}/>
           <Route path='/adl' element={<AdminLogin />}/>
           <Route path='/register' element={<Register />}/>
 

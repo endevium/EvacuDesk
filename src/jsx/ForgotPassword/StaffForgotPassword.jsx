@@ -9,8 +9,8 @@ import Email from './Email';
 import Verification from './Verification';
 import ResetPassword from './ResetPassword';
 
-function ForgotPassword() {
-    const [step, setStep] = useState("email");
+function StaffForgotPassword() {
+    const [step, setStep] = useState("email"); // "email" | "verify" | "reset"
     const [loading, setLoading] = useState(false);
     const [showResponse, setShowResponse] = useState(false);
     const [responseMessage, setResponseMessage] = useState("");
@@ -43,7 +43,7 @@ function ForgotPassword() {
         setEmail(inputEmail);
 
         try {
-            const res = await fetch("http://localhost:3000/evacuee/forgot-password", {
+            const res = await fetch("http://localhost:3000/evacuation-center/forgot-password", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email_address: inputEmail })
@@ -86,12 +86,7 @@ function ForgotPassword() {
             const res = await fetch("http://localhost:3000/auth/verify", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    email_address: email, 
-                    code: otp,
-                    purpose: "reset",
-                    role: "Evacuee"
-                })
+                body: JSON.stringify({ email, otp: inputOtp })
             });
             const data = await res.json();
             setLoading(false);
@@ -103,7 +98,7 @@ function ForgotPassword() {
                 setStep("reset");
             } else {
                 setResponseType("error");
-                setResponseMessage(data.error || "Invalid OTP.");
+                setResponseMessage(data.message || "Invalid OTP.");
                 setShowResponse(true);
             }
         } catch (err) {
@@ -127,7 +122,7 @@ function ForgotPassword() {
         clearAllTimeouts();
 
         try {
-            const res = await fetch("http://localhost:3000/evacuee/reset-password", {
+            const res = await fetch("http://localhost:3000/evacuation-center/reset-password", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email, otp, password: newPassword })
@@ -187,13 +182,13 @@ function ForgotPassword() {
                             </div>
                         )}
                         {!loading && step === "email" && (
-                            <Email onSubmit={handleSendEmail} setStep={setStep} />
+                            <Email onSubmit={handleSendEmail} />
                         )}
                         {!loading && step === "verify" && (
-                            <Verification onSubmit={handleVerifyOtp} setStep={setStep} />
+                            <Verification onSubmit={handleVerifyOtp} />
                         )}
                         {!loading && step === "reset" && (
-                            <ResetPassword onSubmit={handleResetPassword} setStep={setStep} />
+                            <ResetPassword onSubmit={handleResetPassword} />
                         )}
                     </div>
                 </div>
@@ -202,4 +197,4 @@ function ForgotPassword() {
     );
 }
 
-export default ForgotPassword;
+export default StaffForgotPassword;

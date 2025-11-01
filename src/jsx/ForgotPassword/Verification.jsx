@@ -1,7 +1,7 @@
 import { useState } from "react";
 import backButton from '../../assets/back-button.png';
 
-function Verification({ onSubmit }) {
+function Verification({ onSubmit, setStep }) {
   const [code, setCode] = useState(new Array(6).fill(""));
 
   const handleChange = (element, index) => {
@@ -23,13 +23,24 @@ function Verification({ onSubmit }) {
     }
   };
 
+  const handleBackButton = () => setStep("email");
+
   return (
     <>
       <div className="back-button-container">
-        <button>
+        <button onClick={() => handleBackButton()}>
           <img src={backButton} />
         </button>
       </div>
+
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+
       <div className="login-right-text">
         <h2>Verification Code</h2>
         <p>Please enter the verification code sent to your email.</p>

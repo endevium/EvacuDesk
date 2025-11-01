@@ -65,7 +65,7 @@ exports.createCenterArea = asyncHandler(async (req, res) => {
   }
 
   areaData.area_name = finalAreaName;
-  areaData.area_type = evacCenter.area_type; 
+  areaData.area_type = area_type; 
 
   await CenterArea.create(areaData);
 

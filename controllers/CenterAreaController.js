@@ -32,19 +32,22 @@ exports.createCenterArea = asyncHandler(async (req, res) => {
       break;
 
     case "Tent":
-      const lastArea = await CenterArea.findOne({ evacuation_center_id }).sort({ createdAt: -1 });
-      let nextNumber = 1;
-      if (lastArea && lastArea.area_name) {
-        const match = lastArea.area_name.match(/\d+/);
-        if (match) nextNumber = parseInt(match[0]) + 1;
-      }
-      finalAreaName = `Tent ${nextNumber}`;
+    const lastArea = await CenterArea.findOne({ evacuation_center_id, area_type: "Tent" }).sort({ createdAt: -1 });
+    let nextNumber = 1;
+    if (lastArea && lastArea.area_name) {
+      const match = lastArea.area_name.match(/\d+/);
+      if (match) nextNumber = parseInt(match[0]) + 1;
+    }
+    finalAreaName = `Tent ${nextNumber}`;
 
-      if (!size || !["Small", "Medium", "Large"].includes(size)) {
-        return res.status(400).json({ error: "Tent size must be Small, Medium, or Large" });
-      }
-      areaData.size = size;
-      break;
+    if (!size || !["Small","Medium","Large"].includes(size)) {
+      return res.status(400).json({ error: "Tent size must be Small, Medium, or Large" });
+    }
+    areaData.size = size;
+
+    const tentCapacities = { Small: 3, Medium: 5, Large: 8 };
+    areaData.capacity = tentCapacities[size];
+    break;
 
     case "Zone":
       const zoneOptions = ["Bleachers", "Stage", "Gym Floor"];
@@ -126,10 +129,10 @@ exports.getCenterAreaById = asyncHandler(async (req, res) => {
 // add occupant to area
 exports.addOccupantToArea = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { evacuee_id, number_of_family_members } = req.body;
+  const { evacuee_id } = req.body;
 
-  if (!evacuee_id || !number_of_family_members) {
-    return res.status(400).json({ error: "Evacuee ID and number of family members are required" });
+  if (!evacuee_id) {
+    return res.status(400).json({ error: "Evacuee ID is required" });
   }
 
   const area = await CenterArea.findById(id);
@@ -137,30 +140,22 @@ exports.addOccupantToArea = asyncHandler(async (req, res) => {
     return res.status(404).json({ error: "Center area not found." });
   }
 
-  // check if evacuee is already assigned to any area in this center
+  // area occupied
+  if (area.status === "Occupied") {
+    return res.status(400).json({ error: "This area is already occupied." });
+  }
+
+  // check existing area assignment
   const alreadyAssigned = await CenterArea.findOne({
     evacuation_center_id: area.evacuation_center_id,
     'occupants.evacuee_id': evacuee_id
   });
 
   if (alreadyAssigned) {
-    return res.status(400).json({ error: "This evacuee is already assigned to an area" });
+    return res.status(400).json({ error: "This evacuee is already assigned to another area in this center." });
   }
 
-  // check if area has enough capacity
-  let maxCapacity = area.capacity; // Room/Zone
-  if (area.size) {
-    const sizeCapacityMap = { Small: 5, Medium: 10, Large: 15 };
-    maxCapacity = sizeCapacityMap[area.size];
-  }
-
-  if (newTotalOccupancy > maxCapacity) {
-    return res.status(400).json({ 
-      error: `Area cannot accommodate ${number_of_family_members} more people. Only ${maxCapacity - currentOccupancy} spaces available.` 
-    });
-  }
-
-  // check if evacuee is an active occupant in the center
+  // verify occupant exists
   const activeOccupant = await EvacuationCenterOccupants.findOne({
     evacuee_id,
     evacuation_center_id: area.evacuation_center_id,
@@ -171,44 +166,56 @@ exports.addOccupantToArea = asyncHandler(async (req, res) => {
     return res.status(400).json({ error: "This evacuee is not an active occupant in this evacuation center." });
   }
 
-  // add occupant to area
-  area.occupants.push({
-    evacuee_id,
-    number_of_family_members
-  });
+  const number_of_family_members = activeOccupant.number_of_family_members;
+
+  area.occupants.push({ evacuee_id, number_of_family_members });
+
+  // update status based on capacity
+  const currentOccupancy = area.occupants.reduce(
+    (sum, occ) => sum + occ.number_of_family_members,
+    0
+  );
+
+  if (currentOccupancy >= area.capacity) {
+    area.status = "Occupied";
+  } else if (currentOccupancy > 0) {
+    area.status = "Occupied";
+  } else {
+    area.status = "Unoccupied";
+  }
 
   await area.save();
 
+  // update occupant assigned area
   await EvacuationCenterOccupants.findOneAndUpdate(
     { evacuee_id, evacuation_center_id: area.evacuation_center_id },
     { assigned_area: area._id }
   );
 
-  res.json({ message: "Occupant added to area successfully." });
+  res.json({ message: "Family has been assigned to the area." });
 });
 
 // remove occupant from area
 exports.removeOccupantFromArea = asyncHandler(async (req, res) => {
-  const { id, occupantId } = req.params;
+  const { id } = req.params; 
 
   const area = await CenterArea.findById(id);
   if (!area) {
     return res.status(404).json({ error: "Center area not found." });
   }
 
-  // find and remove the occupant
-  const occupantIndex = area.occupants.findIndex(occupant => 
-    occupant._id.toString() === occupantId
-  );
-
-  if (occupantIndex === -1) {
-    return res.status(404).json({ error: "Occupant not found in this area." });
+  // check current occupant
+  if (area.occupants.length === 0) {
+    return res.status(400).json({ error: "This area has no assigned family." });
   }
 
-  area.occupants.splice(occupantIndex, 1);
+  // clear the occupant list 
+  area.occupants = [];
+  area.status = "Unoccupied";
+
   await area.save();
 
-  res.json({ message: "Occupant removed from area successfully." });
+  res.json({ message: "Family has been removed in the area" });
 });
 
 // get all center areas (for admin)

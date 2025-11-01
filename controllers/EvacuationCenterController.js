@@ -34,10 +34,13 @@ exports.createEvacuationCenter = asyncHandler(async (req, res) => {
   // }
 
   // existing center name
-  const existingCenterName = await EvacuationCenter.findOne({ name: req.body.name });
+  const existingCenterName = await EvacuationCenter.findOne({
+    name: { $regex: new RegExp(`^${req.body.name.trim()}$`, "i") }
+  });
   if (existingCenterName) {
     return res.status(400).json({ error: "There is already an evacuation center with that name" });
   }
+
 
   // existing email
   const [existingEvacuee, existingCenter] = await Promise.all([
@@ -48,10 +51,10 @@ exports.createEvacuationCenter = asyncHandler(async (req, res) => {
     return res.status(400).json({ error: "The email already exists. Use a different email." });
   }
 
-  // common password
-  if (await isPasswordPwned(password)) {
-    return res.status(400).json({ error: "This password has appeared in a data breach. Please choose a stronger password."});
-  }
+  // // common password
+  // if (await isPasswordPwned(password)) {
+  //   return res.status(400).json({ error: "This password has appeared in a data breach. Please choose a stronger password."});
+  // }
 
   const hashedPassword = await bcrypt.hash(req.body.password, 10);
 

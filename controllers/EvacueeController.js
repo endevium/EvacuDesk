@@ -78,10 +78,10 @@ exports.signupEvacuee = asyncHandler(async (req, res) => {
     fs.writeFileSync(profileUploadPath, profileFile.buffer);
   }
 
-  // common password check
-  if (await isPasswordPwned(password)) {
-    return res.status(400).json({ error: "This password has appeared in a data breach. Please choose a stronger password." });
-  }
+  // // common password check
+  // if (await isPasswordPwned(password)) {
+  //   return res.status(400).json({ error: "This password has appeared in a data breach. Please choose a stronger password." });
+  // }
 
   const hashedPassword = await bcrypt.hash(password, 10);
 

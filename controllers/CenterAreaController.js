@@ -7,7 +7,7 @@ const asyncHandler = require("../utils/asyncHandler");
 
 // create center area
 exports.createCenterArea = asyncHandler(async (req, res) => {
-  const { evacuation_center_id, capacity, area_name, size } = req.body;
+  const { evacuation_center_id, capacity, area_name, size, area_type } = req.body;
 
   if (!evacuation_center_id) {
     return res.status(400).json({ error: "Missing evacuation_center_id" });
@@ -21,7 +21,7 @@ exports.createCenterArea = asyncHandler(async (req, res) => {
   let finalAreaName;
   let areaData = { evacuation_center_id, occupants: [] };
 
-  switch(evacCenter.area_type) {
+  switch(area_type) {
     case "Room":
       if (!area_name || !capacity) {
         return res.status(400).json({ error: "Missing required fields" });

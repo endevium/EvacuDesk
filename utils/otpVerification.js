@@ -3,9 +3,10 @@ const Evacuee = require("../models/EvacueeModel");
 const Admin = require("../models/AdminModel"); 
 const EvacuationCenter = require("../models/EvacuationCenterModel"); 
 const UserOTP = require("../models/UserOTPModel");
-const asyncHandler = require("../utils/asyncHandler")
+const asyncHandler = require("../utils/asyncHandler");
 const { generateOTP } = require("../utils/otpGeneration");
-const { emailSender } = require("../utils/emailSender")
+const { emailSender } = require("../utils/emailSender");
+const { isPasswordPwned } = require("../utils/pwnedPasswords") 
 
 // verify otp 
 exports.verifyOTP = asyncHandler(async (req, res) => {
@@ -81,6 +82,11 @@ exports.resetPassword = asyncHandler(async (req, res) => {
 
   const otpRecord = await UserOTP.findOne({ user_id: user._id, role, isVerified: true });
   if (!otpRecord) return res.status(400).json({ error: "OTP not verified or expired" });
+
+  // common password check
+  if (await isPasswordPwned(newPassword)) {
+    return res.status(400).json({ error: "This password has appeared in a data breach. Please choose a stronger password." });
+  }
 
   const salt = await bcrypt.genSalt(10);
   user.password = await bcrypt.hash(newPassword, salt);

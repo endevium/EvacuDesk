@@ -14,7 +14,6 @@ router.get("/", ...AdminAndEvacuationCenter, EvacueeController.getEvacuees);
 router.get("/:id", ...AllUsers, EvacueeController.getEvacueeById);
 router.patch("/:id", ...AdminAndEvacuee, upload.single("profile_picture"), EvacueeController.updateEvacuee);
 router.patch("/password/:id", ...Evacuee, EvacueeController.updatePassword);
-router.post("/forgot-password", EvacueeController.forgotPassword);
 router.delete("/:id", ...AdminAndEvacuee, EvacueeController.deleteEvacueeById);
 router.get("/recommended-center/:id", ...Evacuee, EvacueeController.getCenterRecommendation)
 

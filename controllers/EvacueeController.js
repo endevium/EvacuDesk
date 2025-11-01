@@ -17,7 +17,7 @@ exports.getCenterRecommendation = asyncHandler(async (req, res) => {
     return res.status(404).json({ error: "Evacuee not found" });
   }
 
-  const center = await EvacuationCenter.findOne({ barangay: evacuee.barangay }).select("-password -email_address -__v -is_verified -role -createdAt -updatedAt");
+  const center = await EvacuationCenter.find({ barangay: evacuee.barangay }).select("-password -email_address -__v -is_verified -role -createdAt -updatedAt");
   if (!center) {
     return res.status(404).json({ error: "No evacuation center found in your barangay" });
   }
@@ -217,20 +217,6 @@ exports.updatePassword = asyncHandler(async (req, res) => {
   await evacuee.save();
 
   res.json({ message: "Password updated successfully" });
-});
-
-// reset password
-exports.forgotPassword = asyncHandler(async (req, res) => {
-  const { email_address } = req.body;
-  if (!email_address) return res.status(400).json({ error: "Email is required" });
-
-  const evacuee = await Evacuee.findOne({ email_address });
-  if (!evacuee) return res.status(404).json({ error: "Evacuee not found" });
-
-  const otp = await generateOTP(evacuee._id, "Evacuee");
-  await emailSender(evacuee.email_address, evacuee.first_name, otp, "reset");
-
-  res.json({ message: "An OTP has been sent to your email" });
 });
 
 // delete evacuee

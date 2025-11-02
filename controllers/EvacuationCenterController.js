@@ -64,11 +64,11 @@ exports.createEvacuationCenter = asyncHandler(async (req, res) => {
   const center = await EvacuationCenter.create({
     ...req.body,
     name: capitalizeWords(req.body.name),
-    region: capitalizeFirstLetter(req.body.region),
-    province: capitalizeFirstLetter(req.body.province),
-    city: capitalizeFirstLetter(req.body.city),
-    barangay: capitalizeFirstLetter(req.body.barangay),
-    street: capitalizeFirstLetter(req.body.street),
+    region: capitalizeWords(req.body.region),
+    province: capitalizeWords(req.body.province),
+    city: capitalizeWords(req.body.city),
+    barangay: capitalizeWords(req.body.barangay),
+    street: capitalizeWords(req.body.street),
     image: uploadPath.replace(/\\/g, "/"),
     password: hashedPassword,
     is_verified: true,
@@ -122,7 +122,7 @@ exports.getEvacuationCenters = asyncHandler(async (req, res) => {
 
 // get evacuation center by ID
 exports.getEvacuationCenterById = asyncHandler(async (req, res) => {
-  const center = await EvacuationCenter.findById(req.params.id).select('-password -email_address -__v');
+  const center = await EvacuationCenter.findById(req.params.id).select('-password -__v');
   if (!center) return res.status(404).json({ error: "Evacuation center not found" });
   res.json(center);
 });

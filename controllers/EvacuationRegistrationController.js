@@ -320,3 +320,18 @@ exports.updateRegistrationStatus = asyncHandler(async (req, res) => {
 
   res.status(200).json({ message: `Your registration has been ${status.toLowerCase()}` });
 });
+
+exports.updatePickupStatus = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { pickup_status } = req.body;
+
+  const registration = await EvacuationRegistration.findById(id);
+  if (!registration) {
+    return res.status(404).json({ message: "Evacuation registration not found" });
+  }
+
+  registration.pickup_status = pickup_status;
+  await registration.save();
+
+  res.status(200).json({ message: "Pickup status updated successfully" });
+});

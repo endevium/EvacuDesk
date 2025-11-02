@@ -2,6 +2,7 @@ const StockRequest = require('../models/StockRequestModel');
 const Stock = require('../models/StocksModel');
 const EvacuationCenter = require('../models/EvacuationCenterModel');
 const asyncHandler = require('../utils/asyncHandler');
+const { createNotification } = require("./NotificationController");
 
 // create stock request (evacuation center/staff)
 exports.createStockRequest = asyncHandler(async (req, res) => {
@@ -26,6 +27,15 @@ exports.createStockRequest = asyncHandler(async (req, res) => {
 
     const request = new StockRequest({ evacuation_center_id, stocks });
     await request.save();
+
+    // stock new request notification for admin
+    await createNotification({
+        title: 'New Stock Request',
+        body: `Evacuation Center ${centerExist.name} requested stocks: ${Object.entries(stocks).map(([k, v]) => `${k}: ${v}`).join(', ')}`,
+        recipient_role: 'Admin', 
+        meta: { type: 'stock_request', request_id: request._id, evacuation_center_id }
+    });
+
 
     res.status(201).json({ message: 'Stock request created successfully' });
 });
@@ -88,5 +98,13 @@ exports.updateStockStatus = asyncHandler(async (req, res) => {
     await centerStock.save();
     await request.save();
 
+    // notification to evacuation center (stock reques approved, rejected)
+    await createNotification({
+        title: `Stock Request ${status}`,
+        body: `Your stock request has been ${status.toLowerCase()}`,
+        recipient_id: request.evacuation_center_id,
+        recipient_role: 'EvacuationCenter',
+        meta: { request_id, status }
+    });
     res.status(200).json({ message: `Request ${status.toLowerCase()} successfully` });
 });

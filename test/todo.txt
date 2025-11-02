@@ -59,3 +59,344 @@ exports.getEvacueesByCenterId = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+
+
+
+
+
+
+
+
+-------------------------------FRONTEND SOCKET----------------------------------------------------------
+
+INSIDE HOOK
+/////SocketContext.jsx
+
+
+import { useRef, useEffect, useState, createContext, useContext } from "react";
+import { io } from "socket.io-client";
+
+const SocketContext = createContext();
+
+export const SocketProvider = ({ children }) => {
+  const socketRef = useRef(null);
+  const [updates, setUpdates] = useState({}); // { centerId: [areas...] }
+
+  useEffect(() => {
+    const evacuationCenterId = localStorage.getItem("evacuationCenterId");
+    console.log("📝 Evacuation Center ID from localStorage:", evacuationCenterId);
+    if (!evacuationCenterId) return;
+
+    if (!socketRef.current) {
+      console.log("⚡ Initializing socket connection...");
+
+      const socket = io("http://localhost:3000", {
+        transports: ["websocket", "polling"],
+        reconnection: true,
+        reconnectionAttempts: 10,
+        reconnectionDelay: 1000,
+      });
+
+      socket.on("connect", () => {
+        console.log("✅ Socket connected:", socket.id);
+        socket.emit("joinRoom", `area-${evacuationCenterId}`);
+      });
+
+      socket.on("connect_error", (err) => {
+        console.error("❌ Socket connection error:", err.message);
+      });
+
+      socket.on("disconnect", (reason) => {
+        console.log("⚠️ Socket disconnected:", reason);
+      });
+
+      socket.on("centerAreaListUpdate", (data) => {
+        console.log("📡 Received center area update:", data);
+        const centerId = data.evacuation_center_id;
+
+        setUpdates((prev) => {
+          const centerUpdates = prev[centerId] ? [...prev[centerId]] : [];
+
+          if (data.deleted) {
+            return {
+              ...prev,
+              [centerId]: centerUpdates.filter((area) => area._id !== data._id),
+            };
+          } else {
+            const index = centerUpdates.findIndex((area) => area._id === data._id);
+            if (index > -1) centerUpdates[index] = data;
+            else centerUpdates.push(data);
+
+            return { ...prev, [centerId]: centerUpdates };
+          }
+        });
+      });
+
+      socketRef.current = socket;
+    }
+
+    return () => {
+      if (socketRef.current && socketRef.current.connected) {
+        console.log("🧹 Disconnecting socket on unmount");
+        socketRef.current.disconnect();
+      }
+    };
+
+  }, []);
+
+  return (
+    <SocketContext.Provider value={{ socket: socketRef.current, updates }}>
+      {children}
+    </SocketContext.Provider>
+  );
+};
+
+export const useSocket = () => useContext(SocketContext);
+
+
+
+
+
+
+
+
+
+
+
+
+// PushNotification.js
+
+
+
+// src/hooks/useNotificationSetup.js
+import { useEffect } from 'react';
+import { toast } from 'react-toastify';
+import { useSocket } from './SocketContext';
+
+const VAPID_PUBLIC_KEY = 'BNjOeGzU4I84a4vn9OnPnv1dVYj5XvCskv8cpiVjWwsnFsUJ9x5PXMTWIbTdqKJqVzC9tYaIKapX3NsbyAY6nuo';
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+
+  const raw = atob(base64);
+  return new Uint8Array([...raw].map(c => c.charCodeAt(0)));
+}
+
+export default function useNotificationSetup(user) {
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    if (!user || !user._id || !user.role || !socket) return;
+
+    // Register user for socket notifications
+    socket.emit('register', { userId: user._id, role: user.role });
+
+    socket.on('notification', (data) => {
+      toast(`${data.title}: ${data.body}`, {
+        position: 'top-right',
+        type: 'info',
+        autoClose: 5000,
+      });
+    });
+
+    // Push notifications
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(reg => {
+          Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+              reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+              }).then(subscription => {
+                // Save subscription to backend
+                fetch('http://localhost:3000/push-subscription', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ user_id: user._id, role: user.role, subscription })
+                }).catch(console.error);
+              }).catch(console.error);
+            }
+          });
+        });
+    }
+
+    return () => socket.off('notification');
+  }, [user, socket]);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+------------------ManageArea.jsx----------------------------
+
+import '../../css/evacuation-center.css'
+import { useState, useEffect, useRef } from 'react';
+
+import areaActive from '../../assets/area-active.png'
+import requestBtn from '../../assets/request-button.png'
+import check from '../../assets/check.png'
+import error from '../../assets/error.png'
+import close from '../../assets/close.png'
+import { useSocket } from '../../Hooks/SocketContext'
+
+function ManageAreas() {
+    const [showResponse, setShowResponse] = useState(false);
+    const [responseMessage, setResponseMessage] = useState("");
+    const [responseType, setResponseType] = useState("");
+    const [exitAnim, setExitAnim] = useState(false);
+    const [selectedArea, setSelectedArea] = useState(null);
+    const [showDetails, setShowDetails] = useState(false);
+    const [showCreateArea, setShowCreateArea] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [areas, setAreas] = useState([]);
+    const [capacity, setCapacity] = useState(5); 
+    const { updates } = useSocket();
+
+    // GET EVACUATION CENTER DETAILS
+    const evacuationCenterId = localStorage.getItem("evacuationCenterId"); 
+    const token = localStorage.getItem("evacuationCenterToken");
+
+    // TIMEOUTS FOR RESPONSE BODY
+    const showTimeout = useRef(null);
+    const exitTimeout = useRef(null);
+
+    const clearAllTimeouts = () => {
+        if (showTimeout.current) {
+            clearTimeout(showTimeout.current);
+            showTimeout.current = null;
+        }
+        if (exitTimeout.current) {
+            clearTimeout(exitTimeout.current);
+            exitTimeout.current = null;
+        }
+    };
+
+    useEffect(() => {
+        return () => clearAllTimeouts();
+    }, []);
+
+    const fetchAreas = async () => {
+        try {
+            const res = await fetch(`http://localhost:3000/center-area/center/${evacuationCenterId}`, {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+            
+            if (!res.ok) {
+                throw new Error("Failed to fetch areas");
+            }
+            
+            const data = await res.json();
+            setAreas(data);
+        } catch (error) {
+            console.error("Error fetching areas:", error);
+            setResponseMessage("Failed to load areas");
+            setResponseType("error");
+            setShowResponse(true);
+        }
+    };
+
+    // Fetch areas on component mount
+    useEffect(() => {
+        fetchAreas();
+    }, []);
+
+    // socket update
+    useEffect(() => {
+        if (!updates[evacuationCenterId]) return;
+
+        const updatedAreas = updates[evacuationCenterId];
+
+        setAreas((prevAreas) => {
+            const areaMap = {};
+            prevAreas.forEach(area => { areaMap[area._id] = area });
+
+            updatedAreas.forEach(area => {
+                areaMap[area._id] = area;
+            });
+
+            return Object.values(areaMap);
+        });
+    }, [updates, evacuationCenterId]);
+
+
+    const createArea = async () => {
+        clearAllTimeouts()
+        setLoading(true);
+        try {
+            const res = await fetch("http://localhost:3000/center-area/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+
+
+
+
+
+
+
+
+
+
+
+
+----------------------App.jsx--------------------------
+
+import 'react-toastify/dist/ReactToastify.css';
+import { useState, useEffect } from 'react'
+import { SocketProvider } from '../../Hooks/SocketContext';
+
+function App() {
+  const user = getUserFromLocalStorage();
+
+  return (
+    <SocketProvider>
+      <AppContent user={user} />
+    </SocketProvider>
+  );
+}
+
+function AppContent({ user }) {
+  useNotificationSetup(user);
+
+  return (
+    <Router>
+      <Routes>
+        <Route path='/' element={<Home />} />
+        <Route path='/about' element={<About />} />
+        <Route path='/news' element={<News />} />
+        <Route path='/contact' element={<Contact />} />
+        <Route path='/login' element={<Login />} />
+        <Route path='/forgot-password' element={<ForgotPassword />} />
+        <Route path='/staff-forgot-password' element={<StaffForgotPassword />} />
+        <Route path='/change-password' element={<EvacueeChangePassword />} />
+        <Route path='/adl' element={<AdminLogin />} />
+        <Route path='/register' element={<Register />} />
+        <Route path='/evacuee' element={<Evacuee />} />
+        <Route path='/evacuation-center' element={<EvacuationCenter />} />
+        <Route path='/admin' element={<Admin />} />
+      </Routes>
+      <ToastContainer />
+    </Router>
+  );
+}

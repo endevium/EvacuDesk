@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const EvacuationRegistrationSchema = new Schema({
     evacuee_id: { type: Schema.Types.ObjectId, ref: "Evacuee", required: true },
     evacuation_center_id: { type: Schema.Types.ObjectId, ref: "EvacuationCenter", required: true },
-    number_of_family_members: { type: Number, required: true },
+    number_of_family_members: { type: Number, required: true, default: 1 },
     status: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" },
     isActive: { type: Boolean, default: true },
     pwd: { type: Number, default: 0, min: 0 },

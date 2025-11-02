@@ -34,6 +34,8 @@ exports.getOccupantsByCenterId = asyncHandler(async (req, res) => {
     evacuee: occ.evacuee_id || {},
     number_of_family_members: occ.number_of_family_members,
     status: occ.status,
+    date_joined: occ.date_joined,
+    date_returned: occ.date_returned,
     assigned_area: occ.assigned_area ? occ.assigned_area.area_name : null
   }));
 

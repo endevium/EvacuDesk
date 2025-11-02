@@ -13,5 +13,6 @@ router.get('/center/awaiting/:id', ...AdminAndEvacuationCenter, EvacuationRegist
 router.post('/', ...Evacuee, EvacuationRegistrationController.registerEvacuee);
 router.patch('/:id', ...AdminAndEvacuationCenter, EvacuationRegistrationController.updateRegistrationStatus);
 // router.delete('/:id', EvacuationRegistrationController.deleteRegistration);
+router.patch("/pickup-status/:id", EvacuationRegistrationController.updatePickupStatus);
 
 module.exports = router;

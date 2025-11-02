@@ -42,10 +42,6 @@ exports.getExistingEmail = asyncHandler(async (req, res) =>{
 
 // evacuee signup
 exports.signupEvacuee = asyncHandler(async (req, res) => {
-  if (!req.files || !req.files['id_picture']) {
-    return res.status(400).json({ error: "ID picture is required" });
-  }
-
   const idFile = req.files['id_picture'][0];
   const profileFile = req.files['profile_picture'] ? req.files['profile_picture'][0] : null;
 

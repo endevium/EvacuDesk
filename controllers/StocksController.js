@@ -47,14 +47,25 @@ exports.createStock = asyncHandler(async (req, res) => {
 
 // get all stock of all evac center
 exports.getAllStocks = asyncHandler(async (req, res) => {
-  const stocks = await Stock.find().populate({ path: 'evacuation_center_id', select: '-password -email_address -__v -role -createdAt -updatedAt' });
+  const stocks = await Stock.find({ source: "EvacuationCenter"}).populate({ path: 'evacuation_center_id', select: '-password -email_address -__v -role -createdAt -updatedAt' });
   res.status(200).json(stocks);
+});
+
+// get main Admin stock
+exports.getAdminStock = asyncHandler(async (req, res) => {
+  const adminStock = await Stock.findOne({ source: 'Admin' });
+
+  if (!adminStock) {
+    return res.status(404).json({ message: 'Admin stock not found' });
+  }
+
+  res.status(200).json(adminStock);
 });
 
 // get stock by evac center id
 exports.getStockByEvacCenterId = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const stock = await Stock.findOne({ evacuation_center_id: id }).populate('evacuation_center_id');
+  const stock = await Stock.findOne({ source: "EvacuationCenter", evacuation_center_id: id }).populate('evacuation_center_id');
 
   if (!stock) {
     return res.status(404).json({ message: 'Stock record not found' });

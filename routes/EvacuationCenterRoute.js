@@ -10,6 +10,7 @@ router.get("/:id", EvacuationCenterController.getEvacuationCenterById);
 router.post("/", ...Admin, upload.single("image"), EvacuationCenterController.createEvacuationCenter);
 router.post("/login", EvacuationCenterController.loginEvacuationCenter);
 router.patch("/:id", ...AdminAndEvacuationCenter, upload.single("image"), EvacuationCenterController.updateEvacuationCenter);
+router.patch("/password/:id", ...AdminAndEvacuationCenter, EvacuationCenterController.updateEvacuationCenterPassword);
 router.delete("/:id", ...Admin, EvacuationCenterController.deleteEvacuationCenterById);
 
 module.exports = router;

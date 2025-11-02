@@ -11,9 +11,10 @@ const server = http.createServer(app);
 // init socket io
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173", 
+    origin: "http://localhost:5173", // your frontend
     methods: ["GET", "POST"],
   },
+  transports: ["websocket", "polling"], // allow both
 });
 
 // Initialize io in ioService (for use anywhere in the app)
@@ -25,6 +26,12 @@ const activeUsers = new Map();
 // socket connection
 io.on("connection", (socket) => {
   console.log("client connected:", socket.id);
+
+  // join room for evacuation center updates
+  socket.on("joinRoom", (room) => {
+    socket.join(room);
+    console.log(`Socket ${socket.id} joined room ${room}`);
+  });
 
   // register user and roles
   socket.on("register", (payload) => {
@@ -95,6 +102,7 @@ app.use((req, res, next) => {
 
 if (require.main === module) {
   server.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
   });
 }
 

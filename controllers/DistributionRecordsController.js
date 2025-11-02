@@ -30,6 +30,11 @@ exports.distributeSupplies = asyncHandler(async (req, res) => {
         return res.status(400).json({ message: 'No stock items provided' });
     }
 
+    const hasValidAmount = Object.values(stocks).some(amount => Number(amount) > 0);
+    if (!hasValidAmount) {
+        return res.status(400).json({ message: 'Please enter at least one stock amount greater than zero' });
+    }
+
     // evacuation center stock
     let centerStock = await Stock.findOne({ source: 'EvacuationCenter', evacuation_center_id });
     if (!centerStock) {
@@ -40,11 +45,15 @@ exports.distributeSupplies = asyncHandler(async (req, res) => {
 
     // stock quantity/ distribution quantity comparison
     for (const [item, amount] of Object.entries(stocks)) {
+        if (!amount || amount <= 0) continue;
+
         if (!validItems.includes(item)) {
-            return res.status(400).json({ message: `Invalid stock item: ${item}` });
+            const readableItem = item.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
+            return res.status(400).json({ message: `Invalid stock item: ${readableItem}` });
         }
         if (!centerStock.stocks[item] || centerStock.stocks[item] < amount) {
-            return res.status(400).json({ message: `Insufficient ${item} stock at evacuation center` });
+            const readableItem = item.replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase();
+            return res.status(400).json({ message: `Not enough ${readableItem} stock available` });
         }
     }
 
@@ -63,6 +72,15 @@ exports.distributeSupplies = asyncHandler(async (req, res) => {
     });
 
     await distribution.save();
+
+    // evacuee distribution notification
+    await createNotification({
+        title: "Supplies Distributed",
+        body: `Supplies have been distributed to you at ${centerExist.name}.`,
+        recipient_id: evacuee_id,
+        recipient_role: "Evacuee",
+        meta: { distribution_id: distribution._id, evacuation_center_id }
+    });
 
     res.status(201).json({ message: 'Supplies distributed successfully' });
 });
@@ -92,7 +110,7 @@ exports.getEvacueeDistributions = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
     const distributions = await DistributionRecord.find({ evacuee_id: id })
-        .populate('evacuation_center_id', '-password -email_address');
-
+        .populate('evacuation_center_id', '-password -email_address')
+        .populate('evacuee_id', 'first_name last_name');
     res.status(200).json(distributions);
 });

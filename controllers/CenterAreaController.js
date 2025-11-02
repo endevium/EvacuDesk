@@ -170,6 +170,9 @@ exports.addOccupantToArea = asyncHandler(async (req, res) => {
 
   area.occupants.push({ evacuee_id, number_of_family_members });
 
+  // update occupied slot
+  area.occupied_slot = area.occupants.reduce((sum, occ) => sum + occ.number_of_family_members, 0);
+
   // update status based on capacity
   const currentOccupancy = area.occupants.reduce(
     (sum, occ) => sum + occ.number_of_family_members,
@@ -209,8 +212,9 @@ exports.removeOccupantFromArea = asyncHandler(async (req, res) => {
     return res.status(400).json({ error: "This area has no assigned family." });
   }
 
-  // clear the occupant list 
+  // clear the occupant list, statu, slot
   area.occupants = [];
+  area.occupied_slot = 0;
   area.status = "Unoccupied";
 
   await area.save();

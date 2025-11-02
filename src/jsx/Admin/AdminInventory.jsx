@@ -433,124 +433,128 @@ function AdminInventory() {
 
                 <br />
                 <h2>Evacuation Centers Inventory</h2>
-                <div className='inventory-requests-table'>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>No.</th>
-                                <th>Name</th>
-                                <th>Food</th>
-                                <th>Water</th>
-                                <th>Hygiene</th>
-                                <th>Medicine</th>
-                                <th>Clothing</th>
-                                <th>Bedding</th>
-                                <th>Infant</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {evacuationCenterStocks.length === 0 ? (
+                <div className='inventory-requests'>
+                    <div className='inventory-requests-table'>
+                        <table>
+                            <thead>
                                 <tr>
-                                <td colSpan="10" style={{ textAlign: "center", padding: "1rem" }}>
-                                    No evacuation centers found.
-                                </td>
+                                    <th>No.</th>
+                                    <th>Name</th>
+                                    <th>Food</th>
+                                    <th>Water</th>
+                                    <th>Hygiene</th>
+                                    <th>Medicine</th>
+                                    <th>Clothing</th>
+                                    <th>Bedding</th>
+                                    <th>Infant</th>
                                 </tr>
-                            ) : (
-                                evacuationCenterStocks.map((center, index) => (
-                                <tr key={center._id} className="summary-row">
-                                    <td style={{ textAlign: "center" }}>{index + 1}</td>
-                                    <td>{center?.evacuation_center_id?.name}</td>
-                                    <td>{center.stocks?.FoodPack}</td>
-                                    <td>{center.stocks?.WaterPack}</td>
-                                    <td>{center.stocks?.HygienePack}</td>
-                                    <td>{center.stocks?.MedicinePack}</td>
-                                    <td>{center.stocks?.ClothingPack}</td>
-                                    <td>{center.stocks?.BeddingPack}</td>
-                                    <td>{center.stocks?.InfantPack}</td>               
-                                </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {evacuationCenterStocks.length === 0 ? (
+                                    <tr>
+                                    <td colSpan="10" style={{ textAlign: "center", padding: "1rem" }}>
+                                        No evacuation centers found.
+                                    </td>
+                                    </tr>
+                                ) : (
+                                    evacuationCenterStocks.map((center, index) => (
+                                    <tr key={center._id} className="summary-row">
+                                        <td style={{ textAlign: "center" }}>{index + 1}</td>
+                                        <td>{center?.evacuation_center_id?.name}</td>
+                                        <td>{center.stocks?.FoodPack}</td>
+                                        <td>{center.stocks?.WaterPack}</td>
+                                        <td>{center.stocks?.HygienePack}</td>
+                                        <td>{center.stocks?.MedicinePack}</td>
+                                        <td>{center.stocks?.ClothingPack}</td>
+                                        <td>{center.stocks?.BeddingPack}</td>
+                                        <td>{center.stocks?.InfantPack}</td>               
+                                    </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <br />
                 <h2>Stock Requests</h2>
-                <div className='stock-requests-table'>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>No.</th>
-                                <th>Name</th>
-                                <th>Food</th>
-                                <th>Water</th>
-                                <th>Hygiene</th>
-                                <th>Medicine</th>
-                                <th>Clothing</th>
-                                <th>Bedding</th>
-                                <th>Infant</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {stockRequests.length === 0 ? (
+                <div className='stock-requests'>
+                    <div className='stock-requests-table'>
+                        <table>
+                            <thead>
                                 <tr>
-                                <td colSpan="10" style={{ textAlign: "center", padding: "1rem" }}>
-                                    No requests found.
-                                </td>
+                                    <th>No.</th>
+                                    <th>Name</th>
+                                    <th>Food</th>
+                                    <th>Water</th>
+                                    <th>Hygiene</th>
+                                    <th>Medicine</th>
+                                    <th>Clothing</th>
+                                    <th>Bedding</th>
+                                    <th>Infant</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
                                 </tr>
-                            ) : (
-                                stockRequests.map((request, index) => (
-                                <tr key={request._id} className="summary-row">
-                                    <td style={{ textAlign: "center" }}>{index + 1}</td>
-                                    <td>{request.evacuation_center_id?.name}</td>
-                                    <td>{request.stocks?.FoodPack}</td>
-                                    <td>{request.stocks?.WaterPack}</td>
-                                    <td>{request.stocks?.HygienePack}</td>
-                                    <td>{request.stocks?.MedicinePack}</td>
-                                    <td>{request.stocks?.ClothingPack}</td>
-                                    <td>{request.stocks?.BeddingPack}</td>
-                                    <td>{request.stocks?.InfantPack}</td>
-                                    <td>
-                                        {request.status?.trim().toLowerCase() === "pending" ? (
-                                            <div className="status-field-assigned">
-                                            <span>PENDING</span>
-                                            </div>
-                                        ) : request.status?.trim().toLowerCase() === "approved" ? (
-                                            <div className="status-field-active">
-                                            <span>RECEIVED</span>
-                                            </div>
-                                        ) : request.status?.trim().toLowerCase() === "rejected" ? (
-                                            <div className="status-field-returned">
-                                            <span>REJECTED</span>
-                                            </div>
-                                        ) : (
-                                            <span>{request.status || "Unavailable"}</span>
-                                        )}
+                            </thead>
+                            <tbody>
+                                {stockRequests.length === 0 ? (
+                                    <tr>
+                                    <td colSpan="10" style={{ textAlign: "center", padding: "1rem" }}>
+                                        No requests found.
                                     </td>
-                                    <td className='actions-cell'>
-                                        <button 
-                                            className={request.status === "Approved" || request.status === "Rejected" ? "disabled-button" : "mark-picked-button"} 
-                                            disabled={request.status === "Approved"}
-                                            onClick={() => handleShowConfirmation(request._id)}
-                                        >
-                                            Approve
-                                        </button>
+                                    </tr>
+                                ) : (
+                                    stockRequests.map((request, index) => (
+                                    <tr key={request._id} className="summary-row">
+                                        <td style={{ textAlign: "center" }}>{index + 1}</td>
+                                        <td>{request.evacuation_center_id?.name}</td>
+                                        <td>{request.stocks?.FoodPack}</td>
+                                        <td>{request.stocks?.WaterPack}</td>
+                                        <td>{request.stocks?.HygienePack}</td>
+                                        <td>{request.stocks?.MedicinePack}</td>
+                                        <td>{request.stocks?.ClothingPack}</td>
+                                        <td>{request.stocks?.BeddingPack}</td>
+                                        <td>{request.stocks?.InfantPack}</td>
+                                        <td>
+                                            {request.status?.trim().toLowerCase() === "pending" ? (
+                                                <div className="status-field-assigned">
+                                                <span>PENDING</span>
+                                                </div>
+                                            ) : request.status?.trim().toLowerCase() === "approved" ? (
+                                                <div className="status-field-active">
+                                                <span>RECEIVED</span>
+                                                </div>
+                                            ) : request.status?.trim().toLowerCase() === "rejected" ? (
+                                                <div className="status-field-returned">
+                                                <span>REJECTED</span>
+                                                </div>
+                                            ) : (
+                                                <span>{request.status || "Unavailable"}</span>
+                                            )}
+                                        </td>
+                                        <td className='actions-cell'>
+                                            <button 
+                                                className={request.status === "Approved" || request.status === "Rejected" ? "disabled-button" : "mark-picked-button"} 
+                                                disabled={request.status === "Approved"}
+                                                onClick={() => handleShowConfirmation(request._id)}
+                                            >
+                                                Approve
+                                            </button>
 
-                                        <button 
-                                            className={request.status === "Approved" || request.status === "Rejected" ? "disabled-button" : "dismiss-button"} 
-                                            disabled={request.status === "Approved"}
-                                            onClick={() => handleShowRejectConfirmation(request._id)}
-                                        >
-                                            Reject
-                                        </button>
-                                    </td>
-                                </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
+                                            <button 
+                                                className={request.status === "Approved" || request.status === "Rejected" ? "disabled-button" : "dismiss-button"} 
+                                                disabled={request.status === "Approved"}
+                                                onClick={() => handleShowRejectConfirmation(request._id)}
+                                            >
+                                                Reject
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 

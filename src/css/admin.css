@@ -438,3 +438,14 @@ input[type="tel"] {
     color: #224539;
     font-weight: 500;
 }
+
+
+.inventory-requests {
+    height: 250px;
+    overflow-y: auto;
+}
+
+.stock-requests {
+    height: 250px;
+    overflow-y: auto;
+}

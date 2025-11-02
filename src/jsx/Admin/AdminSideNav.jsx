@@ -24,7 +24,6 @@ function AdminSideNav({ activeMenu, setActiveMenu }) {
         { id: 'home', label: 'Home', activeIcon: home, icon: homeActive },
         { id: 'create-evac', label: 'Evacuation Centers', activeIcon: evacuationCenter, icon: evacuationCenterActive },
         { id: 'manage-inventory', label: 'Inventory', activeIcon: inventory, icon: inventoryActive },
-        { id: 'announcements', label: 'Announcements', activeIcon: announcements, icon: announcementsActive },
         { id: 'notifications', label: 'Notifications', activeIcon: notifications, icon: notificationsActive }
     ];
 

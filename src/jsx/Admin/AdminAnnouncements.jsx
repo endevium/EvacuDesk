@@ -98,6 +98,9 @@ function AdminAnnouncements() {
         };
     
         fetchBulletins();
+
+        const interval = setInterval(fetchBulletins, 5000);
+        return () => clearInterval(interval);
     }, []);
 
     useEffect(() => {

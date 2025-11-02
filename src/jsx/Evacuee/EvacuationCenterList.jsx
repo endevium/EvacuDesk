@@ -346,9 +346,16 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
             }
         };
 
-        fetchCenters();
-        fetchRecommendedCenters();
-        fetchPending();
+        const fetchAll = () => {
+            fetchCenters();
+            fetchRecommendedCenters();
+            fetchPending();
+        };
+    
+        fetchAll();
+    
+        const interval = setInterval(fetchAll, 15000);
+        return () => clearInterval(interval);
     }, []);
 
     // Safe image URL getter
@@ -678,9 +685,10 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
                             <p>Adults: {currentEvac.adults}</p>
                             <p>Seniors: {currentEvac.seniors}</p>
                             <p>PWD: {currentEvac.pwd}</p>
+                            <p>Assigned Area: {currentEvac.assigned_area}</p>
                         </>
                     )}
-                    <p onClick={handleShowAreas}>Assigned Area: </p>
+                    
                 </div>
             </div>
         </>

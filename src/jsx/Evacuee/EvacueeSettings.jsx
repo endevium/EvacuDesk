@@ -489,6 +489,8 @@ function EvacueeSettings() {
                             id="contactNo"
                             value={phoneNumber}
                             onChange={handleChange}
+                            minLength={11}
+                            maxLength={11}
                         />
                         </div>
                     </div>

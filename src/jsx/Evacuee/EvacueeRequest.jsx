@@ -47,6 +47,8 @@ function EvacueeRequest() {
         };
 
         fetchDistributions();
+        const interval = setInterval(fetchDistributions, 5000);
+        return () => clearInterval(interval);
     }, [evacueeId, token]);
 
     return(

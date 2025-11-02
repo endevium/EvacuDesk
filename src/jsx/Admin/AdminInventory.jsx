@@ -25,13 +25,13 @@ function AdminInventory() {
     const token = localStorage.getItem("adminToken");
     const [newStockRequest, setNewStockRequest] = useState({
         action: "restock",
-        FoodPack: 0,
-        WaterPack: 0,
-        HygienePack: 0,
-        MedicinePack: 0,
-        ClothingPack: 0,
-        BeddingPack: 0,
-        InfantPack: 0,
+        FoodPack: '',
+        WaterPack: '',
+        HygienePack: '',
+        MedicinePack: '',
+        ClothingPack: '',
+        BeddingPack: '',
+        InfantPack: '',
     });
 
     const showTimeout = useRef(null);
@@ -62,13 +62,13 @@ function AdminInventory() {
         setShowCreateRequest(false);
         setNewStockRequest({
             action: "restock",
-            FoodPack: 0,
-            WaterPack: 0,
-            HygienePack: 0,
-            MedicinePack: 0,
-            ClothingPack: 0,
-            BeddingPack: 0,
-            InfantPack: 0,
+            FoodPack: '',
+            WaterPack: '',
+            HygienePack: '',
+            MedicinePack: '',
+            ClothingPack: '',
+            BeddingPack: '',
+            InfantPack: '',
         })
     };
 
@@ -84,6 +84,8 @@ function AdminInventory() {
         };
 
         fetchAdminStock();
+        const interval = setInterval(fetchAdminStock, 5000);
+        return () => clearInterval(interval);
     }, []);
 
     useEffect(() => {
@@ -108,6 +110,8 @@ function AdminInventory() {
         };
 
         fetchStockRequests();
+        const interval = setInterval(fetchStockRequests, 5000);
+        return () => clearInterval(interval);
     }, [token]);
 
     useEffect(() => {
@@ -132,6 +136,8 @@ function AdminInventory() {
         };
 
         fetchEvacuationCenterSocks();
+        const interval = setInterval(fetchEvacuationCenterSocks, 5000);
+        return () => clearInterval(interval);
     }, [ token]);
 
     const createRequest = async () => {
@@ -213,7 +219,31 @@ function AdminInventory() {
         }
     }
 
-    const approveRequest = async (id) => {
+    const [showConfirmation, setShowConfirmation] = useState(false);
+    const [showRejectConfirmation, setShowRejectConfirmation] = useState(false);
+    const [selectedRequestId, setSelectedRequestId] = useState(null);
+
+    const handleShowConfirmation = (id) => {
+        setSelectedRequestId(id);
+        setShowConfirmation(true);
+    };
+
+    const handleCloseShowConfirmation = () => {
+        setShowConfirmation(false);
+        setSelectedRequestId(null);
+    };
+
+    const handleShowRejectConfirmation = (id) => {
+        setSelectedRequestId(id);
+        setShowRejectConfirmation(true);
+    };
+
+    const handleCloseShowRejectConfirmation = () => {
+        setShowRejectConfirmation(false);
+        setSelectedRequestId(null);
+    };
+    
+    const approveRequest = async () => {
         try {
             const res = await fetch(`http://localhost:3000/stock-request/status`, {
                 method: "PATCH",
@@ -222,7 +252,7 @@ function AdminInventory() {
                     "Authorization": `Bearer ${token}`,
                 },
                 body: JSON.stringify({
-                    request_id: id,
+                    request_id: selectedRequestId,
                     status: "Approved"
                 })
             });
@@ -245,9 +275,57 @@ function AdminInventory() {
                 }, 400);
             }, 3000);
 
-            handleCloseCreateRequest();
+            handleCloseShowConfirmation();
         } catch (error) {
             setResponseMessage(error.message || "Error sending stock");
+            setResponseType("error");
+            setShowResponse(true);
+    
+            showTimeout.current = setTimeout(() => {
+                setExitAnim(true);
+                exitTimeout.current = setTimeout(() => {
+                    setShowResponse(false);
+                    setExitAnim(false);
+                }, 400);
+            }, 3000);
+        }
+    }
+
+    const rejectRequest = async () => {
+        try {
+            const res = await fetch(`http://localhost:3000/stock-request/status`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    request_id: selectedRequestId,
+                    status: "Rejected"
+                })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || "Failed to reject request");
+            }
+      
+            setResponseMessage("Stock request rejected successfully!");
+            setResponseType("success");
+            setShowResponse(true);
+      
+            showTimeout.current = setTimeout(() => {
+                setExitAnim(true);
+                exitTimeout.current = setTimeout(() => {
+                    setShowResponse(false);
+                    setExitAnim(false);
+                }, 400);
+            }, 3000);
+
+            handleCloseShowRejectConfirmation();
+        } catch (error) {
+            setResponseMessage(error.message || "Error rejecting stock request");
             setResponseType("error");
             setShowResponse(true);
     
@@ -453,11 +531,19 @@ function AdminInventory() {
                                     </td>
                                     <td className='actions-cell'>
                                         <button 
-                                            className={request.status === "Approved" ? "disabled-button" : "mark-picked-button"} 
+                                            className={request.status === "Approved" || request.status === "Rejected" ? "disabled-button" : "mark-picked-button"} 
                                             disabled={request.status === "Approved"}
-                                            onClick={() => approveRequest(request._id)}
+                                            onClick={() => handleShowConfirmation(request._id)}
                                         >
                                             Approve
+                                        </button>
+
+                                        <button 
+                                            className={request.status === "Approved" || request.status === "Rejected" ? "disabled-button" : "dismiss-button"} 
+                                            disabled={request.status === "Approved"}
+                                            onClick={() => handleShowRejectConfirmation(request._id)}
+                                        >
+                                            Reject
                                         </button>
                                     </td>
                                 </tr>
@@ -569,13 +655,13 @@ function AdminInventory() {
                                 onClick={() =>
                                     setNewStockRequest({
                                         action: "restock",
-                                        FoodPack: 0,
-                                        WaterPack: 0,
-                                        HygienePack: 0,
-                                        MedicinePack: 0,
-                                        ClothingPack: 0,
-                                        BeddingPack: 0,
-                                        InfantPack: 0,
+                                        FoodPack: '',
+                                        WaterPack: '',
+                                        HygienePack: '',
+                                        MedicinePack: '',
+                                        ClothingPack: '',
+                                        BeddingPack: '',
+                                        InfantPack: '',
                                     })
                                 }
                                 >
@@ -585,6 +671,36 @@ function AdminInventory() {
                                 Submit
                                 </button>
                             </div>
+                    </div>
+                </div>
+            )}
+
+            {showConfirmation && (
+                <div className="confirm-logout">
+                    <div className="confirm-logout-body">
+                        <div className="error-text">
+                            <h2>Confirm Approve</h2>
+                            <p>Are you sure you want to approve this request?</p>
+                        </div>
+                        <div className="buttons">
+                            <button className='yes-button' onClick={() => approveRequest()}>Yes</button>
+                            <button className='cancel-button' onClick={handleCloseShowConfirmation}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showRejectConfirmation && (
+                <div className="confirm-logout">
+                    <div className="confirm-logout-body">
+                        <div className="error-text">
+                            <h2>Confirm Reject</h2>
+                            <p>Are you sure you want to reject this request?</p>
+                        </div>
+                        <div className="buttons">
+                            <button className='yes-button' onClick={() => rejectRequest()}>Yes</button>
+                            <button className='cancel-button' onClick={handleCloseShowRejectConfirmation}>Cancel</button>
+                        </div>
                     </div>
                 </div>
             )}

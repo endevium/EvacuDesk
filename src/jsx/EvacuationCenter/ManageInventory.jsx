@@ -25,13 +25,13 @@ function ManageInventory() {
     const token = localStorage.getItem("evacuationCenterToken");
     const [newStockRequest, setNewStockRequest] = useState({
         evacuation_center_id: evacuationCenterId,
-        FoodPack: 0,
-        WaterPack: 0,
-        HygienePack: 0,
-        MedicinePack: 0,
-        ClothingPack: 0,
-        BeddingPack: 0,
-        InfantPack: 0,
+        FoodPack: '',
+        WaterPack: '',
+        HygienePack: '',
+        MedicinePack: '',
+        ClothingPack: '',
+        BeddingPack: '',
+        InfantPack: '',
     });
 
     const showTimeout = useRef(null);
@@ -95,6 +95,8 @@ function ManageInventory() {
         };
 
         fetchStocks();
+        const interval = setInterval(fetchStocks, 5000);
+        return () => clearInterval(interval);
     }, [evacuationCenterId]);
 
     useEffect(() => {
@@ -119,6 +121,8 @@ function ManageInventory() {
         };
 
         fetchStockRequests();
+        const interval = setInterval(fetchStockRequests, 5000);
+        return () => clearInterval(interval);
     }, [evacuationCenterId, token]);
 
     const createRequest = async () => {
@@ -435,13 +439,13 @@ function ManageInventory() {
                                 onClick={() =>
                                     setNewStockRequest({
                                         evacuation_center_id: evacuationCenterId,
-                                        FoodPack: 0,
-                                        WaterPack: 0,
-                                        HygienePack: 0,
-                                        MedicinePack: 0,
-                                        ClothingPack: 0,
-                                        BeddingPack: 0,
-                                        InfantPack: 0,
+                                        FoodPack: '',
+                                        WaterPack: '',
+                                        HygienePack: '',
+                                        MedicinePack: '',
+                                        ClothingPack: '',
+                                        BeddingPack: '',
+                                        InfantPack: '',
                                     })
                                 }
                                 >

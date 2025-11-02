@@ -600,7 +600,7 @@ function EvacueeRegisterTwo({
                     <input
                         type="tel"
                         id="phone_number"
-                        placeholder='+63123456789'
+                        placeholder='09123456789'
                         value={formData.phone_number}
                         onChange={handleChange}
                         required

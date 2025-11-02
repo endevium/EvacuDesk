@@ -179,6 +179,8 @@ function CreateEvacuationCenter() {
         };
 
         fetchCenters();
+        const interval = setInterval(fetchCenters, 5000);
+        return () => clearInterval(interval);
     }, []);
 
 
@@ -347,6 +349,7 @@ function CreateEvacuationCenter() {
                                                     placeholder="********"
                                                     value={password}
                                                     onChange={(e) => setPassword(e.target.value)}
+                                                    minLength={8}
                                                     required
                                                     className="password-input"
                                                 />
@@ -364,6 +367,7 @@ function CreateEvacuationCenter() {
                                             type='tel' 
                                             placeholder='09123456789' 
                                             minLength={11}
+                                            maxLength={11}
                                             required 
                                             value={phone_number}
                                             onChange={(e) => setPhoneNumber(e.target.value)}

@@ -33,9 +33,12 @@ function EvacueeAnnouncements({
         setLoading(true);
         try {
           // Use the center ID instead of center name in the API call
-          const res = await fetch(
-            `http://localhost:3000/bulletin/center/${evacuationCenter}`
-          );
+          const res = await fetch(`http://localhost:3000/bulletin/center-name?center_name=${evacuationCenter}`, {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+          });
   
           if (!res.ok) {
             setBulletins([]);
@@ -54,9 +57,7 @@ function EvacueeAnnouncements({
   
       fetchBulletins();
 
-      // Optional: Refresh bulletins periodically
-      const interval = setInterval(fetchBulletins, 30000); // Every 30 seconds
-    
+      const interval = setInterval(fetchBulletins, 30000);
       return () => clearInterval(interval);
     }, [evacuationCenter]);
 

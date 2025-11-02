@@ -83,7 +83,7 @@ function ManageEvacuees() {
                             evacuee_id: evacuee._id,
                             name: fullName,
                             approvalDate: new Date(occ.date_joined).toISOString().split("T")[0],
-                            status: occ.status || "Active",
+                            status: occ.status,
                             sex: evacuee.sex || "N/A",
                             age,
                             phone: evacuee.phone_number || "N/A",
@@ -91,10 +91,11 @@ function ManageEvacuees() {
                             medical: evacuee.disabilities || "None",
                             idPicture: evacuee.id_picture ? `http://localhost:3000/${evacuee.id_picture}` : "https://via.placeholder.com/120",
                             familyMembers: occ.number_of_family_members || 0,
-                            assigned_area: occ.assigned_area ? occ.assigned_area.area_number : null
+                            assigned_area: occ.assigned_area
                         };
                     });
 
+                    console.log(mappedEvacuees);
                     setEvacuees(mappedEvacuees);
                 } else {
                     setEvacuees([]);
@@ -126,11 +127,16 @@ function ManageEvacuees() {
             
             const data = await res.json();
             // Format areas for React Select
-            const formattedAreas = data.map(area => ({
-                value: area._id,
-                label: `${area.area_name} (${area.available_space} available of ${area.capacity})`,
-                areaData: area
-            }));
+            const formattedAreas = data.map(area => {
+                const occupied = area.occupants ? area.occupants.length : 0;
+                const available = area.capacity - occupied;
+            
+                return {
+                    value: area._id,
+                    label: `${area.area_name} (${available} available of ${area.capacity})`,
+                    areaData: area
+                };
+            });
             setAreas(formattedAreas);
         } catch (error) {
             console.error("Error fetching areas:", error);
@@ -286,7 +292,7 @@ function ManageEvacuees() {
     const filteredEvacuees = evacuees.filter(evacuee => {
         if (activeFilter === 'all') return true;
         if (activeFilter === 'active') return evacuee.status === 'Active';
-        if (activeFilter === 'assigned') return evacuee.status === 'Assigned';
+        if (activeFilter === 'assigned') return evacuee.assigned_area && evacuee.status !== 'Returned';
         if (activeFilter === 'returned') return evacuee.status === 'Returned';
         if (activeFilter === 'pickup') return evacuee.status === 'For Pick-up';
         return true;
@@ -499,7 +505,7 @@ function ManageEvacuees() {
                             <p><strong>Address:</strong> {selectedEvacuee.address}</p>
                             <p><strong>Number of Family Members:</strong> {selectedEvacuee.familyMembers}</p>
                             <p><strong>Medical Conditions:</strong> {selectedEvacuee.medical}</p>
-                            <p><strong>Assigned Area:</strong> {selectedEvacuee.assigned_area ? "Yes" : "No"}</p>
+                            <p><strong>Assigned Area:</strong> {selectedEvacuee.assigned_area}</p>
                             <p>
                                 <strong>ID Picture:</strong>{' '}
                                 <a href={selectedEvacuee.idPicture} target="_blank" rel="noopener noreferrer">

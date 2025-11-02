@@ -45,6 +45,8 @@ function EvacueeNotifications() {
         }
 
         fetchNotifications();
+        const interval = setInterval(fetchNotifications, 5000);
+        return () => clearInterval(interval);
     })
 
     return(

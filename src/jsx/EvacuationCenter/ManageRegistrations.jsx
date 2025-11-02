@@ -107,6 +107,8 @@ function ManageRegistrations() {
         };
 
         fetchRegistrations();
+        const interval = setInterval(fetchRegistrations, 5000);
+        return () => clearInterval(interval);
     }, []);
 
     const handleOpenShowDetails = (evacuee) => {
@@ -119,14 +121,14 @@ function ManageRegistrations() {
         setSelectedEvacuee(null);
     };
 
-    const handleApproveEvacuee = async (id) => {
+    const handleApproveEvacuee = async () => {
         try {
             const token = localStorage.getItem("evacuationCenterToken");
             const payload = {
                 status: "Approved"
             }
 
-            const res = await fetch(`http://localhost:3000/evacuation-registration/${id}`, {
+            const res = await fetch(`http://localhost:3000/evacuation-registration/${selectedEvacueeId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -155,29 +157,30 @@ function ManageRegistrations() {
                 }, 400);
             }, 3000);
 
-            } catch (error) {
-                setResponseMessage(error.message || "Error approving evacuee");
-                setResponseType("error");
-                setShowResponse(true);
-      
-                showTimeout.current = setTimeout(() => {
-                    setExitAnim(true);
-                    exitTimeout.current = setTimeout(() => {
-                        setShowResponse(false);
-                        setExitAnim(false);
-                    }, 400);
+            handleCloseShowConfirmation();
+        } catch (error) {
+            setResponseMessage(error.message || "Error approving evacuee");
+            setResponseType("error");
+            setShowResponse(true);
+    
+            showTimeout.current = setTimeout(() => {
+                setExitAnim(true);
+                exitTimeout.current = setTimeout(() => {
+                    setShowResponse(false);
+                    setExitAnim(false);
+                }, 400);
             }, 3000);
         }
     }
 
-    const handleRejectEvacuee = async (id) => {
+    const handleRejectEvacuee = async () => {
         try {
             const token = localStorage.getItem("evacuationCenterToken");
             const payload = {
                 status: "Rejected"
             }
 
-            const res = await fetch(`http://localhost:3000/evacuation-registration/${id}`, {
+            const res = await fetch(`http://localhost:3000/evacuation-registration/${selectedEvacueeId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -206,7 +209,8 @@ function ManageRegistrations() {
                 }, 400);
             }, 3000);
 
-            } catch (error) {
+            handleCloseShowRejectConfirmation();
+        } catch (error) {
                 setResponseMessage(error.message || "Error rejecting evacuee");
                 setResponseType("error");
                 setShowResponse(true);
@@ -221,14 +225,14 @@ function ManageRegistrations() {
         }
     }
 
-    const handlePickupEvacuee = async (id) => {
+    const handlePickupEvacuee = async () => {
         try {
             const token = localStorage.getItem("evacuationCenterToken");
             const payload = {
                 pickup_status: "Picked Up"
             }
 
-            const res = await fetch(`http://localhost:3000/evacuation-registration/pickup-status/${id}`, {
+            const res = await fetch(`http://localhost:3000/evacuation-registration/pickup-status/${selectedEvacueeId}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -258,7 +262,8 @@ function ManageRegistrations() {
                 }, 400);
             }, 3000);
 
-            } catch (error) {
+            handleCloseShowPickupConfirmation();
+        } catch (error) {
                 setResponseMessage(error.message || "Error picking up evacuee");
                 setResponseType("error");
                 setShowResponse(true);
@@ -280,6 +285,41 @@ function ManageRegistrations() {
         if (activeFilter === 'declined') return evacuee.status === 'Rejected';
         return true;
     });
+
+    const [showConfirmation, setShowConfirmation] = useState(false);
+    const [showPickupConfirmation, setShowPickupConfirmation] = useState(false);
+    const [showRejectConfirmation, setShowRejectConfirmation] = useState(false);
+    const [selectedEvacueeId, setSelectedEvacueeId] = useState(null);
+
+    const handleShowConfirmation = (id) => {
+        setSelectedEvacueeId(id);
+        setShowConfirmation(true);
+    };
+
+    const handleCloseShowConfirmation = () => {
+        setShowConfirmation(false);
+        setSelectedEvacueeId(null);
+    };
+
+    const handleShowPickupConfirmation = (id) => {
+        setSelectedEvacueeId(id);
+        setShowPickupConfirmation(true);
+    };
+
+    const handleCloseShowPickupConfirmation = () => {
+        setShowPickupConfirmation(false);
+        setSelectedEvacueeId(null);
+    };
+
+    const handleShowRejectConfirmation = (id) => {
+        setSelectedEvacueeId(id);
+        setShowRejectConfirmation(true);
+    };
+
+    const handleCloseShowRejectConfirmation = () => {
+        setShowRejectConfirmation(false);
+        setSelectedEvacueeId(null);
+    };
 
     return(
         <>  
@@ -367,9 +407,7 @@ function ManageRegistrations() {
                                     {evacuee.for_pickup === "Yes" && evacuee.pickup_status === "Awaiting Pickup" ? 
                                         <button 
                                             className={evacuee.status === "Rejected" ? 'disabled-button' : 'pickup-button'}
-                                            onClick={() => {
-                                            handlePickupEvacuee(evacuee.id);
-                                            }}
+                                            onClick={() => handleShowPickupConfirmation(evacuee.id)}
                                             disabled={evacuee.status === "Rejected"}
                                         >
                                             Pickup
@@ -377,18 +415,14 @@ function ManageRegistrations() {
                                     : 
                                         <button 
                                             className={evacuee.status === "Rejected" ? 'disabled-button' : 'mark-picked-button'} 
-                                            onClick={() => {
-                                            handleApproveEvacuee(evacuee.id);
-                                            }}
+                                            onClick={() => handleShowConfirmation(evacuee.id)}
                                         >
                                             Approve
                                         </button>
                                     }
                                     <button 
                                         className={evacuee.status === "Rejected" ? 'disabled-button' : 'dismiss-button'} 
-                                        onClick={() => {
-                                        handleRejectEvacuee(evacuee.id);
-                                        }}
+                                        onClick={() => handleShowRejectConfirmation(evacuee.id)}
                                     >
                                         Reject
                                     </button>
@@ -441,6 +475,51 @@ function ManageRegistrations() {
                         </div>
 
                         
+                    </div>
+                </div>
+            )}
+
+            {showConfirmation && (
+                <div className="confirm-logout">
+                    <div className="confirm-logout-body">
+                        <div className="error-text">
+                            <h2>Confirm Approve</h2>
+                            <p>Are you sure you want to approve this request?</p>
+                        </div>
+                        <div className="buttons">
+                            <button className='yes-button' onClick={() => handleApproveEvacuee()}>Yes</button>
+                            <button className='cancel-button' onClick={handleCloseShowConfirmation}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showPickupConfirmation && (
+                <div className="confirm-logout">
+                    <div className="confirm-logout-body">
+                        <div className="error-text">
+                            <h2>Confirm Pickup</h2>
+                            <p>Are you sure you want to pickup this evacuee?</p>
+                        </div>
+                        <div className="buttons">
+                            <button className='yes-button' onClick={() => handlePickupEvacuee()}>Yes</button>
+                            <button className='cancel-button' onClick={handleCloseShowPickupConfirmation}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showRejectConfirmation && (
+                <div className="confirm-logout">
+                    <div className="confirm-logout-body">
+                        <div className="error-text">
+                            <h2>Confirm Reject</h2>
+                            <p>Are you sure you want to reject this evacuee?</p>
+                        </div>
+                        <div className="buttons">
+                            <button className='yes-button' onClick={() => handleRejectEvacuee()}>Yes</button>
+                            <button className='cancel-button' onClick={handleCloseShowRejectConfirmation}>Cancel</button>
+                        </div>
                     </div>
                 </div>
             )}

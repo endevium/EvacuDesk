@@ -72,6 +72,8 @@ function ManageAreas() {
     // Fetch areas on component mount
     useEffect(() => {
         fetchAreas();
+        const interval = setInterval(fetchAreas, 5000);
+        return () => clearInterval(interval);
     }, []);
 
     const createArea = async () => {
@@ -284,7 +286,7 @@ function ManageAreas() {
                             {/* Area Information */}
                             <div className="detail-section">
                                 <h3>Area Information</h3>
-                                <p><strong>Capacity:</strong> {selectedArea.capacity} people</p>
+                                <p><strong>Capacity:</strong> {selectedArea.capacity || '0'} people</p>
                                 <p><strong>Current Occupancy:</strong> {getTotalOccupants(selectedArea)} people</p>
                                 <p><strong>Available Space:</strong> {selectedArea.available_space} people</p>
                                 <p><strong>Total Requests:</strong> {getTotalRequests(selectedArea)}</p>
@@ -303,7 +305,6 @@ function ManageAreas() {
                                         <div key={occupant._id} className="occupant-item">
                                             <p><strong>Occupant {index + 1}:</strong> {occupant.evacuee_id?.first_name} {occupant.evacuee_id?.last_name}</p>
                                             <p><strong>Family Members:</strong> {occupant.number_of_family_members}</p>
-                                            <p><strong>Requests:</strong> {occupant.request_count || 0}</p>
                                             <p><strong>Contact:</strong> {occupant.evacuee_id?.phone_number || "Not provided"}</p>
                                             {occupant.evacuee_id?.medical_conditions && (
                                                 <p><strong>Medical Conditions:</strong> {occupant.evacuee_id.medical_conditions}</p>

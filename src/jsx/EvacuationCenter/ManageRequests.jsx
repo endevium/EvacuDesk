@@ -20,13 +20,13 @@ function ManageRequests() {
     const [newDistribution, setNewDistribution] = useState({
         evacuee_id: '',
         stocks: {
-            FoodPack: 0,
-            WaterPack: 0,
-            HygienePack: 0,
-            MedicinePack: 0,
-            ClothingPack: 0,
-            BeddingPack: 0,
-            InfantPack: 0,
+            FoodPack: '',
+            WaterPack: '',
+            HygienePack: '',
+            MedicinePack: '',
+            ClothingPack: '',
+            BeddingPack: '',
+            InfantPack: '',
         }
     });
 
@@ -51,13 +51,13 @@ function ManageRequests() {
         setNewDistribution({
             evacuee_id: '',
             stocks: {
-                FoodPack: 0,
-                WaterPack: 0,
-                HygienePack: 0,
-                MedicinePack: 0,
-                ClothingPack: 0,
-                BeddingPack: 0,
-                InfantPack: 0,
+                FoodPack: '',
+                WaterPack: '',
+                HygienePack: '',
+                MedicinePack: '',
+                ClothingPack: '',
+                BeddingPack: '',
+                InfantPack: '',
             },
         })
     };
@@ -106,6 +106,8 @@ function ManageRequests() {
         };
 
         fetchDistributions();
+        const interval = setInterval(fetchDistributions, 5000);
+        return () => clearInterval(interval);
     }, [evacuationCenterId, token]);
 
     useEffect(() => {
@@ -188,7 +190,7 @@ function ManageRequests() {
             const data = await res.json();
 
             if (!res.ok) {
-                throw new Error(data.message || "Failed to distribute");
+                throw new Error(data.error || "Failed to distribute");
             }
       
             setResponseMessage("Distributed successfully!");
@@ -416,13 +418,13 @@ function ManageRequests() {
                                     setNewDistribution({
                                         evacuee_id: '',
                                         stocks: {
-                                            FoodPack: 0,
-                                            WaterPack: 0,
-                                            HygienePack: 0,
-                                            MedicinePack: 0,
-                                            ClothingPack: 0,
-                                            BeddingPack: 0,
-                                            InfantPack: 0,
+                                            FoodPack: '',
+                                            WaterPack: '',
+                                            HygienePack: '',
+                                            MedicinePack: '',
+                                            ClothingPack: '',
+                                            BeddingPack: '',
+                                            InfantPack: '',
                                         },
                                     })
                                 }

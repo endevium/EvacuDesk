@@ -73,8 +73,8 @@ function Evacuee() {
         };
 
         fetchActiveEvacuation();
-        // const interval = setInterval(fetchActiveEvacuation, 5000);
-        // return () => clearInterval(interval);
+        const interval = setInterval(fetchActiveEvacuation, 5000);
+        return () => clearInterval(interval);
     }, []);
 
     const renderPage = () => {

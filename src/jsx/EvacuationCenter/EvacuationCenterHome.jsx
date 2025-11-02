@@ -34,6 +34,8 @@ function EvacuationCenterHome() {
         };
 
         fetchDashboard();
+        const interval = setInterval(fetchDashboard, 5000);
+        return () => clearInterval(interval);
     }, [evacuationCenterId]);
 
 
@@ -86,9 +88,9 @@ function EvacuationCenterHome() {
         doc.text(`Clothing Packs: ${dashboardData?.Stocks.ClothingPack}`, 20, 88);
         doc.text(`Bedding Packs: ${dashboardData?.Stocks.BeddingPack}`, 20, 95);
         doc.text(`Infant Packs: ${dashboardData?.Stocks.InfantPack}`, 20, 102);
-        doc.text(`Approved Requests: ${dashboardData.Pending}`, 20, 109);
+        doc.text(`Approved Requests: ${dashboardData.Approved}`, 20, 109);
         doc.text(`Pending Requests: ${dashboardData.Pending}`, 20, 116);
-        doc.text(`Declined Requests: ${dashboardData.Declined}`, 20, 123);
+        doc.text(`Declined Requests: ${dashboardData.Rejected}`, 20, 123);
         doc.text(`Occupied Slots: ${dashboardData.OccupiedSlots}`, 20, 130);
         doc.text(`Available Slots: ${dashboardData.UnoccupiedSlots}`, 20, 137);
 

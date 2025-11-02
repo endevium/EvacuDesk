@@ -20,6 +20,8 @@ import requestBtn from '../../assets/request-button.png'
 import fulfilled from '../../assets/request_completed.png'
 import pending from '../../assets/pending.png'
 import denied from '../../assets/denied.png'
+import reliefItems from '../../assets/relief-items.png';
+import totalNotifications from '../../assets/total-notifications.png';
 
 
 function EvacueeHome() {
@@ -38,15 +40,20 @@ function EvacueeHome() {
         };
 
         fetchDashboard();
+        const interval = setInterval(fetchDashboard, 5000);
+        return () => clearInterval(interval);
     }, [evacueeId]);
 
     const lineData = useMemo(() => {
         if (!dashboardData || !dashboardData.DistributedPerWeek) return [];
-        return Object.entries(dashboardData.DistributedPerWeek).map(([week, count]) => ({
-            week,
-            count
-        }));
-    }, [dashboardData]);
+        
+        return Object.entries(dashboardData.DistributedPerWeek).map(([week, value]) => {
+          const count = typeof value === "object"
+            ? Object.values(value).reduce((sum, n) => sum + n, 0) 
+            : value;
+          return { week, count };
+        });
+      }, [dashboardData]);
 
     const pieData = useMemo(() => {
         if (!dashboardData) return [];
@@ -63,7 +70,12 @@ function EvacueeHome() {
     const handleGenerateReport = () => {
         if (!dashboardData) return alert("No data to generate report.");
         const requestsSummary = Object.entries(dashboardData.DistributedPerWeek || {})
-            .map(([week, count]) => `${week}: ${count}`)
+            .map(([week, value]) => {
+                const total = typeof value === "object"
+                ? Object.values(value).reduce((sum, n) => sum + n, 0)
+                : value;
+                return `${week}: ${total}`;
+            })
             .join(", ");
 
         const doc = new jsPDF();
@@ -123,7 +135,7 @@ function EvacueeHome() {
                     <div className='dashboard-mini-card'>
                         <div className='dashboard-mini-icon'>
                         <h2>Relief Items Received</h2>
-                        <img src={pending} />
+                        <img src={reliefItems} />
                         </div>
                         <p>{dashboardData?.totalReliefItemsReceived ?? 0}</p>
                     </div>
@@ -131,7 +143,7 @@ function EvacueeHome() {
                     <div className='dashboard-mini-card'>
                         <div className='dashboard-mini-icon'>
                         <h2>Total Notifications</h2>
-                        <img src={denied} />
+                        <img src={totalNotifications} />
                         </div>
                         <p>{dashboardData?.totalNotifications ?? 0}</p>
                     </div>

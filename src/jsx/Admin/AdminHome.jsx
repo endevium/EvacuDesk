@@ -34,6 +34,8 @@ function AdminHome() {
         };
 
         fetchDashboard();
+        const interval = setInterval(fetchDashboard, 5000);
+        return () => clearInterval(interval);
     }, []);
 
     const requestsPie = useMemo(() => {
@@ -75,11 +77,18 @@ function AdminHome() {
         doc.setFontSize(14);
         doc.text("Summary", 20, 50);
         doc.setFontSize(12);
-        doc.text(`(Overall) Approved Stock Requests: ${dashboardData.Fulfilled}`, 20, 60);
-        doc.text(`(Overall) Pending Stock Requests: ${dashboardData.Pending}`, 20, 67);
-        doc.text(`(Overall) Declined Stock Requests: ${dashboardData.Declined}`, 20, 74);
-        doc.text(`(Overall) Occupied Slots: ${dashboardData.OccupiedSlots}`, 20, 84);
-        doc.text(`(Overall) Available Slots: ${dashboardData.UnoccupiedSlots}`, 20, 91);
+        doc.text(`Food Packs: ${dashboardData?.Stocks.FoodPack}`, 20, 60);
+        doc.text(`Water Packs: ${dashboardData?.Stocks.WaterPack}`, 20, 67);
+        doc.text(`Hygiene Packs: ${dashboardData?.Stocks.HygienePack}`, 20, 74);
+        doc.text(`Medicine Packs: ${dashboardData?.Stocks.MedicinePack}`, 20, 81);
+        doc.text(`Clothing Packs: ${dashboardData?.Stocks.ClothingPack}`, 20, 88);
+        doc.text(`Bedding Packs: ${dashboardData?.Stocks.BeddingPack}`, 20, 95);
+        doc.text(`Infant Packs: ${dashboardData?.Stocks.InfantPack}`, 20, 102);
+        doc.text(`(Overall) Approved Stock Requests: ${dashboardData.Approved}`, 20, 109);
+        doc.text(`(Overall) Pending Stock Requests: ${dashboardData.Pending}`, 20, 116);
+        doc.text(`(Overall) Declined Stock Requests: ${dashboardData.Rejected}`, 20, 123);
+        doc.text(`(Overall) Occupied Stock Slots: ${dashboardData.OccupiedSlots}`, 20, 130);
+        doc.text(`(Overall) Available Stock Slots: ${dashboardData.UnoccupiedSlots}`, 20, 137);
 
         doc.setFontSize(10);
         doc.text("EvacuDesk - Generated Automatically", 20, 280);

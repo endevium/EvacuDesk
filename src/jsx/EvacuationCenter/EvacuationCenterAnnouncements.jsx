@@ -161,6 +161,8 @@ function EvacuationCenterAnnouncements() {
         };
     
         fetchBulletins();
+        const interval = setInterval(fetchBulletins, 5000);
+        return () => clearInterval(interval);
     }, [evacuationCenterName]);
 
     useEffect(() => {

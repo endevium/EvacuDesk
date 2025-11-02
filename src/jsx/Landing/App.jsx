@@ -1,5 +1,6 @@
 import '../../css/App.css'
-import { useState } from 'react'
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { BrowserRouter as Router, Route, Routes, Link, useLocation } from 'react-router-dom'
 
 import bodyImage from '../../assets/body-image.png'
@@ -90,6 +91,7 @@ function Home() {
 }
 
 function Body() {
+  const navigate = useNavigate();
   return(
     <>
       <div className="main-body">
@@ -102,7 +104,7 @@ function Body() {
             <p>EvacuDesk ensures efficient shelter management, empowering <br/>
             communities with safety, organization, and streamlined disaster <br/>
             response.</p>
-            <button className="get-started-button">Get Started</button>
+            <button className="get-started-button" onClick={() => navigate("/login")}>Get Started</button>
           </div>
         </div>
       </div>
@@ -299,6 +301,7 @@ function FifthBody() {
 }
 
 function SixthBody() {
+  const navigate = useNavigate();
   return(
     <>
       <div className="sixth-body">
@@ -323,7 +326,7 @@ function SixthBody() {
               relationships, and create a brighter future for everyone.
             </p>
 
-            <button className="join-button">Join Us</button>
+            <button className="join-button" onClick={() => navigate("/login")}>Join Us</button>
           </div>
         </div>
       </div>
@@ -395,6 +398,7 @@ function SeventhBody() {
 }
 
 function EighthBody() {
+  const navigate = useNavigate();
   return(
     <>
       <div className="eighth-body">
@@ -402,7 +406,7 @@ function EighthBody() {
           <h2>Smart Evacuation Planning Made Easy</h2>
           <p>Join with EvacuDesk to build safety, strengthen preparedness, protect families, and create resilient <br/>
             communities where everyone is ready for emergencies together.</p>
-          <button className="join-now-button">Join Now</button>
+          <button className="join-now-button" onClick={() => navigate("/login")}>Join Now</button>
         </div>
         <div className="eighth-image">
           <img src={eighthImage} alt="eighthImage"/>

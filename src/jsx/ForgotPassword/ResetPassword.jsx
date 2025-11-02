@@ -22,10 +22,19 @@ const ResetPassword = ({ onSubmit, setStep }) => {
   return (
     <>
       <div className="back-button-container">
-        <button onClick={handleShowConfirmation()}>
-          <img src={(backButton)} />
+        <button onClick={() => handleShowConfirmation()}>
+          <img src={backButton} />
         </button>
       </div>
+
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
       <div className="login-right-text">
         <h2>Reset Password</h2>
         <p>Please enter your new password.</p>
@@ -62,7 +71,7 @@ const ResetPassword = ({ onSubmit, setStep }) => {
                   </div>
                   <div className="buttons">
                       <button className='yes-button' onClick={() => handleBackButton()}>Yes</button>
-                      <button className='cancel-button' onClick={handleCloseShowConfirmation}>Cancel</button>
+                      <button className='cancel-button' onClick={() => handleCloseShowConfirmation()}>Cancel</button>
                   </div>
               </div>
           </div>

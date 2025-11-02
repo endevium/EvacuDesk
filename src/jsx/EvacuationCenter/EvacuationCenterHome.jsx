@@ -6,20 +6,15 @@ import {
 } from 'recharts';
 
 import homeActive from '../../assets/home-active.png'
-import evacuationCenterActive from '../../assets/evacuation-center-active.png'
-import requestActive from '../../assets/request-active.png'
-import announcementsActive from '../../assets/announcements-active.png'
-import notificationsActive from '../../assets/notification-active.png'
-import settingsActive from '../../assets/settings-active.png'
-import evacCenter from '../../assets/evac-center-placeholder.png'
-import close from '../../assets/close.png'
-import addCircle from '../../assets/add_circle.png'
-import check from '../../assets/check.png'
-import error from '../../assets/error.png'
-import requestBtn from '../../assets/request-button.png'
 import fulfilled from '../../assets/request_completed.png'
 import pending from '../../assets/pending.png'
 import denied from '../../assets/denied.png'
+import foodPacks from '../../assets/food-packs.png'
+import waterPacks from '../../assets/water-packs.png'
+import hygienePacks from '../../assets/hygiene-packs.png'
+import medicinePacks from '../../assets/medicine-packs.png'
+import clothingPacks from '../../assets/clothing-packs.png'
+import infantPacks from '../../assets/infant-packs.png'
 
 
 function EvacuationCenterHome() {
@@ -45,7 +40,7 @@ function EvacuationCenterHome() {
     const requestsPie = useMemo(() => {
         if (!dashboardData) return [];
         return [
-        { name: "Fulfilled", value: dashboardData.Fulfilled || 0 },
+        { name: "Approved", value: dashboardData.Approved || 0 },
         { name: "Pending", value: dashboardData.Pending || 0 },
         { name: "Declined", value: dashboardData.Declined || 0 },
         ];
@@ -84,11 +79,18 @@ function EvacuationCenterHome() {
         doc.setFontSize(14);
         doc.text("Summary", 20, 50);
         doc.setFontSize(12);
-        doc.text(`Fulfilled Requests: ${dashboardData.Fulfilled}`, 20, 60);
-        doc.text(`Pending Requests: ${dashboardData.Pending}`, 20, 67);
-        doc.text(`Declined Requests: ${dashboardData.Declined}`, 20, 74);
-        doc.text(`Occupied Slots: ${dashboardData.OccupiedSlots}`, 20, 84);
-        doc.text(`Available Slots: ${dashboardData.UnoccupiedSlots}`, 20, 91);
+        doc.text(`Food Packs: ${dashboardData?.Stocks.FoodPack}`, 20, 60);
+        doc.text(`Water Packs: ${dashboardData?.Stocks.WaterPack}`, 20, 67);
+        doc.text(`Hygiene Packs: ${dashboardData?.Stocks.HygienePack}`, 20, 74);
+        doc.text(`Medicine Packs: ${dashboardData?.Stocks.MedicinePack}`, 20, 81);
+        doc.text(`Clothing Packs: ${dashboardData?.Stocks.ClothingPack}`, 20, 88);
+        doc.text(`Bedding Packs: ${dashboardData?.Stocks.BeddingPack}`, 20, 95);
+        doc.text(`Infant Packs: ${dashboardData?.Stocks.InfantPack}`, 20, 102);
+        doc.text(`Approved Requests: ${dashboardData.Pending}`, 20, 109);
+        doc.text(`Pending Requests: ${dashboardData.Pending}`, 20, 116);
+        doc.text(`Declined Requests: ${dashboardData.Declined}`, 20, 123);
+        doc.text(`Occupied Slots: ${dashboardData.OccupiedSlots}`, 20, 130);
+        doc.text(`Available Slots: ${dashboardData.UnoccupiedSlots}`, 20, 137);
 
         // Footer
         doc.setFontSize(10);
@@ -111,33 +113,66 @@ function EvacuationCenterHome() {
                 </button>
             </div>
             <div className='page-content'>
-                <h2>Evacuation Center Overview</h2>
+                <h2>Available Stocks</h2>
                 <div className='dashboard-mini-root'>
-                <div className="dashboard-mini-card">
-                    <div className="dashboard-mini-icon">
-                        <h2>Approved</h2>
-                        <img src={fulfilled} />
+                    <div className="dashboard-mini-card">
+                        <div className="dashboard-mini-icon">
+                        <h2>Food Packs</h2>
+                        <img src={foodPacks} />
                         </div>
-                        <p>{dashboardData?.Fulfilled ?? 0}</p>
+                        <p>{dashboardData?.Stocks?.FoodPack ?? 0}</p>
                     </div>
 
                     <div className="dashboard-mini-card">
                         <div className="dashboard-mini-icon">
-                        <h2>Pending</h2>
-                        <img src={pending} />
+                        <h2>Water Packs</h2>
+                        <img src={waterPacks} />
                         </div>
-                        <p>{dashboardData?.Pending ?? 0}</p>
+                        <p>{dashboardData?.Stocks?.WaterPack ?? 0}</p>
                     </div>
 
                     <div className="dashboard-mini-card">
                         <div className="dashboard-mini-icon">
-                        <h2>Declined</h2>
-                        <img src={denied} />
+                        <h2>Hygiene Packs</h2>
+                        <img src={hygienePacks} />
                         </div>
-                        <p>{dashboardData?.Declined ?? 0}</p>
+                        <p>{dashboardData?.Stocks?.HygienePack ?? 0}</p>
+                    </div>
+
+                    <div className="dashboard-mini-card">
+                        <div className="dashboard-mini-icon">
+                        <h2>Medicine Packs</h2>
+                        <img src={medicinePacks} />
+                        </div>
+                        <p>{dashboardData?.Stocks?.MedicinePack ?? 0}</p>
+                    </div>
+
+                    <div className="dashboard-mini-card">
+                        <div className="dashboard-mini-icon">
+                        <h2>Clothing Packs</h2>
+                        <img src={clothingPacks} />
+                        </div>
+                        <p>{dashboardData?.Stocks?.ClothingPack ?? 0}</p>
+                    </div>
+
+                    <div className="dashboard-mini-card">
+                        <div className="dashboard-mini-icon">
+                        <h2>Bedding Packs</h2>
+                        <img src={clothingPacks} />
+                        </div>
+                        <p>{dashboardData?.Stocks?.BeddingPack ?? 0}</p>
+                    </div>
+
+                    <div className="dashboard-mini-card">
+                        <div className="dashboard-mini-icon">
+                        <h2>Infant Packs</h2>
+                        <img src={infantPacks} />
+                        </div>
+                        <p>{dashboardData?.Stocks?.InfantPack ?? 0}</p>
                     </div>
                 </div>
-                <br/>
+                <br />
+            
                 <div className='charts'>
                     <div className='line-graph'>
                         <h2>Requests Overview</h2>

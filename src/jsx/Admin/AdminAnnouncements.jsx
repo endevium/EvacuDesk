@@ -11,7 +11,7 @@ function AdminAnnouncements() {
     const [showAnnouncement, setShowAnnouncement] = useState(false);
     const [bulletins, setBulletins] = useState([]);
     const [selectedBulletin, setSelectedBulletin] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [showCreateAnnouncement, setShowCreateAnnouncement] = useState(false);
     const token = localStorage.getItem("adminToken");
 
@@ -74,7 +74,6 @@ function AdminAnnouncements() {
     // FETCH BULLETINS
     useEffect(() => {
         const fetchBulletins = async () => {
-            setLoading(true);
             try {
                 const res = await fetch("http://localhost:3000/bulletin", {
                     method: "GET",
@@ -95,8 +94,6 @@ function AdminAnnouncements() {
             } catch (error) {
                 console.error("Error fetching bulletins:", error);
                 setBulletins([]);
-            } finally {
-                setLoading(false);
             }
         };
     

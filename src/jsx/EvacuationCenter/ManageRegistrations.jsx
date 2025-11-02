@@ -28,6 +28,13 @@ function ManageRegistrations() {
     const [responseType, setResponseType] = useState("");
     const [exitAnim, setExitAnim] = useState(false);
 
+    const FILTERS = {
+        ALL: 'all',
+        PICKUP: 'pickup',
+        PENDING: 'pending',
+        REJECTED: 'declined',
+    };
+
     const showTimeout = useRef(null);
     const exitTimeout = useRef(null);
 
@@ -47,8 +54,6 @@ function ManageRegistrations() {
     }, []);
 
     useEffect(() => {
-        let interval;
-
         const fetchRegistrations = async () => {
             try {
                 const centerId = localStorage.getItem("evacuationCenterId");
@@ -87,20 +92,21 @@ function ManageRegistrations() {
                     familyMembers: item.number_of_family_members,
                     situation: "-",
                     status: item.status,
-                    idPicture: "https://via.placeholder.com/120",
+                    for_pickup: item.for_pickup,
+                    priority_level: item.priority_level,
+                    pickup_status: item.pickup_status,
+                    idPicture: `http://localhost:3000/${item.evacuee_id.id_picture}`,
                 }));
 
-                setEvacuees(mapped);
+                const sorted = mapped.sort((a, b) => (b.priority_level || 0) - (a.priority_level || 0));
+
+                setEvacuees(sorted);
             } catch (err) {
                 console.error("Error fetching registrations:", err);
             }
         };
 
         fetchRegistrations();
-
-        interval = setInterval(fetchRegistrations, 5000);
-
-        return () => clearInterval(interval);
     }, []);
 
     const handleOpenShowDetails = (evacuee) => {
@@ -215,8 +221,61 @@ function ManageRegistrations() {
         }
     }
 
+    const handlePickupEvacuee = async (id) => {
+        try {
+            const token = localStorage.getItem("evacuationCenterToken");
+            const payload = {
+                pickup_status: "Picked Up"
+            }
+
+            const res = await fetch(`http://localhost:3000/evacuation-registration/pickup-status/${id}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify(
+                    payload
+                )
+            });
+
+            const data = await res.json();
+            
+
+            if (!res.ok) {
+                throw new Error(data.error || "Failed to pick up evacuee");
+            }
+            
+            setResponseMessage("Evacuee picked up successfully!");
+            setResponseType("success");
+            setShowResponse(true);
+      
+            showTimeout.current = setTimeout(() => {
+                setExitAnim(true);
+                exitTimeout.current = setTimeout(() => {
+                    setShowResponse(false);
+                    setExitAnim(false);
+                }, 400);
+            }, 3000);
+
+            } catch (error) {
+                setResponseMessage(error.message || "Error picking up evacuee");
+                setResponseType("error");
+                setShowResponse(true);
+      
+                showTimeout.current = setTimeout(() => {
+                    setExitAnim(true);
+                    exitTimeout.current = setTimeout(() => {
+                        setShowResponse(false);
+                        setExitAnim(false);
+                    }, 400);
+            }, 3000);
+        }
+    }
+
     const filteredEvacuees = evacuees.filter(evacuee => {
         if (activeFilter === 'all') return true;
+        if (activeFilter === 'pickup') return evacuee.for_pickup === 'Yes' && evacuee.pickup_status == 'Awaiting Pickup' && evacuee.status !== 'Rejected';
         if (activeFilter === 'pending') return evacuee.status === 'Pending';
         if (activeFilter === 'declined') return evacuee.status === 'Rejected';
         return true;
@@ -249,24 +308,15 @@ function ManageRegistrations() {
             </div>
 
             <div className='evacuation-centers-buttons'>
-                <button 
-                    className={activeFilter === 'all' ? 'active' : ''} 
-                    onClick={() => setActiveFilter('all')}
-                >
-                    All
-                </button>
-                <button 
-                    className={activeFilter === 'pending' ? 'active' : ''} 
-                    onClick={() => setActiveFilter('pending')}
-                >
-                    Pending
-                </button>
-                <button 
-                    className={activeFilter === 'declined' ? 'active' : ''} 
-                    onClick={() => setActiveFilter('declined')}
-                >
-                    Declined
-                </button>
+                {Object.entries(FILTERS).map(([key, value]) => (
+                    <button 
+                        key={value}
+                        className={activeFilter === value ? 'active-filter' : ''} 
+                        onClick={() => setActiveFilter(value)}
+                    >
+                        {key.charAt(0) + key.slice(1).toLowerCase()}
+                    </button>
+                ))}
             </div>
 
             <div className='page-content-manage-registrations'>
@@ -277,16 +327,17 @@ function ManageRegistrations() {
                                 <th>No.</th>
                                 <th>Registration</th>
                                 <th>Name</th>
-                                <th>Sex</th>
+                                <th>Priority Level</th>
+                                <th>Pickup</th>
                                 <th>Age</th>
-                                <th>Family</th>
+                                <th>Sex</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                         {filteredEvacuees.length === 0 ? (
                                 <tr>
-                                <td colSpan="7" style={{ textAlign: 'center', padding: '1rem' }}>
+                                <td colSpan="8" style={{ textAlign: 'center', padding: '1rem' }}>
                                     No evacuees found.
                                 </td>
                                 </tr>
@@ -299,22 +350,44 @@ function ManageRegistrations() {
                                     <td style={{ textAlign: 'center' }}>{index + 1}</td>
                                     <td>{evacuee.registrationDate}</td>
                                     <td>{evacuee.name}</td>
-                                    <td>{evacuee.sex}</td>
+                                    <td>{evacuee.priority_level}</td>
+                                    <td>
+                                        {evacuee.for_pickup === "Yes" 
+                                            ? evacuee.pickup_status === "Awaiting Pickup"
+                                            ? "Yes"
+                                            : evacuee.pickup_status === "Picked Up"
+                                                ? "Picked Up"
+                                                : "-"
+                                            : "No"
+                                        }
+                                    </td>
                                     <td>{evacuee.age}</td>
-                                    <td>{evacuee.familyMembers}</td>
+                                    <td>{evacuee.sex}</td>
                                     <td className='actions-cell'>
+                                    {evacuee.for_pickup === "Yes" && evacuee.pickup_status === "Awaiting Pickup" ? 
+                                        <button 
+                                            className={evacuee.status === "Rejected" ? 'disabled-button' : 'pickup-button'}
+                                            onClick={() => {
+                                            handlePickupEvacuee(evacuee.id);
+                                            }}
+                                            disabled={evacuee.status === "Rejected"}
+                                        >
+                                            Pickup
+                                        </button>
+                                    : 
+                                        <button 
+                                            className={evacuee.status === "Rejected" ? 'disabled-button' : 'mark-picked-button'} 
+                                            onClick={() => {
+                                            handleApproveEvacuee(evacuee.id);
+                                            }}
+                                        >
+                                            Approve
+                                        </button>
+                                    }
                                     <button 
-                                        className='mark-picked-button' 
+                                        className={evacuee.status === "Rejected" ? 'disabled-button' : 'dismiss-button'} 
                                         onClick={() => {
-                                        handleApproveEvacuee(evacuee.id);
-                                        }}
-                                    >
-                                        Approve
-                                    </button>
-                                    <button 
-                                        className='dismiss-button' 
-                                        onClick={() => {
-                                        handleOpenShowDetails(evacuee);
+                                        handleRejectEvacuee(evacuee.id);
                                         }}
                                     >
                                         Reject
@@ -353,6 +426,12 @@ function ManageRegistrations() {
                             <p><strong>Address:</strong> {selectedEvacuee.address}</p>
                             <p><strong>Number of Family Members:</strong> {selectedEvacuee.familyMembers}</p>
                             <p><strong>Medical Conditions:</strong> {selectedEvacuee.medical}</p>
+                            <p><strong>Status:</strong> {selectedEvacuee.status || "Unavailable"}</p>
+                            <p><strong>Priority Level:</strong> {selectedEvacuee.priority_level || "N/A"}</p>
+                            <p><strong>For Pickup:</strong> {selectedEvacuee.for_pickup}</p>
+                            {selectedEvacuee.assigned_area && (
+                                <p><strong>Assigned Area:</strong> {selectedEvacuee.assigned_area}</p>
+                            )}
                             <p>
                                 <strong>ID Picture:</strong>{' '}
                                 <a href={selectedEvacuee.idPicture} target="_blank" rel="noopener noreferrer">
@@ -361,10 +440,7 @@ function ManageRegistrations() {
                             </p>
                         </div>
 
-                        <div className='evacuee-buttons'>
-                            <button className="reject-button">Reject</button>
-                            <button className="approve-button">Approve</button>
-                        </div>
+                        
                     </div>
                 </div>
             )}

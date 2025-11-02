@@ -2,16 +2,13 @@ import '../../css/admin_side.css'
 import evacudesk from '../../assets/evacudesk-white.png'
 import homeActive from '../../assets/home-active.png'
 import evacuationCenterActive from '../../assets/evacuation-center-active.png'
-import usersActive from '../../assets/usersActive.png'
-import requestActive from '../../assets/request-active.png'
+import inventoryActive from '../../assets/inventory-active.png'
 import announcementsActive from '../../assets/announcements-active.png'
 import notificationsActive from '../../assets/notification-active.png'
-import settingsActive from '../../assets/settings-active.png'
 import home from '../../assets/home.png'
 import evacuationCenter from '../../assets/evacuation-center.png'
-import users from '../../assets/users.png'
-import request from '../../assets/request.png'
 import announcements from '../../assets/announcements.png'
+import inventory from '../../assets/inventory.png'
 import notifications from '../../assets/notification.png'
 import settings from '../../assets/settings.png'
 import logout from '../../assets/logout.png'
@@ -26,7 +23,9 @@ function AdminSideNav({ activeMenu, setActiveMenu }) {
     const menuItems = [
         { id: 'home', label: 'Home', activeIcon: home, icon: homeActive },
         { id: 'create-evac', label: 'Evacuation Centers', activeIcon: evacuationCenter, icon: evacuationCenterActive },
+        { id: 'manage-inventory', label: 'Inventory', activeIcon: inventory, icon: inventoryActive },
         { id: 'announcements', label: 'Announcements', activeIcon: announcements, icon: announcementsActive },
+        { id: 'notifications', label: 'Notifications', activeIcon: notifications, icon: notificationsActive }
     ];
 
     const handleLogout = () => {

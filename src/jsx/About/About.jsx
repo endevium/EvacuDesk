@@ -32,6 +32,7 @@ function About() {
 }
 
 function AboutOne() {
+    const navigate = useNavigate();
     return(
         <>
             <div className="about-main-body">
@@ -45,7 +46,7 @@ function AboutOne() {
                             EvacuDesk?</h1>
 
                         <p>Evacudesk provides safety, preparedness, and trust, ensuring communities stay protected, empowered, and resilient during emergencies and unexpected disasters.</p>
-                        <button className="discover-more-button">
+                        <button className="discover-more-button" onClick={() => navigate("/login")}>
                             Discover More
                         </button>
                     </div>

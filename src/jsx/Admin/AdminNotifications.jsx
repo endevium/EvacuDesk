@@ -3,6 +3,32 @@ import { useEffect, useState, useRef } from 'react';
 import notificationsActive from '../../assets/notification-active.png'
 
 function AdminNotifications() {
+    const [notifications, setNotifications] = useState([]);
+    const id = localStorage.getItem("evacuationCenterId");
+
+    useEffect(() => {
+        const fetchNotifications = async () => {
+            try {
+                const res = await fetch(`http://localhost:3000/notification/admin`, {
+                    method: "GET",
+                })
+                const data = await res.json();
+
+                if (!res.ok) {
+                    setNotifications([]);
+                    throw new Error(data.error || "Fetching notifications failed");
+                }
+
+                setNotifications(Array.isArray(data) ? data : data.notifications || []);
+            } catch (error) {
+                console.error("Error fetching bulletins:", error);
+                setNotifications([]);
+            } 
+        }
+
+        fetchNotifications();
+    })
+
     return(
         <>
             <div className="page-label">
@@ -15,17 +41,19 @@ function AdminNotifications() {
             </div>
 
             <div className='page-content-notifications'>
-                <div className='notification-buttons'>
-                    <button>All</button>
-                    <button>Unread</button>
-                </div>
                 <div className='notifications-root'>
-                    <div className='notification-card'>
-                        <div className='notification-text'>
-                            <h2>Notification Title</h2>
-                            <p>Notification Body</p>
-                        </div>
-                    </div>
+                    {notifications.length === 0 ? (
+                        <p className='no-current-evac'>No notifications found.</p>
+                    ) : (
+                        notifications.map(notification => (
+                            <div key={notification._id}className='notification-card'>
+                                <div className='notification-text'>
+                                    <h2>{notification.title}</h2>
+                                    <p>{notification.body}</p>
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
         </>

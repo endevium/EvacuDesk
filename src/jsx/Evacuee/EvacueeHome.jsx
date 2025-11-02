@@ -41,8 +41,8 @@ function EvacueeHome() {
     }, [evacueeId]);
 
     const lineData = useMemo(() => {
-        if (!dashboardData || !dashboardData.RequestsPerWeek) return [];
-        return Object.entries(dashboardData.RequestsPerWeek).map(([week, count]) => ({
+        if (!dashboardData || !dashboardData.DistributedPerWeek) return [];
+        return Object.entries(dashboardData.DistributedPerWeek).map(([week, count]) => ({
             week,
             count
         }));
@@ -62,7 +62,7 @@ function EvacueeHome() {
 
     const handleGenerateReport = () => {
         if (!dashboardData) return alert("No data to generate report.");
-        const requestsSummary = Object.entries(dashboardData.RequestsPerWeek || {})
+        const requestsSummary = Object.entries(dashboardData.DistributedPerWeek || {})
             .map(([week, count]) => `${week}: ${count}`)
             .join(", ");
 
@@ -82,10 +82,10 @@ function EvacueeHome() {
         doc.setFontSize(14);
         doc.text("Summary", 20, 50);
         doc.setFontSize(12);
-        doc.text(`Fulfilled Requests: ${dashboardData.Fulfilled}`, 20, 60);
-        doc.text(`Pending Requests: ${dashboardData.Pending}`, 20, 67);
-        doc.text(`Declined Requests: ${dashboardData.Declined}`, 20, 74);
-        doc.text(`Requests per Week: ${requestsSummary}`, 20, 84);
+        doc.text(`Total Registrations: ${dashboardData.pastRegistrations}`, 20, 60);
+        doc.text(`Total Relief Items: ${dashboardData.totalReliefItemsReceived}`, 20, 67);
+        doc.text(`Total Notifications: ${dashboardData.totalNotifications}`, 20, 74);
+        doc.text(`Relief distributions per week: ${requestsSummary}`, 20, 84);
         doc.text(`Occupied Slots: ${dashboardData.OccupiedSlots}`, 20, 94);
         doc.text(`Available Slots: ${dashboardData.UnoccupiedSlots}`, 20, 104);
 
@@ -110,69 +110,81 @@ function EvacueeHome() {
                 </button>
             </div>
             <div className='page-content'>
-                <h2>Requests Overview</h2>
+                <h2>General Overview</h2>
                 <div className='dashboard-mini-root'>
                     <div className='dashboard-mini-card'>
                         <div className='dashboard-mini-icon'>
-                        <h2>Fulfilled</h2>
+                        <h2>Total Registrations</h2>
                         <img src={fulfilled} />
                         </div>
-                        <p>{dashboardData?.Fulfilled ?? 0}</p>
+                        <p>{dashboardData?.pastRegistrations ?? 0}</p>
                     </div>
 
                     <div className='dashboard-mini-card'>
                         <div className='dashboard-mini-icon'>
-                        <h2>Pending</h2>
+                        <h2>Relief Items Received</h2>
                         <img src={pending} />
                         </div>
-                        <p>{dashboardData?.Pending ?? 0}</p>
+                        <p>{dashboardData?.totalReliefItemsReceived ?? 0}</p>
                     </div>
 
                     <div className='dashboard-mini-card'>
                         <div className='dashboard-mini-icon'>
-                        <h2>Declined</h2>
+                        <h2>Total Notifications</h2>
                         <img src={denied} />
                         </div>
-                        <p>{dashboardData?.Declined ?? 0}</p>
+                        <p>{dashboardData?.totalNotifications ?? 0}</p>
                     </div>
                 </div>
                 <br/>
                 <div className='charts'>
                     <div className='line-graph'>
-                        <h2>Aid History</h2>
+                        <h2>Distribution History</h2>
                         <div className='graph-root'>
-                            <ResponsiveContainer width="95%" height="90%">
-                                <LineChart data={lineData}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="week" />
-                                <YAxis />
-                                <Tooltip />
-                                <Legend />
-                                <Line type="monotone" dataKey="count" stroke="#45AD7F" strokeWidth={2} />
-                                </LineChart>
-                            </ResponsiveContainer>
+                            {lineData.length > 0 ? (
+                                <ResponsiveContainer width="95%" height="90%">
+                                    <LineChart data={lineData}>
+                                        <CartesianGrid strokeDasharray="3 3" />
+                                        <XAxis dataKey="week" />
+                                        <YAxis />
+                                        <Tooltip />
+                                        <Legend />
+                                        <Line type="monotone" dataKey="count" stroke="#45AD7F" strokeWidth={2} />
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            ) : (
+                                <div className='graph-text'>
+                                    <p className='no-current-evac'>No distribution history available.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                     <div className='pie-chart'>
                         <h2>Center Occupancy vs Capacity</h2>
                         <div className='graph-root'>
-                            <ResponsiveContainer width="95%" height="90%">
-                                <PieChart>
-                                    <Pie
-                                        data={pieData}
-                                        cx="50%"
-                                        cy="50%"
-                                        outerRadius={100}
-                                        dataKey="value"
-                                    >
-                                        {pieData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip />
-                                    <Legend />
-                                </PieChart>
-                            </ResponsiveContainer>
+                            {pieData.some(entry => entry.value > 0) ? (
+                                <ResponsiveContainer width="95%" height="90%">
+                                    <PieChart>
+                                        <Pie
+                                            data={pieData}
+                                            cx="50%"
+                                            cy="50%"
+                                            outerRadius={100}
+                                            dataKey="value"
+                                        >
+                                            {pieData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip />
+                                        <Legend />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            ) : (
+                                <div className='graph-text'>
+                                    <p className='no-current-evac'>No occupancy data available.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

@@ -1,29 +1,34 @@
 import '../../css/evacuation-center.css'
 import { useState, useEffect, useRef } from 'react'
 
-import homeActive from '../../assets/home-active.png'
-import evacuationCenterActive from '../../assets/evacuation-center-active.png'
 import requestActive from '../../assets/request-active.png'
-import announcementsActive from '../../assets/announcements-active.png'
-import notificationsActive from '../../assets/notification-active.png'
-import settingsActive from '../../assets/settings-active.png'
-import evacCenter from '../../assets/evac-center-placeholder.png'
 import close from '../../assets/close.png'
-import addCircle from '../../assets/add_circle.png'
 import check from '../../assets/check.png'
 import error from '../../assets/error.png'
-import requestBtn from '../../assets/request-button.png'
-import fulfilled from '../../assets/request_completed.png'
-import pending from '../../assets/pending.png'
-import denied from '../../assets/denied.png'
+
 
 function ManageRequests() {
-    const [activeFilter, setActiveFilter] = useState("all");
-    const [requests, setRequests] = useState([]);
+    const [distributions, setDistributions] = useState([]);
     const [showResponse, setShowResponse] = useState(false);
     const [responseMessage, setResponseMessage] = useState("");
     const [responseType, setResponseType] = useState("");
     const [exitAnim, setExitAnim] = useState(false);
+    const [showDistribute, setShowDistribute] = useState(false);
+    const [evacuees, setEvacuees] = useState([]);
+    const evacuationCenterId = localStorage.getItem("evacuationCenterId");
+    const token = localStorage.getItem("evacuationCenterToken");
+    const [newDistribution, setNewDistribution] = useState({
+        evacuee_id: '',
+        stocks: {
+            FoodPack: 0,
+            WaterPack: 0,
+            HygienePack: 0,
+            MedicinePack: 0,
+            ClothingPack: 0,
+            BeddingPack: 0,
+            InfantPack: 0,
+        }
+    });
 
     const showTimeout = useRef(null);
     const exitTimeout = useRef(null);
@@ -39,70 +44,154 @@ function ManageRequests() {
         }
     };
 
-    const evacuationCenterId = localStorage.getItem("evacuationCenterId");
-    const token = localStorage.getItem("evacuationCenterToken");
 
-    const filteredRequests = Array.isArray(requests)
-    ? requests.filter(request => {
-        if (activeFilter === 'all') return true;
-        if (activeFilter === 'pending') return request.status === 'Pending';
-        if (activeFilter === 'declined') return request.status === 'Declined';
-        return true;
+    const handleShowDistribute = () => setShowDistribute(true);
+    const handleCloseDistribute = () => {
+        setShowDistribute(false);
+        setNewDistribution({
+            evacuee_id: '',
+            stocks: {
+                FoodPack: 0,
+                WaterPack: 0,
+                HygienePack: 0,
+                MedicinePack: 0,
+                ClothingPack: 0,
+                BeddingPack: 0,
+                InfantPack: 0,
+            },
         })
-    : [];
+    };
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+      
+        if ([
+          "FoodPack", "WaterPack", "HygienePack",
+          "MedicinePack", "ClothingPack", "BeddingPack", "InfantPack"
+        ].includes(name)) {
+          setNewDistribution((prev) => ({
+            ...prev,
+            stocks: {
+              ...prev.stocks,
+              [name]: value,
+            },
+          }));
+        } else {
+          setNewDistribution((prev) => ({
+            ...prev,
+            [name]: value,
+          }));
+        }
+    };
 
     useEffect(() => {
-        let interval;
-
-        const fetchRequests = async () => {
+        const fetchDistributions = async () => {
             try {
-                const response = await fetch(`http://localhost:3000/evacuee-request/center/${evacuationCenterId}`, {
+                const response = await fetch(
+                    `http://localhost:3000/distribution-record/center/${evacuationCenterId}`,
+                    {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+
+                const data = await response.json();
+                setDistributions(Array.isArray(data) ? data : []);
+            } catch (error) {
+                console.error("Error fetching distributions:", error);
+            }
+        };
+
+        fetchDistributions();
+    }, [evacuationCenterId, token]);
+
+    useEffect(() => {
+        const fetchEvacuees = async () => {
+            try {
+                const res = await fetch(`http://localhost:3000/evacuation-center-occupant/center/${evacuationCenterId}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
+                        "Authorization": `Bearer ${token}`,
                     },
                 });
+                if (!res.ok) throw new Error("Failed to fetch evacuees");
+                const data = await res.json();
+
+                if (data && Array.isArray(data.occupants)) {
+                    const filtered = data.occupants.filter(
+                        (occ) => occ.status !== "Returned"
+                    );
         
-                const data = await response.json();
-                setRequests(data);
+                    const mappedEvacuees = filtered.map((occ) => {
+                        const evacuee = occ.evacuee;
+                        const fullName = `${evacuee.first_name} ${evacuee.last_name}`;
+                    
+                        return {
+                            id: occ._id,
+                            evacuee_id: evacuee._id,
+                            name: fullName,
+                            priority_level: occ.priority_level,
+                        };
+                    });
+
+                    const sorted = mappedEvacuees.sort((a, b) => (b.priority_level || 0) - (a.priority_level || 0));
+                    setEvacuees(sorted);
+                } else {
+                    setEvacuees([]);
+                }
             } catch (error) {
-                console.error("Error fetching requests:", error);
+                console.error("Error fetching evacuees:", error);
+                setEvacuees([]);
             }
         };
-    
-        fetchRequests();
 
-        interval = setInterval(fetchRequests, 5000);
-
+        fetchEvacuees();
+        const interval = setInterval(fetchEvacuees, 5000);
         return () => clearInterval(interval);
+    }, [evacuationCenterId]);
 
-    }, [evacuationCenterId, token]);
+    const distribute = async () => {
+        if (!newDistribution.evacuee_id) {
+            setResponseMessage("Please select an evacuee");
+            setResponseType("error");
+            setShowResponse(true);
+    
+            showTimeout.current = setTimeout(() => {
+                setExitAnim(true);
+                exitTimeout.current = setTimeout(() => {
+                    setShowResponse(false);
+                    setExitAnim(false);
+                }, 400);
+            }, 3000);
+            return;
+        }
 
-    const fulfillRequest = async (id) => {
         try {
-            const payload = {
-                status: "Fulfilled"
-            }
-
-            const res = await fetch(`http://localhost:3000/evacuee-request/status/${id}`, {
-                method: "PATCH",
+            const res = await fetch(`http://localhost:3000/distribution-record/`, {
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`,
                 },
-                body: JSON.stringify(
-                    payload
-                )
+                body: JSON.stringify({
+                    ...newDistribution,
+                    stocks: Object.fromEntries(
+                        Object.entries(newDistribution.stocks).map(([k,v]) => [k, Number(v)])
+                    )
+                })
             });
 
             const data = await res.json();
 
             if (!res.ok) {
-                throw new Error(data.error || "Failed to fulfill request");
+                throw new Error(data.message || "Failed to distribute");
             }
       
-            setResponseMessage("Request fulfilled successfully!");
+            setResponseMessage("Distributed successfully!");
             setResponseType("success");
             setShowResponse(true);
       
@@ -114,48 +203,12 @@ function ManageRequests() {
                 }, 400);
             }, 3000);
 
-            } catch (error) {
-                setResponseMessage(error.message || "Error fulfilling request");
-                setResponseType("error");
-                setShowResponse(true);
-      
-                showTimeout.current = setTimeout(() => {
-                    setExitAnim(true);
-                    exitTimeout.current = setTimeout(() => {
-                        setShowResponse(false);
-                        setExitAnim(false);
-                    }, 400);
-            }, 3000);
-        }
-    }
-
-    const rejectRequest = async (id) => {
-        try {
-            const payload = {
-                status: "Rejected"
-            }
-
-            const res = await fetch(`http://localhost:3000/evacuee-request/status/${id}`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
-                body: JSON.stringify(
-                    payload
-                )
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.error || "Failed to reject request");
-            }
-      
-            setResponseMessage("Request rejected successfully!");
-            setResponseType("success");
+            handleCloseDistribute();
+        } catch (error) {
+            setResponseMessage(error.message || "Error distributing");
+            setResponseType("error");
             setShowResponse(true);
-      
+    
             showTimeout.current = setTimeout(() => {
                 setExitAnim(true);
                 exitTimeout.current = setTimeout(() => {
@@ -163,21 +216,9 @@ function ManageRequests() {
                     setExitAnim(false);
                 }, 400);
             }, 3000);
-
-            } catch (error) {
-                setResponseMessage(error.message || "Error rejecting request");
-                setResponseType("error");
-                setShowResponse(true);
-      
-                showTimeout.current = setTimeout(() => {
-                    setExitAnim(true);
-                    exitTimeout.current = setTimeout(() => {
-                        setShowResponse(false);
-                        setExitAnim(false);
-                    }, 400);
-            }, 3000);
         }
     }
+
 
     return(
         <>  
@@ -201,33 +242,18 @@ function ManageRequests() {
                     <img src={requestActive}/>
                 </div>
                 <div className='page-label-text'>
-                    <p>Manage Requests</p>
+                    <p>Manage Distributions</p>
                 </div>
-                
-            </div>
-
-            <div className='evacuation-centers-buttons'>
-                <button 
-                    className={activeFilter === 'all' ? 'active' : ''} 
-                    onClick={() => setActiveFilter('all')}
-                >
-                    All
-                </button>
-                <button 
-                    className={activeFilter === 'pending' ? 'active' : ''} 
-                    onClick={() => setActiveFilter('pending')}
-                >
-                    Pending
-                </button>
-                <button 
-                    className={activeFilter === 'declined' ? 'active' : ''} 
-                    onClick={() => setActiveFilter('declined')}
-                >
-                    Declined
-                </button>
+                <div className='page-buttons'>
+                    <button className="create-distribution-button" onClick={() => handleShowDistribute()}>
+                        <img src={requestActive} alt="create" />
+                        Distribute
+                    </button>
+                </div>
             </div>
 
             <div className='page-content-manage-requests'>
+                <h2>Distribution History</h2>
                 <div className='requests-table'>
                     <table>
                         <thead>
@@ -235,56 +261,37 @@ function ManageRequests() {
                                 <th>No.</th>
                                 <th>Date</th>
                                 <th>Name</th>
-                                <th>Type</th>
-                                <th>Quantity</th>
-                                <th>Description</th>
-                                <th>Status</th>
-                                <th>Actions</th>
+                                <th>Food</th>
+                                <th>Water</th>
+                                <th>Hygiene</th>
+                                <th>Medicine</th>
+                                <th>Clothing</th>
+                                <th>Bedding</th>
+                                <th>Infant</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredRequests.length === 0 ? (
+                            {distributions.length === 0 ? (
                                 <tr>
-                                <td colSpan="8" style={{ textAlign: "center", padding: "1rem" }}>
-                                    No requests found.
+                                <td colSpan="10" style={{ textAlign: "center", padding: "1rem" }}>
+                                    No distributions found.
                                 </td>
                                 </tr>
                             ) : (
-                                filteredRequests.map((request, index) => (
-                                <tr key={request._id} className="summary-row">
+                                distributions.map((distribution, index) => (
+                                <tr key={distribution._id} className="summary-row">
                                     <td style={{ textAlign: "center" }}>{index + 1}</td>
-                                    <td>{new Date(request.createdAt).toLocaleDateString()}</td>
+                                    <td>{new Date(distribution.createdAt).toLocaleDateString()}</td>
                                     <td>
-                                    {request.evacuee_id?.first_name} {request.evacuee_id?.last_name}
+                                    {distribution.evacuee_id?.first_name} {distribution.evacuee_id?.last_name}
                                     </td>
-                                    <td>{request.request_type}</td>
-                                    <td>{request.quantity}</td>
-                                    <td>{request.description}</td>
-                                    <td>{request.status}</td>
-                                    <td className="actions-cell">
-                                    <button 
-                                        className={
-                                            request.status === "Fulfilled" || request.status === "Rejected"
-                                                ? "disabled-button" 
-                                                : "fulfill-button"
-                                        }
-                                        onClick={() => fulfillRequest(request._id)}
-                                        disabled={request.status === "Fulfilled" || request.status === "Rejected"}
-                                    >
-                                        Approve
-                                    </button>
-                                    <button 
-                                        className={
-                                            request.status === "Fulfilled" || request.status === "Rejected"
-                                                ? "disabled-button" 
-                                                : "fulfill-button"
-                                        }
-                                        onClick={() => rejectRequest(request._id)}
-                                        disabled={request.status === "Fulfilled" || request.status === "Rejected"}
-                                    >
-                                        Reject
-                                    </button>
-                                    </td>
+                                    <td>{distribution.stocks?.FoodPack}</td>
+                                    <td>{distribution.stocks?.WaterPack}</td>
+                                    <td>{distribution.stocks?.HygienePack}</td>
+                                    <td>{distribution.stocks?.MedicinePack}</td>
+                                    <td>{distribution.stocks?.ClothingPack}</td>
+                                    <td>{distribution.stocks?.BeddingPack}</td>
+                                    <td>{distribution.stocks?.InfantPack}</td>
                                 </tr>
                                 ))
                             )}
@@ -292,6 +299,143 @@ function ManageRequests() {
                     </table>
                 </div>
             </div>
+
+            {showDistribute && (
+                <div className="request">
+                    <div className="request-body">
+                        <div className="close-container">
+                        <button onClick={() => handleCloseDistribute()}>
+                            <img src={close} alt="close" />
+                        </button>
+                        </div>
+                        <div className="create-request">
+                            <h2>Distribute</h2>
+                            <form >
+                            <div className="input-fields">
+                            <label>Evacuee</label>
+                            <select
+                                name="evacuee_id"
+                                value={newDistribution.evacuee_id}
+                                onChange={handleInputChange}
+                                required
+                            >   
+                                <option value="">Select Evacuee</option>
+                                {evacuees.map((evacuee) => 
+                                    <option key={evacuee.id} value={evacuee.evacuee_id}>
+                                        {evacuee.name}
+                                    </option>
+                                )}
+                            </select>
+            
+                            <label>Food Pack</label>
+                            <input
+                                type="number"
+                                name="FoodPack"
+                                placeholder="0"
+                                min="0"
+                                value={newDistribution.stocks.FoodPack}
+                                onChange={handleInputChange}
+                                required
+                            />
+            
+                            <label>Water Pack</label>
+                            <input
+                                type="number"
+                                name="WaterPack"
+                                placeholder="0"
+                                min="0"
+                                value={newDistribution.stocks.WaterPack}
+                                onChange={handleInputChange}
+                                required
+                            />
+
+                            <label>Hygiene Pack</label>
+                            <input
+                                type="number"
+                                name="HygienePack"
+                                placeholder="0"
+                                min="0"
+                                value={newDistribution.stocks.HygienePack}
+                                onChange={handleInputChange}
+                                required
+                            />
+
+                            <label>Medicine Pack</label>
+                            <input
+                                type="number"
+                                name="MedicinePack"
+                                placeholder="0"
+                                min="0"
+                                value={newDistribution.stocks.MedicinePack}
+                                onChange={handleInputChange}
+                                required
+                            />
+
+                            <label>Clothing Pack</label>
+                            <input
+                                type="number"
+                                name="ClothingPack"
+                                placeholder="0"
+                                min="0"
+                                value={newDistribution.stocks.ClothingPack}
+                                onChange={handleInputChange}
+                                required
+                            />
+
+                            <label>Bedding Pack</label>
+                            <input
+                                type="number"
+                                name="BeddingPack"
+                                placeholder="0"
+                                min="0"
+                                value={newDistribution.stocks.BeddingPack}
+                                onChange={handleInputChange}
+                                required
+                            />
+
+                            <label>Infant Pack</label>
+                            <input
+                                type="number"
+                                name="InfantPack"
+                                placeholder="0"
+                                min="0"
+                                value={newDistribution.stocks.InfantPack}
+                                onChange={handleInputChange}
+                                required
+                            />
+            
+                            </div>      
+                            </form>
+                        </div>
+
+                        <div className="buttons">
+                                <button
+                                type="reset"
+                                className="reset-btn"
+                                onClick={() =>
+                                    setNewDistribution({
+                                        evacuee_id: '',
+                                        stocks: {
+                                            FoodPack: 0,
+                                            WaterPack: 0,
+                                            HygienePack: 0,
+                                            MedicinePack: 0,
+                                            ClothingPack: 0,
+                                            BeddingPack: 0,
+                                            InfantPack: 0,
+                                        },
+                                    })
+                                }
+                                >
+                                Clear
+                                </button>
+                                <button type="submit" className="submit-btn" onClick={() => distribute()}>
+                                Submit
+                                </button>
+                            </div>
+                    </div>
+                </div>
+            )}
         </>
     )
 }

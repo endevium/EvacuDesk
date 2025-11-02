@@ -33,8 +33,8 @@ function Register() {
         birthdate: "",
         street_number: "",
         barangay: "",
-        city: "",
-        province: "",
+        city: "Dagupan City",
+        province: "Pangasinan",
         disabilities: "",
         id_picture: null
     });
@@ -283,7 +283,7 @@ function EvacueeRegisterOne({
     };
 
     // Form submission functionality
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (/\s/.test(formData.password)) {
@@ -320,7 +320,52 @@ function EvacueeRegisterOne({
             return;
         }
 
-        onNext();
+        try {
+            const res = await fetch(`http://localhost:3000/evacuee/existing-email`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    email_address: formData.email_address
+                })
+            });
+        
+            const data = await res.json();
+        
+            if (res.status === 400) {
+                setResponseMessage("This email is already registered.");
+                setResponseType("error");
+                setShowResponse(true);
+    
+                clearTimeout(showTimeout.current);
+                showTimeout.current = setTimeout(() => {
+                    setExitAnim(true);
+                    exitTimeout.current = setTimeout(() => {
+                        setShowResponse(false);
+                        setExitAnim(false);
+                    }, 400);
+                }, 3000);
+    
+                return;
+            }
+
+            onNext();
+        
+        } catch (error) {
+            setResponseMessage(error.message || "An unexpected error occurred.");
+            setResponseType("error");
+            setShowResponse(true);
+        
+            clearTimeout(showTimeout.current);
+            showTimeout.current = setTimeout(() => {
+                setExitAnim(true);
+                exitTimeout.current = setTimeout(() => {
+                    setShowResponse(false);
+                    setExitAnim(false);
+                }, 400);
+            }, 3000);
+        }        
     };
 
     return(
@@ -771,7 +816,7 @@ function EvacueeRegisterFour({
             .then((data) => {
                 localStorage.setItem("evacueeId", data.id);
 
-                setLoading(true);
+                setLoading(false);
                 setResponseMessage("Registration successful!");
                 setResponseType("success");
                 setShowResponse(true);
@@ -783,7 +828,7 @@ function EvacueeRegisterFour({
                         setExitAnim(false);
                         onNext();
                     }, 400);
-                }, 3000);
+                }, 1000);
             })
             // Show error message
             .catch((error) => {
@@ -918,7 +963,7 @@ function EvacueeVerification({
                         setExitAnim(false);
                         navigate("/login");
                     }, 400);
-                }, 3000);
+                }, 1000);
             } else {
                 setResponseType("error");
                 setResponseMessage(data.error || "Invalid OTP.");

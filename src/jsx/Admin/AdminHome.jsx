@@ -7,20 +7,16 @@ import {
 } from 'recharts';
 
 import homeActive from '../../assets/home-active.png'
-import evacuationCenterActive from '../../assets/evacuation-center-active.png'
-import requestActive from '../../assets/request-active.png'
-import announcementsActive from '../../assets/announcements-active.png'
-import notificationsActive from '../../assets/notification-active.png'
-import settingsActive from '../../assets/settings-active.png'
-import evacCenter from '../../assets/evac-center-placeholder.png'
-import close from '../../assets/close.png'
-import addCircle from '../../assets/add_circle.png'
-import check from '../../assets/check.png'
-import error from '../../assets/error.png'
-import requestBtn from '../../assets/request-button.png'
 import fulfilled from '../../assets/request_completed.png'
 import pending from '../../assets/pending.png'
 import denied from '../../assets/denied.png'
+import foodPacks from '../../assets/food-packs.png'
+import waterPacks from '../../assets/water-packs.png'
+import hygienePacks from '../../assets/hygiene-packs.png'
+import medicinePacks from '../../assets/medicine-packs.png'
+import clothingPacks from '../../assets/clothing-packs.png'
+import infantPacks from '../../assets/infant-packs.png'
+
 
 
 function AdminHome() {
@@ -43,9 +39,9 @@ function AdminHome() {
     const requestsPie = useMemo(() => {
         if (!dashboardData) return [];
         return [
-        { name: "Fulfilled", value: dashboardData.Fulfilled },
+        { name: "Approved", value: dashboardData.Approved },
         { name: "Pending", value: dashboardData.Pending },
-        { name: "Declined", value: dashboardData.Declined },
+        { name: "Rejected", value: dashboardData.Rejected },
         ];
     }, [dashboardData]);
 
@@ -74,20 +70,17 @@ function AdminHome() {
         doc.text(`Overall Centers`, 20, 30);
         doc.text(`Generated on: ${new Date().toLocaleString()}`, 20, 37);
 
-        // Divider
         doc.line(20, 40, 190, 40);
 
-        // Dashboard Summary
         doc.setFontSize(14);
         doc.text("Summary", 20, 50);
         doc.setFontSize(12);
-        doc.text(`(Overall) Fulfilled Requests: ${dashboardData.Fulfilled}`, 20, 60);
-        doc.text(`(Overall) Pending Requests: ${dashboardData.Pending}`, 20, 67);
-        doc.text(`(Overall) Declined Requests: ${dashboardData.Declined}`, 20, 74);
+        doc.text(`(Overall) Approved Stock Requests: ${dashboardData.Fulfilled}`, 20, 60);
+        doc.text(`(Overall) Pending Stock Requests: ${dashboardData.Pending}`, 20, 67);
+        doc.text(`(Overall) Declined Stock Requests: ${dashboardData.Declined}`, 20, 74);
         doc.text(`(Overall) Occupied Slots: ${dashboardData.OccupiedSlots}`, 20, 84);
         doc.text(`(Overall) Available Slots: ${dashboardData.UnoccupiedSlots}`, 20, 91);
 
-        // Footer
         doc.setFontSize(10);
         doc.text("EvacuDesk - Generated Automatically", 20, 280);
 
@@ -109,14 +102,74 @@ function AdminHome() {
             </div>
 
             <div className='page-content'>
-                <h2>Overall Evacuation Center Overview</h2>
+                <h2>Available Stocks</h2>
+                <div className='dashboard-mini-root'>
+                    <div className="dashboard-mini-card">
+                        <div className="dashboard-mini-icon">
+                        <h2>Food Packs</h2>
+                        <img src={foodPacks} />
+                        </div>
+                        <p>{dashboardData?.Stocks?.FoodPack ?? 0}</p>
+                    </div>
+
+                    <div className="dashboard-mini-card">
+                        <div className="dashboard-mini-icon">
+                        <h2>Water Packs</h2>
+                        <img src={waterPacks} />
+                        </div>
+                        <p>{dashboardData?.Stocks?.WaterPack ?? 0}</p>
+                    </div>
+
+                    <div className="dashboard-mini-card">
+                        <div className="dashboard-mini-icon">
+                        <h2>Hygiene Packs</h2>
+                        <img src={hygienePacks} />
+                        </div>
+                        <p>{dashboardData?.Stocks?.HygienePack ?? 0}</p>
+                    </div>
+
+                    <div className="dashboard-mini-card">
+                        <div className="dashboard-mini-icon">
+                        <h2>Medicine Packs</h2>
+                        <img src={medicinePacks} />
+                        </div>
+                        <p>{dashboardData?.Stocks?.MedicinePack ?? 0}</p>
+                    </div>
+
+                    <div className="dashboard-mini-card">
+                        <div className="dashboard-mini-icon">
+                        <h2>Clothing Packs</h2>
+                        <img src={clothingPacks} />
+                        </div>
+                        <p>{dashboardData?.Stocks?.ClothingPack ?? 0}</p>
+                    </div>
+
+                    <div className="dashboard-mini-card">
+                        <div className="dashboard-mini-icon">
+                        <h2>Bedding Packs</h2>
+                        <img src={clothingPacks} />
+                        </div>
+                        <p>{dashboardData?.Stocks?.BeddingPack ?? 0}</p>
+                    </div>
+
+                    <div className="dashboard-mini-card">
+                        <div className="dashboard-mini-icon">
+                        <h2>Infant Packs</h2>
+                        <img src={infantPacks} />
+                        </div>
+                        <p>{dashboardData?.Stocks?.InfantPack ?? 0}</p>
+                    </div>
+                </div>
+
+                <br/>
+                <h2>Overall Stock Request Overview</h2>
                 <div className='dashboard-mini-root'>
                 <div className="dashboard-mini-card">
                     <div className="dashboard-mini-icon">
                         <h2>Approved</h2>
                         <img src={fulfilled} />
                         </div>
-                        <p>{dashboardData?.Fulfilled ?? 0}</p>
+                        <p>{dashboardData?.Approved ?? 0}</p>
                     </div>
 
                     <div className="dashboard-mini-card">
@@ -132,7 +185,7 @@ function AdminHome() {
                         <h2>Declined</h2>
                         <img src={denied} />
                         </div>
-                        <p>{dashboardData?.Declined ?? 0}</p>
+                        <p>{dashboardData?.Rejected ?? 0}</p>
                     </div>
                 </div>
                 <br/>

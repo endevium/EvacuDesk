@@ -4,6 +4,7 @@ import homeActive from '../../assets/home-active.png'
 import evacuationCenterActive from '../../assets/evacuation-center-active.png'
 import usersActive from '../../assets/usersActive.png'
 import requestActive from '../../assets/request-active.png'
+import inventoryActive from '../../assets/inventory-active.png'
 import announcementsActive from '../../assets/announcements-active.png'
 import notificationsActive from '../../assets/notification-active.png'
 import settingsActive from '../../assets/settings-active.png'
@@ -12,6 +13,7 @@ import home from '../../assets/home.png'
 import evacuationCenter from '../../assets/evacuation-center.png'
 import users from '../../assets/users.png'
 import request from '../../assets/request.png'
+import inventory from '../../assets/inventory.png'
 import announcements from '../../assets/announcements.png'
 import notifications from '../../assets/notification.png'
 import settings from '../../assets/settings.png'
@@ -27,12 +29,14 @@ function EvacuationCenterSideNav({ activeMenu, setActiveMenu }) {
 
     const menuItems = [
         { id: 'home', label: 'Home', activeIcon: home, icon: homeActive },
-        { id: 'manage-areas', label: 'Manage Areas', activeIcon: area, icon: areaActive },
-        { id: 'manage-evacuees', label: 'Manage Evacuees', activeIcon: evacuationCenter, icon: evacuationCenterActive },
-        { id: 'manage-registrations', label: 'Manage Registrations', activeIcon: users, icon: usersActive },
-        { id: 'manage-requests', label: 'Manage Requests', activeIcon: request, icon: requestActive },
+        { id: 'manage-areas', label: 'Areas', activeIcon: area, icon: areaActive },
+        { id: 'manage-evacuees', label: 'Evacuees', activeIcon: evacuationCenter, icon: evacuationCenterActive },
+        { id: 'manage-registrations', label: 'Registrations', activeIcon: users, icon: usersActive },
+        { id: 'manage-requests', label: 'Distribution', activeIcon: request, icon: requestActive },
+        { id: 'manage-inventory', label: 'Inventory', activeIcon: inventory, icon: inventoryActive },
         { id: 'announcements', label: 'Announcements', activeIcon: announcements, icon: announcementsActive },
         { id: 'notifications', label: 'Notifications', activeIcon: notifications, icon: notificationsActive },
+        { id: 'settings', label: 'Settings', activeIcon: settings, icon: settingsActive }
     ];
 
     const handleLogout = () => {

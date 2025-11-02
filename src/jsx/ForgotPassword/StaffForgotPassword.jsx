@@ -10,7 +10,7 @@ import Verification from './Verification';
 import ResetPassword from './ResetPassword';
 
 function StaffForgotPassword() {
-    const [step, setStep] = useState("email"); // "email" | "verify" | "reset"
+    const [step, setStep] = useState("email");
     const [loading, setLoading] = useState(false);
     const [showResponse, setShowResponse] = useState(false);
     const [responseMessage, setResponseMessage] = useState("");
@@ -43,10 +43,13 @@ function StaffForgotPassword() {
         setEmail(inputEmail);
 
         try {
-            const res = await fetch("http://localhost:3000/evacuation-center/forgot-password", {
+            const res = await fetch("http://localhost:3000/auth/request-otp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email_address: inputEmail })
+                body: JSON.stringify({ 
+                    email_address: inputEmail,
+                    role: "EvacuationCenter" 
+                })
             });
             const data = await res.json();
             setLoading(false);
@@ -58,7 +61,7 @@ function StaffForgotPassword() {
                 setStep("verify");
             } else {
                 setResponseType("error");
-                setResponseMessage(data.message || "Failed to send OTP.");
+                setResponseMessage(data.error || "Failed to send OTP.");
                 setShowResponse(true);
             }
         } catch (err) {
@@ -86,7 +89,11 @@ function StaffForgotPassword() {
             const res = await fetch("http://localhost:3000/auth/verify", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, otp: inputOtp })
+                body: JSON.stringify({ 
+                    email_address: email, 
+                    code: inputOtp,
+                    role: "EvacuationCenter"
+                })
             });
             const data = await res.json();
             setLoading(false);
@@ -98,7 +105,7 @@ function StaffForgotPassword() {
                 setStep("reset");
             } else {
                 setResponseType("error");
-                setResponseMessage(data.message || "Invalid OTP.");
+                setResponseMessage(data.error || "Invalid OTP.");
                 setShowResponse(true);
             }
         } catch (err) {
@@ -122,10 +129,14 @@ function StaffForgotPassword() {
         clearAllTimeouts();
 
         try {
-            const res = await fetch("http://localhost:3000/evacuation-center/reset-password", {
+            const res = await fetch("http://localhost:3000/auth/reset-password", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, otp, password: newPassword })
+                body: JSON.stringify({ 
+                    email_address: email, 
+                    role: "EvacuationCenter", 
+                    newPassword: newPassword 
+                })
             });
             const data = await res.json();
             setLoading(false);
@@ -137,7 +148,7 @@ function StaffForgotPassword() {
                 setTimeout(() => navigate("/login"), 2000);
             } else {
                 setResponseType("error");
-                setResponseMessage(data.message || "Failed to reset password.");
+                setResponseMessage(data.error || "Failed to reset password.");
                 setShowResponse(true);
             }
         } catch (err) {
@@ -182,13 +193,13 @@ function StaffForgotPassword() {
                             </div>
                         )}
                         {!loading && step === "email" && (
-                            <Email onSubmit={handleSendEmail} />
+                            <Email onSubmit={handleSendEmail} setStep={setStep} />
                         )}
                         {!loading && step === "verify" && (
-                            <Verification onSubmit={handleVerifyOtp} />
+                            <Verification onSubmit={handleVerifyOtp} setStep={setStep} />
                         )}
                         {!loading && step === "reset" && (
-                            <ResetPassword onSubmit={handleResetPassword} />
+                            <ResetPassword onSubmit={handleResetPassword} setStep={setStep} />
                         )}
                     </div>
                 </div>

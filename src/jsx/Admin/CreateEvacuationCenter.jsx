@@ -1,12 +1,14 @@
-import '../../css/admin.css'
+import '../../css/admin.css';
 import { useEffect, useState, useRef} from 'react';
 
-import evacuationCenterActive from '../../assets/evacuation-center-active.png'
-import evacCenter from '../../assets/evac-center-placeholder.png'
-import close from '../../assets/close.png'
-import check from '../../assets/check.png'
-import error from '../../assets/error.png'
-import requestBtn from '../../assets/request-button.png'
+import evacuationCenterActive from '../../assets/evacuation-center-active.png';
+import evacCenter from '../../assets/evac-center-placeholder.png';
+import close from '../../assets/close.png';
+import check from '../../assets/check.png';
+import error from '../../assets/error.png';
+import requestBtn from '../../assets/request-button.png';
+import Eye from '../../assets/Eye.png';
+import Eyeoff from '../../assets/Eyeoff.png';
 
 function CreateEvacuationCenter() {
     const [centers, setCenters] = useState([]);
@@ -25,15 +27,16 @@ function CreateEvacuationCenter() {
     // EVAC CENTER MODEL
     const [name, setName] = useState("");
     const [type, setType] = useState("");
-    const [capacity, setCapacity] = useState(0);
+    const [capacity, setCapacity] = useState(1);
     const [email_address, setEmailAddress] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [phone_number, setPhoneNumber] = useState("");
-    const [street_number, setStreetNumber] = useState("");
+    const [street, setStreetNumber] = useState("");
     const [barangay, setBarangay] = useState("");
-    const [city, setCity] = useState("");
-    const [province, setProvince] = useState("");
-    const [region, setRegion] = useState("");
+    const [city, setCity] = useState("Dagupan City");
+    const [province, setProvince] = useState("Pangasinan");
+    const [region, setRegion] = useState("1");
     const [image, setImage] = useState(null);
     const [previewImage, setPreviewImage] = useState(evacCenter);
 
@@ -48,15 +51,15 @@ function CreateEvacuationCenter() {
     const handleClear = () => {
         setName("");
         setType("");
-        setCapacity(0);
+        setCapacity(1);
         setEmailAddress("");
         setPassword("");
         setPhoneNumber("");
         setStreetNumber("");
         setBarangay("");
-        setCity("");
-        setProvince("");
-        setRegion("");
+        setCity("Dagupan City");
+        setProvince("Pangasinan");
+        setRegion("1");
         setImage(null);
         if (previewImage) {
             URL.revokeObjectURL(previewImage);
@@ -72,6 +75,24 @@ function CreateEvacuationCenter() {
 
         clearAllTimeouts();
         setLoading(true);
+
+        if (!/^09\d{9}$/.test(phone_number)) {
+            setResponseMessage("Phone number must start with 09 and be 11 digits long.");
+            setResponseType("error");
+            setShowResponse(true);
+        
+            clearTimeout(showTimeout.current);
+            showTimeout.current = setTimeout(() => {
+              setExitAnim(true);
+              exitTimeout.current = setTimeout(() => {
+                setShowResponse(false);
+                setExitAnim(false);
+              }, 400);
+            }, 3000);
+
+            return;
+        }
+
         try {
             const formData = new FormData();
             formData.append("name", name);
@@ -80,7 +101,7 @@ function CreateEvacuationCenter() {
             formData.append("email_address", email_address);
             formData.append("password", password);
             formData.append("staff_contact_number", phone_number);
-            formData.append("street_number", street_number);
+            formData.append("street", street);
             formData.append("barangay", barangay);
             formData.append("city", city);
             formData.append("province", province);
@@ -158,12 +179,6 @@ function CreateEvacuationCenter() {
         };
 
         fetchCenters();
-
-        const interval = setInterval(() => {
-            fetchCenters();
-        }, 5000);
-    
-        return () => clearInterval(interval);
     }, []);
 
 
@@ -265,14 +280,14 @@ function CreateEvacuationCenter() {
                         <div className='details'>
                             <h2>Create Evacuation Center</h2>
                             <div className='input-fields'>
-                                <form>
+                                <form onSubmit={createEC}>
                                     <div className='form-fields'>
                                         <div className='important-details'>
                                             <div className='announcement-image'>
                                                 <img src={previewImage}/>
                                             </div>
 
-                                            <label>Image</label>
+                                            <label>Image <span className="required">*</span></label>
                                             <input 
                                             type='file' 
                                             accept='image/*'
@@ -280,7 +295,7 @@ function CreateEvacuationCenter() {
                                             onChange={handleImageChange}
                                             />
 
-                                            <label>Evacuation Center Name</label>
+                                            <label>Evacuation Center Name <span className="required">*</span></label>
                                             <input 
                                             type='text' 
                                             placeholder='PHINMA UPang' 
@@ -289,7 +304,7 @@ function CreateEvacuationCenter() {
                                             onChange={(e) => setName(e.target.value)}
                                             />
 
-                                            <label>Type</label>
+                                            <label>Type <span className="required">*</span></label>
                                             <select
                                                 required 
                                                 value={type}
@@ -303,10 +318,11 @@ function CreateEvacuationCenter() {
                                                 <option value="Open Field">Open Field</option>
                                             </select>
 
-                                            <label>Capacity</label>
+                                            <label>Capacity <span className="required">*</span></label>
                                             <input 
                                             type='number' 
                                             placeholder='0' 
+                                            min="1"
                                             required 
                                             value={capacity}
                                             onChange={(e) => setCapacity(e.target.value)}
@@ -315,7 +331,7 @@ function CreateEvacuationCenter() {
 
                                         <div className='location-details'>
                                             <h2>Account Details</h2>
-                                            <label>Email Address</label>
+                                            <label>Email Address <span className="required">*</span></label>
                                             <input 
                                             type='email' 
                                             placeholder='john.doe@example.com' 
@@ -324,55 +340,100 @@ function CreateEvacuationCenter() {
                                             onChange={(e) => setEmailAddress(e.target.value)}
                                             />
 
-                                            <label>Password</label>
-                                            <input 
-                                            type='password' 
-                                            placeholder='********' 
-                                            required 
-                                            value={password}
-                                            onChange={(e) => setPassword(e.target.value)}
-                                            />
+                                            <label>Password <span className="required">*</span></label>
+                                            <div className="password-wrapper">
+                                                <input
+                                                    type={showPassword ? "text" : "password"}
+                                                    placeholder="********"
+                                                    value={password}
+                                                    onChange={(e) => setPassword(e.target.value)}
+                                                    required
+                                                    className="password-input"
+                                                />
+                                                <button
+                                                type="button"
+                                                className="eye-btn"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                >
+                                                    {showPassword ? <img src= {Eyeoff} /> : <img src= {Eye} />}
+                                                </button>
+                                            </div>
 
-                                            <label>Phone Number</label>
+                                            <label>Phone Number <span className="required">*</span></label>
                                             <input 
                                             type='tel' 
                                             placeholder='09123456789' 
+                                            minLength={11}
                                             required 
                                             value={phone_number}
                                             onChange={(e) => setPhoneNumber(e.target.value)}
                                             />
-
-                                            
-                                            
                                         </div>
 
                                         <div className='location-details'>
                                             <h2>Location</h2>
-                                            <label>Street Number</label>
+                                            <label>Street Number <span className="required">*</span></label>
                                             <input 
                                             type='text' 
                                             placeholder='123 Apple St.' 
                                             required 
-                                            value={street_number}
+                                            value={street}
                                             onChange={(e) => setStreetNumber(e.target.value)}
                                             />
 
-                                            <label>Barangay</label>
-                                            <input 
-                                            type='text' 
-                                            placeholder='Bari' 
-                                            required 
-                                            value={barangay}
-                                            onChange={(e) => setBarangay(e.target.value)}
-                                            />
+                                            <label>Barangay <span className="required">*</span></label>
+                                            <select 
+                                                required 
+                                                value={barangay}
+                                                onChange={(e) => setBarangay(e.target.value)}
+                                            >
+                                                <option value="">Select Barangay</option>
+                                                {[
+                                                "Barangay I",
+                                                "Barangay II",
+                                                "Barangay IV",
+                                                "Bacayao Norte",
+                                                "Bacayao Sur",
+                                                "Barangay Pogo Chico",
+                                                "Barangay Pogo Grande",
+                                                "Bonuan Binloc",
+                                                "Bonuan Boquig",
+                                                "Bonuan Gueset",
+                                                "Calmay",
+                                                "Carael",
+                                                "Caranglaan",
+                                                "Herrero-Perez",
+                                                "Lasip Chico",
+                                                "Lasip Grande",
+                                                "Lomboy",
+                                                "Lucao",
+                                                "Malued",
+                                                "Mamalingling",
+                                                "Mangin",
+                                                "Mayombo",
+                                                "Pantal",
+                                                "Poblacion Oeste",
+                                                "Pogo Chico",
+                                                "Pogo Grande",
+                                                "Salapingao",
+                                                "Tambac",
+                                                "Tapuac",
+                                                "Tebeng",
+                                                ].map((brgy) => (
+                                                <option key={brgy} value={brgy}>
+                                                    {brgy}
+                                                </option>
+                                                ))}
+                                            </select>
 
                                             <label>City</label>
                                             <input 
-                                            type='text' 
-                                            placeholder='Dagupan City' 
-                                            required 
-                                            value={city}
-                                            onChange={(e) => setCity(e.target.value)}
+                                                type='text' 
+                                                placeholder='Dagupan City' 
+                                                required 
+                                                value={city}
+                                                onChange={(e) => setCity(e.target.value)}
+                                                disabled
                                             />
 
                                             <label>Province</label>
@@ -382,6 +443,7 @@ function CreateEvacuationCenter() {
                                                 required 
                                                 value={province}
                                                 onChange={(e) => setProvince(e.target.value)}
+                                                disabled
                                             />
 
                                             <label>Region</label>
@@ -391,17 +453,16 @@ function CreateEvacuationCenter() {
                                                 required 
                                                 value={region}
                                                 onChange={(e) => setRegion(e.target.value)}
+                                                disabled
                                             />
                                         </div>
                                     </div>
-
-
 
                                     <div className='buttons'>
                                         <button type='reset' className='clear-button' onClick={handleClear}>
                                             Clear
                                         </button>
-                                        <button type='submit' className='submit-button' onClick={createEC}>
+                                        <button type='submit' className='submit-button'>
                                             Submit
                                         </button>
                                     </div>
@@ -413,7 +474,7 @@ function CreateEvacuationCenter() {
             )}
 
             {showEvacCenter && selectedCenter && (
-                <div className='evacuation-center-info'>
+                <div className='evacuation-center-info-admin'>
                     <div className='evacuation-center-info-body'>
                     <div className='close-container'>
                             <button onClick={handleCloseSelectedCenter}>
@@ -434,7 +495,6 @@ function CreateEvacuationCenter() {
                                 <p>
                                     Address: {selectedCenter.street}, {selectedCenter.barangay}, {selectedCenter.city}, {selectedCenter.province}
                                 </p>
-                                <p>Staff: {selectedCenter.staff_name}</p>
                                 <p>Contact No.: {selectedCenter.staff_contact_number}</p>
                                 <p>
                                     Capacity: {selectedCenter.taken_slots}/{selectedCenter.capacity}

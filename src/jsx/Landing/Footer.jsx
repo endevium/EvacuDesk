@@ -1,10 +1,12 @@
-import '../../css/App.css'
-import facebookIcon from '../../assets/facebook.png'
-import twitterIcon from '../../assets/twitter.png'
-import linkedInIcon from '../../assets/linkedin.png'
-import footerImage from '../../assets/footer-image.png'
+import '../../css/App.css';
+import { useNavigate } from 'react-router-dom';
+import facebookIcon from '../../assets/facebook.png';
+import twitterIcon from '../../assets/twitter.png';
+import linkedInIcon from '../../assets/linkedin.png';
+import footerImage from '../../assets/footer-image.png';
 
 function Footer() {
+    const navigate = useNavigate();
     return(
       <>
         <div className="footer">
@@ -38,15 +40,9 @@ function Footer() {
                   <li>Volunteer</li>
                   <li>Share</li>
                 </ul>
-                <h2>Contact</h2>
-                <ul className="contact-list">
-                  <li><img src={facebookIcon}/></li>
-                  <li><img src={twitterIcon}/></li>
-                  <li><img src={linkedInIcon}/></li>
-                </ul>
               </div>
   
-              <div className="footer-image">
+              <div className="footer-image" onClick={() => navigate("/login")}>
                 <img src={footerImage} alt="footer-image"/>
               </div>
             </div>

@@ -103,7 +103,7 @@ function Login() {
 
                 setTimeout(() => {
                     navigate("/evacuee");
-                }, 2000);
+                }, 1000);
 
             })
             // Get error message
@@ -170,7 +170,7 @@ function Login() {
                 // After successful login, redirect to evacuation center
                 setTimeout(() => {
                     navigate("/evacuation-center");
-                }, 2000);
+                }, 1000);
             })
             // Get error message
             .catch((error) => {
@@ -547,7 +547,7 @@ function StaffLogin({
                         onChange={(e) => setRememberMe(e.target.checked)}
                     />
                     <label htmlFor="rememberMe">Remember Me</label>
-                    <span onClick={() => navigate("/forgot-password")}>Forgot Password?</span>
+                    <span onClick={() => navigate("/staff-forgot-password")}>Forgot Password?</span>
                 </div>
                 <button onClick={handleLoginClick}>Login</button>
             </div>

@@ -17,7 +17,11 @@ function ManageAreas() {
     const [showCreateArea, setShowCreateArea] = useState(false);
     const [loading, setLoading] = useState(false);
     const [areas, setAreas] = useState([]);
-    const [capacity, setCapacity] = useState(5); 
+    const [areaType, setAreaType] = useState("");
+    const [areaName, setAreaName] = useState("");
+    const [tentSize, setTentSize] = useState("");
+    const [capacity, setCapacity] = useState(5);
+
 
     // GET EVACUATION CENTER DETAILS
     const evacuationCenterId = localStorage.getItem("evacuationCenterId"); 
@@ -71,34 +75,59 @@ function ManageAreas() {
     }, []);
 
     const createArea = async () => {
-        clearAllTimeouts()
+        clearAllTimeouts();
         setLoading(true);
+    
         try {
+            if (!areaType) throw new Error("Please select an area type.");
+    
+            const payload = { evacuation_center_id: evacuationCenterId };
+    
+            if (areaType === "Room") {
+                if (!areaName || !capacity) throw new Error("Please enter room name and capacity.");
+                payload.area_type = areaType;
+                payload.area_name = areaName;
+                payload.capacity = capacity;
+            } else if (areaType === "Tent") {
+                if (!tentSize) throw new Error("Please select a tent size.");
+                payload.area_type = areaType;
+                payload.size = tentSize;
+            } else if (areaType === "Zone") {
+                if (!areaName || !capacity) throw new Error("Please select a zone and set capacity.");
+                payload.area_type = areaType;
+                payload.area_name = areaName;
+                payload.capacity = capacity;
+            }
+
+            console.log("Sending payload:", payload);
+    
             const res = await fetch("http://localhost:3000/center-area/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`
                 },
-                body: JSON.stringify({
-                    evacuation_center_id: evacuationCenterId,
-                    capacity: capacity
-                })
-            })
+                body: JSON.stringify(payload)
+            });
+    
             const data = await res.json();
-
+    
             if (!res.ok) {
                 throw new Error(data.error || "Failed to create area");
             }
-            
+    
             setResponseMessage("Area created successfully!");
             setResponseType("success");
             setShowResponse(true);
-
+    
             setCapacity(5);
+            setAreaType("");
+            setAreaName("");
+            setTentSize("");
             setShowCreateArea(false);
-            fetchAreas();
 
+            fetchAreas();
+    
             showTimeout.current = setTimeout(() => {
                 setExitAnim(true);
                 exitTimeout.current = setTimeout(() => {
@@ -106,11 +135,12 @@ function ManageAreas() {
                     setExitAnim(false);
                 }, 400);
             }, 4000);
+    
         } catch (error) {
             setResponseMessage(error.message);
             setResponseType("error");
             setShowResponse(true);
-
+    
             showTimeout.current = setTimeout(() => {
                 setExitAnim(true);
                 exitTimeout.current = setTimeout(() => {
@@ -119,9 +149,10 @@ function ManageAreas() {
                 }, 400);
             }, 4000);
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
+    
 
     const handleShowDetails = (area) => {
         setSelectedArea(area);
@@ -136,20 +167,9 @@ function ManageAreas() {
         setCapacity(5);
     };
 
-    const handleCapacityChange = (e) => {
-        const value = parseInt(e.target.value);
-        if (value >= 1) {
-            setCapacity(value);
-        }
-    };
-
-    const incrementCapacity = () => {
-        setCapacity(prev => prev + 1);
-    };
-
-    const decrementCapacity = () => {
-        setCapacity(prev => prev > 1 ? prev - 1 : 1);
-    };
+    const incrementCapacity = () => setCapacity(prev => prev + 1);
+    const decrementCapacity = () => setCapacity(prev => Math.max(1, prev - 1));
+    const handleCapacityChange = (e) => setCapacity(Number(e.target.value));
 
     // Helper function to get total occupants in area
     const getTotalOccupants = (area) => {
@@ -213,8 +233,8 @@ function ManageAreas() {
                     <table>
                         <thead>
                             <tr>
-                                <th>Area No.</th>
-                                <th>Requests</th>
+                                <th>Area Type</th>
+                                <th>Area Name</th>
                                 <th>Occupants</th>
                                 <th>Capacity</th>                           
                                 <th>Status</th> 
@@ -224,18 +244,18 @@ function ManageAreas() {
                         <tbody>
                             {areas.map((area) => (
                                 <tr key={area._id}>
-                                    <td style={{ textAlign: 'center' }}>{area.area_number}</td>
-                                    <td style={{ textAlign: 'center', width: '60px' }}>
-                                        {getTotalRequests(area)}
-                                    </td>
+                                    <td style={{ textAlign: 'center' }}>{area.size ? `${area.size} ${area.area_type}` : area.area_type}</td>
+                                    <td style={{ textAlign: 'center' }}>{area.area_name}</td>
                                     <td>{getOccupantNames(area)}</td>
                                     <td style={{ textAlign: 'center', width: '80px' }}>
                                         {getTotalOccupants(area)}/{area.capacity}
                                     </td>
                                     <td>
-                                        <span className={`status ${area.status?.toLowerCase()}`}>
-                                            {area.status || "Available"}
-                                        </span>
+                                        <div className={area.status === "Unoccupied" ? 'status-field-unoccupied' : 'status-field-occupied'}>
+                                            <span className={`status ${area.status?.toLowerCase()}`}>
+                                                {area.status ? area.status.toUpperCase() : "AVAILABLE"}
+                                            </span>
+                                        </div>
                                     </td>
                                     <td className='actions-cell'>
                                         <button 
@@ -259,7 +279,7 @@ function ManageAreas() {
                             <img src={close} alt="close" />
                         </div>
                         <div className="details">
-                            <h2>{selectedArea.area_number}</h2>
+                            <h2>{selectedArea.area_name}</h2>
                             
                             {/* Area Information */}
                             <div className="detail-section">
@@ -300,54 +320,137 @@ function ManageAreas() {
             )}
 
             {showCreateArea && (
-                <div className='create-area'>
-                    <div className='create-area-body'>
-                        <div className="close-container">
-                            <button onClick={handleCloseCreateArea}>
-                                <img src={close} alt="close" />
-                            </button>
-                        </div>
+            <div className="create-area">
+                <div className="create-area-body">
+                <div className="close-container">
+                    <button onClick={handleCloseCreateArea}>
+                    <img src={close} alt="close" />
+                    </button>
+                </div>
 
-                        <div className='details'>
-                            <h2>Create Area</h2>
-                            <label>Capacity</label>
-                            <div className='buttons-row'>
-                                <button type="button" onClick={decrementCapacity}>-</button>
-                                <input 
-                                    type="number" 
-                                    value={capacity} 
-                                    onChange={handleCapacityChange}
-                                    min="1"
-                                    style={{
-                                        textAlign: 'center',
-                                        fontSize: '1.2rem',
-                                        border: 'none',
-                                        background: 'transparent',
-                                        width: '60px'
-                                    }}
-                                />
-                                <button type="button" onClick={incrementCapacity}>+</button>
-                            </div>
+                <div className="details">
+                    <h2>Create Area</h2>
 
-                            <div className="buttons">
-                                <button
-                                    type="button"
-                                    className="clear-button"
-                                    onClick={handleCloseCreateArea}
-                                >
-                                    Cancel
-                                </button>
-                                <button 
-                                    type="button" 
-                                    className="submit-button"
-                                    onClick={createArea}
-                                >
-                                    Create
-                                </button>
-                            </div>
+                    <div className="area-creation">
+                    <label htmlFor="areaType">Area Type</label>
+                    <select
+                        id="areaType"
+                        value={areaType}
+                        onChange={(e) => setAreaType(e.target.value)}
+                        required
+                    >
+                        <option value="">Select Area Type</option>
+                        <option value="Room">Room</option>
+                        <option value="Tent">Tent</option>
+                        <option value="Zone">Gym / Zone</option>
+                    </select>
+
+                    {areaType === "Room" && (
+                        <>
+                        <label htmlFor="areaName">Room Name</label>
+                        <input
+                            type="text"
+                            id="areaName"
+                            value={areaName}
+                            onChange={(e) => setAreaName(e.target.value)}
+                            placeholder="Enter room name"
+                            required
+                        />
+
+                        <label>Capacity</label>
+                        <div className="buttons-row">
+                            <button type="button" onClick={decrementCapacity}>-</button>
+                            <input
+                            type="number"
+                            value={capacity}
+                            onChange={handleCapacityChange}
+                            min="1"
+                            style={{
+                                textAlign: "center",
+                                fontSize: "1.2rem",
+                                border: "none",
+                                background: "transparent",
+                                width: "60px",
+                            }}
+                            />
+                            <button type="button" onClick={incrementCapacity}>+</button>
                         </div>
+                        </>
+                    )}
+
+                    {areaType === "Tent" && (
+                        <>
+                        <label htmlFor="tentSize">Tent Size</label>
+                        <select
+                            id="tentSize"
+                            value={tentSize}
+                            onChange={(e) => setTentSize(e.target.value)}
+                            required
+                        >
+                            <option value="">Select Size</option>
+                            <option value="Small">Small</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Large">Large</option>
+                        </select>
+                        </>
+                    )}
+
+                    {areaType === "Zone" && (
+                        <>
+                        <label htmlFor="zoneArea">Zone Area</label>
+                        <select
+                            id="zoneArea"
+                            value={areaName}
+                            onChange={(e) => setAreaName(e.target.value)}
+                            required
+                        >
+                            <option value="">Select Zone</option>
+                            <option value="Bleachers">Bleachers</option>
+                            <option value="Stage">Stage</option>
+                            <option value="Gym Floor">Gym Floor</option>
+                        </select>
+
+                        <label>Capacity</label>
+                        <div className="buttons-row">
+                            <button type="button" onClick={decrementCapacity}>-</button>
+                            <input
+                            type="number"
+                            value={capacity}
+                            onChange={handleCapacityChange}
+                            min="1"
+                            style={{
+                                textAlign: "center",
+                                fontSize: "1.2rem",
+                                border: "none",
+                                background: "transparent",
+                                width: "60px",
+                            }}
+                            />
+                            <button type="button" onClick={incrementCapacity}>+</button>
+                        </div>
+                        </>
+                    )}
+                    </div>
+
+                    <div className="buttons">
+                    <button
+                        type="button"
+                        className="clear-button"
+                        onClick={handleCloseCreateArea}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
+                        className="submit-button"
+                        onClick={createArea}
+                    >
+                        Create
+                    </button>
                     </div>
                 </div>
+                </div>
+            </div>
             )}
         </>
     )

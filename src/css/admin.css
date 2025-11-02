@@ -48,12 +48,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2001;
+    z-index: 2000;
 }
 
 .create-evac-center .create-evac-center-body {
     background: rgba(255, 255, 255);
-    width: 950px;
+    width: 380px;
     height: 600px;
     border: 1px #c0c0c0 solid;
     border-radius: 25px;
@@ -95,7 +95,9 @@
 .create-evac-center .create-evac-center-body .details .input-fields .form-fields {
     width: 100%;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
+    overflow-y: auto;
+    height: 430px;;
     gap: 35px;
 }
 
@@ -103,14 +105,12 @@
     display: flex;
     flex-direction: column;
     gap: 5px;
-    width: 31%;
 }
 
 .create-evac-center .create-evac-center-body .details .input-fields .location-details {
     display: flex;
     flex-direction: column;
     gap: 5px;
-    width: 30%;
 }
 
 .create-evac-center .create-evac-center-body .details .input-fields .extra-details {
@@ -152,8 +152,8 @@
     font-family: Inter;
 }
 
-.create-evac-center .create-evac-center-body .details .input-fields  form [type="date"], input[type="text"], input[type="number"],
-input[type="tel"], input[type="password"] {
+.create-evac-center .create-evac-center-body .details .input-fields form [type="date"], input[type="text"], input[type="number"],
+input[type="tel"] {
     width: 97%;
     height: 32px;
     margin-top: 10px;
@@ -161,9 +161,16 @@ input[type="tel"], input[type="password"] {
     border: 0.5px #acacac solid;
 }
 
+.create-evac-center .create-evac-center-body .details .input-fields form input[type="password"] {
+    width: 96%;
+    height: 32px;
+    margin-top: 10px;
+    border-radius: 10px;
+    border: 0;
+}
 .create-evac-center .create-evac-center-body .details .input-fields select {
-    width: 100%;
-    height: 35px;
+    width: 99%;
+    height: 38px;
     margin-top: 5px;
     margin-bottom: 5px;
     border-radius: 10px;
@@ -240,7 +247,7 @@ input[type="tel"], input[type="password"] {
 }
 
 .create-evac-center .create-evac-center-body .buttons button {
-    width: 150px;
+    width: 250px;
     height: 37px;
     border: 0;
     border-radius: 10px;
@@ -258,6 +265,89 @@ input[type="tel"], input[type="password"] {
     background-color:#224539;
 }
 
+.evacuation-center-info-admin {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.evacuation-center-info-admin .evacuation-center-info-body {
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255);
+    width: 450px;
+    height: 450px;
+    border: 1px #c0c0c0 solid;
+    border-radius: 25px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px;
+    padding: 1rem;
+}
+
+.evacuation-center-info-admin .evacuation-center-info-body .close-container {
+    height: 35px;
+    padding-bottom: 10px;
+}
+
+.evacuation-center-info-admin .evacuation-center-info-body .close-container button {
+    border: 0;
+    background-color: white;
+    cursor: pointer;
+}
+
+.evacuation-center-info-admin .evacuation-center-info-body .close-container img {
+    height: 35px;
+    width: 35px;
+}
+
+.evacuation-center-info-admin .evacuation-center-info-body .info {
+    width: 100%;
+    max-height: 450px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding-left: 5px;
+}
+
+.evacuation-center-info-admin .evacuation-center-info-body h2 {
+    color:#45AD7F;
+}
+
+.evacuation-center-info-admin .evacuation-center-info-body .info .evac-img {
+    width: 97%;
+    height: 240px;
+
+}
+
+.evacuation-center-info-admin .evacuation-center-info-body .info .evac-img img {
+    width: 100%;
+    height: 240px;
+}
+
+.evacuation-center-info-admin .evacuation-center-info-body .info .evac-text {
+    width: 97%;
+    display: flex;
+    flex-direction: column;
+    font-family: Inter;
+}
+
+.evacuation-center-info-admin.evacuation-center-info .evacuation-center-info-body .info .evac-text h2 {
+    color:#45AD7F;
+    font-size: 20px;
+    margin-top: 0;
+}
+
+.evacuation-center-info-admin .evacuation-center-info-body .info .evac-text p {
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-size: 15px;
+}
 
 
 

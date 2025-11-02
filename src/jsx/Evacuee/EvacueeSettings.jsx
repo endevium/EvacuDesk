@@ -2,14 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 
 import '../../css/evacuee-settings.css';
 
-import homeActive from '../../assets/home-active.png'
-import evacuationCenterActive from '../../assets/evacuation-center-active.png'
-import requestActive from '../../assets/request-active.png'
-import announcementsActive from '../../assets/announcements-active.png'
-import notificationsActive from '../../assets/notification-active.png'
 import settingsActive from '../../assets/settings-active.png'
-import logout from '../../assets/logout.png'
-import backButton from '../../assets/back-button.png';
 import check from '../../assets/check.png';
 import error from '../../assets/error.png';
 import userAvatar from '../../assets/profile-placeholder.png';
@@ -18,7 +11,6 @@ import Eyeoff from '../../assets/Eyeoff.png';
 
 
 function EvacueeSettings() {
-    const [isContactEditing, setIsContactEditing] = useState(false);
     const [password, setPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -131,14 +123,6 @@ function EvacueeSettings() {
     
     const handleUploadClick = () => {
         fileInputRef.current.click();
-    };
-    
-
-    const handleDeleteClick = () => {
-        setProfilePicture(userAvatar);
-        fileInputRef.current.value = null;
-
-        handleUpdateProfilePicture(userAvatar);
     };
 
     const handleUpdateProfilePicture = async (file) => {
@@ -488,10 +472,10 @@ function EvacueeSettings() {
 
                     <div className="form-row address-row">
                         <div className="form-field city-field">
-                        <label htmlFor="city">Email Address</label>
+                        <label htmlFor="email">Email Address</label>
                         <input
                             type="text"
-                            id="city"
+                            id="email"
                             value={email}
                             onChange={handleChange}
                             disabled

@@ -43,10 +43,13 @@ function ForgotPassword() {
         setEmail(inputEmail);
 
         try {
-            const res = await fetch("http://localhost:3000/evacuee/forgot-password", {
+            const res = await fetch("http://localhost:3000/auth/request-otp", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email_address: inputEmail })
+                body: JSON.stringify({ 
+                    email_address: inputEmail,
+                    role: "Evacuee" 
+                })
             });
             const data = await res.json();
             setLoading(false);
@@ -58,7 +61,7 @@ function ForgotPassword() {
                 setStep("verify");
             } else {
                 setResponseType("error");
-                setResponseMessage(data.message || "Failed to send OTP.");
+                setResponseMessage(data.error || "Failed to send OTP.");
                 setShowResponse(true);
             }
         } catch (err) {
@@ -88,8 +91,7 @@ function ForgotPassword() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ 
                     email_address: email, 
-                    code: otp,
-                    purpose: "reset",
+                    code: inputOtp,
                     role: "Evacuee"
                 })
             });
@@ -127,10 +129,14 @@ function ForgotPassword() {
         clearAllTimeouts();
 
         try {
-            const res = await fetch("http://localhost:3000/evacuee/reset-password", {
+            const res = await fetch("http://localhost:3000/auth/reset-password", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, otp, password: newPassword })
+                body: JSON.stringify({ 
+                    email_address: email, 
+                    role: "Evacuee", 
+                    newPassword: newPassword 
+                })
             });
             const data = await res.json();
             setLoading(false);
@@ -142,7 +148,7 @@ function ForgotPassword() {
                 setTimeout(() => navigate("/login"), 2000);
             } else {
                 setResponseType("error");
-                setResponseMessage(data.message || "Failed to reset password.");
+                setResponseMessage(data.error || "Failed to reset password.");
                 setShowResponse(true);
             }
         } catch (err) {

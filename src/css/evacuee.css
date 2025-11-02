@@ -177,6 +177,10 @@
     margin-top: 20px;
 }
 
+.graph-text {
+    width: 100%;
+}
+
 .evacuee .evacuee-body .page-content-none .evacuation-centers-root {
     width: 100%;
     display: grid;
@@ -757,7 +761,10 @@
     height: 35px;
     width: 35px;
 }
-
+.request .request-body .create-request {
+    height: 340px;
+    overflow-y: auto;
+}
 .request .request-body .create-request h2 {
     color:#224539;
     margin-top: 0;
@@ -813,7 +820,7 @@
 }
 
 .request .request-body .buttons button {
-    width: 100px;
+    width: 180px;
     height: 37px;
     border: 0;
     border-radius: 10px;
@@ -993,7 +1000,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2000;
+    z-index: 4000;
 }
   
 .spinner {

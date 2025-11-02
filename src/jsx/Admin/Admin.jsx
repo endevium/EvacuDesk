@@ -7,7 +7,7 @@ import AdminHome from './AdminHome';
 import AdminAnnouncements from './AdminAnnouncements';
 import AdminNotifications from './AdminNotifications';
 import CreateEvacuationCenter from './CreateEvacuationCenter';
-
+import AdminInventory from './AdminInventory';
 
 import { useState } from 'react';
 
@@ -19,6 +19,8 @@ function Admin() {
             return <AdminHome />;
         case 'create-evac':
             return <CreateEvacuationCenter />;
+        case 'manage-inventory':
+            return <AdminInventory />;
         case 'announcements':
             return <AdminAnnouncements />;
         case 'notifications':

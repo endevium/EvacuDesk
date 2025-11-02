@@ -6,6 +6,7 @@ import EvacuationCenterHome from './EvacuationCenterHome';
 import ManageEvacuees from './ManageEvacuees';
 import ManageRegistrations from './ManageRegistrations';
 import ManageRequests from './ManageRequests';
+import ManageInventory from './ManageInventory';
 import EvacuationCenterAnnouncements from './EvacuationCenterAnnouncements';
 import EvacuationCenterNotifications from './EvacuationCenterNotifications';
 import EvacuationCenterSettings from './EvacuationCenterSettings';
@@ -26,6 +27,8 @@ function EvacuationCenter() {
             return <ManageRegistrations />
         case 'manage-requests':
             return <ManageRequests />;
+        case 'manage-inventory':
+            return <ManageInventory />;
         case 'announcements':
             return <EvacuationCenterAnnouncements />;
         case 'notifications':

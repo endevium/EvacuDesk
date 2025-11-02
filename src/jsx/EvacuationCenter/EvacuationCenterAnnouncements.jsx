@@ -11,7 +11,7 @@ function EvacuationCenterAnnouncements() {
     const [showAnnouncement, setShowAnnouncement] = useState(false);
     const [bulletins, setBulletins] = useState([]);
     const [selectedBulletin, setSelectedBulletin] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [showCreateAnnouncement, setShowCreateAnnouncement] = useState(false);
     const id = localStorage.getItem("evacuationCenterId");
     const evacuationCenterName = localStorage.getItem("centerName");
@@ -139,7 +139,6 @@ function EvacuationCenterAnnouncements() {
 
     useEffect(() => {
         const fetchBulletins = async () => {
-            setLoading(true);
             try {
                 const res = await fetch(`http://localhost:3000/bulletin/center-name?center_name=${encodeURIComponent(evacuationCenterName)}`, {
                     method: "GET",
@@ -158,9 +157,7 @@ function EvacuationCenterAnnouncements() {
             } catch (error) {
                 console.error("Error fetching bulletins:", error);
                 setBulletins([]);
-            } finally {
-                setLoading(false);
-            }
+            } 
         };
     
         fetchBulletins();
@@ -230,7 +227,15 @@ function EvacuationCenterAnnouncements() {
                         <div className="announcement-text">
                         <h2>{bulletin.title}</h2>
                         <p>{bulletin.evacuation_center_name || "Unknown Author"}</p>
-                        <p>{new Date(bulletin.createdAt).toLocaleString()}</p>
+                        <p>{bulletin.createdAt
+                            ? new Date(bulletin.createdAt).toLocaleString("en-PH", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                            })
+                            : "No date available"}</p>
                         <div className="announcement-button">
                             <button onClick={() => handleShowAnnouncement(bulletin)}>
                             View

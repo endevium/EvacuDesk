@@ -1,5 +1,7 @@
 import '../../css/evacuation-center.css'
 import { useState, useEffect, useRef } from 'react'
+import { jsPDF } from 'jspdf';
+import "jspdf-autotable";
 import Select from "react-select"
 
 import evacuationCenterActive from '../../assets/evacuation-center-active.png'
@@ -23,6 +25,13 @@ function ManageEvacuees() {
     const [responseMessage, setResponseMessage] = useState("");
     const [responseType, setResponseType] = useState("");
     const [exitAnim, setExitAnim] = useState(false);
+
+    const FILTERS = {
+        ALL: 'all',
+        ACTIVE: 'active',
+        ASSIGNED: 'assigned',
+        RETURNED: 'returned',
+    };
 
     const showTimeout = useRef(null);
     const exitTimeout = useRef(null);
@@ -61,7 +70,7 @@ function ManageEvacuees() {
 
                 if (data && Array.isArray(data.occupants)) {
                     const mappedEvacuees = data.occupants.map((occ) => {
-                        const evacuee = occ.evacuee_id;
+                        const evacuee = occ.evacuee;
                         const fullName = `${evacuee.first_name} ${evacuee.last_name}`;
                         const address = `${evacuee.barangay || "N/A"}, ${evacuee.city || "N/A"}, ${evacuee.province || "N/A"}`;
 
@@ -119,7 +128,7 @@ function ManageEvacuees() {
             // Format areas for React Select
             const formattedAreas = data.map(area => ({
                 value: area._id,
-                label: `${area.area_number} (${area.available_space} available of ${area.capacity})`,
+                label: `${area.area_name} (${area.available_space} available of ${area.capacity})`,
                 areaData: area
             }));
             setAreas(formattedAreas);
@@ -133,7 +142,7 @@ function ManageEvacuees() {
             clearAllTimeouts();
 
             const payload = {
-                status: "Left"
+                status: "Returned"
             }
 
             const res = await fetch(`http://localhost:3000/evacuation-center-occupant/status/${evacueeId}`, {
@@ -153,7 +162,7 @@ function ManageEvacuees() {
 
             setEvacuees(prev =>
                 prev.map(e =>
-                    e.id === id ? { ...e, status: "Left" } : e
+                    e.id === evacueeId ? { ...e, status: "Returned" } : e
                 )
             );
       
@@ -170,6 +179,7 @@ function ManageEvacuees() {
                 }, 400);
             }, 3000);
 
+            handleCloseShowConfirmation();
         } catch (error) {
             setResponseMessage(error.message || "Error dismissing evacuee");
             setResponseType("error");
@@ -197,7 +207,7 @@ function ManageEvacuees() {
         clearAllTimeouts();
 
         try {
-            const res = await fetch(`http://localhost:3000/center-area/${selectedArea.value}/add-occupant`, {
+            const res = await fetch(`http://localhost:3000/center-area/add-occupant/${selectedArea.value}`, {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
@@ -205,7 +215,6 @@ function ManageEvacuees() {
                 },
                 body: JSON.stringify({
                     evacuee_id: selectedEvacuee.evacuee_id,
-                    number_of_family_members: selectedEvacuee.familyMembers
                 })
             });
 
@@ -258,7 +267,7 @@ function ManageEvacuees() {
 
     const handleShowAssignArea = (evacuee) => {
         setSelectedEvacuee(evacuee);
-        fetchAreas(); // Refresh available areas
+        fetchAreas();
         setShowAssignArea(true);
     };
 
@@ -277,9 +286,67 @@ function ManageEvacuees() {
     const filteredEvacuees = evacuees.filter(evacuee => {
         if (activeFilter === 'all') return true;
         if (activeFilter === 'active') return evacuee.status === 'Active';
+        if (activeFilter === 'assigned') return evacuee.status === 'Assigned';
+        if (activeFilter === 'returned') return evacuee.status === 'Returned';
         if (activeFilter === 'pickup') return evacuee.status === 'For Pick-up';
         return true;
     });
+
+    const generateEvacueeListReport = () => {
+        if (evacuees.length === 0) {
+            setResponseMessage("No evacuees to generate report.");
+            setResponseType("error");
+            setShowResponse(true);
+            return;
+        }
+    
+        const doc = new jsPDF();
+    
+        doc.setFontSize(18);
+        doc.text("EvacuDesk: Evacuees List", 14, 22);
+    
+        doc.setFontSize(12);
+        doc.text(`Evacuation Center ID: ${evacuationCenterId}`, 14, 30);
+        doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 36);
+    
+        doc.setLineWidth(0.5);
+        doc.line(14, 40, 196, 40);
+    
+        const tableColumn = ["No.", "Name", "Sex", "Age", "Family", "Status", "Assigned Area", "Approval Date"];
+        
+        const tableRows = evacuees.map((evacuee, index) => [
+            index + 1,
+            evacuee.name,
+            evacuee.sex,
+            evacuee.age,
+            evacuee.familyMembers,
+            evacuee.status,
+            evacuee.assigned_area || "N/A",
+            evacuee.approvalDate
+        ]);
+    
+        if (doc.autoTable) {
+            doc.autoTable({
+                startY: 45,
+                head: [tableColumn],
+                body: tableRows,
+                theme: "grid",
+                headStyles: { fillColor: [69, 173, 127] },
+                styles: { fontSize: 10 }
+            });
+        } else {
+            let y = 45;
+            doc.setFontSize(10);
+            doc.text(tableColumn.join(" | "), 14, y);
+            y += 6;
+            tableRows.forEach(row => {
+                doc.text(row.join(" | "), 14, y);
+                y += 6;
+            });
+        }
+    
+        doc.save(`Evacuees_List_${new Date().toISOString().split("T")[0]}.pdf`);
+    };
 
     return(
         <>  
@@ -311,6 +378,21 @@ function ManageEvacuees() {
                 <div className='page-label-text'>
                     <p>Manage Evacuees ({evacuees.filter(e => e.status === 'Active').length})</p>
                 </div>
+                <button className="create-report-button" onClick={generateEvacueeListReport}>
+                    Generate List
+                </button>
+            </div>
+
+            <div className='evacuation-centers-buttons'>
+                {Object.entries(FILTERS).map(([key, value]) => (
+                    <button 
+                        key={value}
+                        className={activeFilter === value ? 'active-filter' : ''} 
+                        onClick={() => setActiveFilter(value)}
+                    >
+                        {key.charAt(0) + key.slice(1).toLowerCase()}
+                    </button>
+                ))}
             </div>
 
             <div className='page-content-manage-evacuees'>
@@ -344,27 +426,43 @@ function ManageEvacuees() {
                                     <td>{evacuee.sex}</td>
                                     <td>{evacuee.age}</td>
                                     <td>{evacuee.familyMembers}</td>
-                                    <td>{evacuee.assigned_area ? "Assigned" : evacuee.status}</td>
+                                    <td>
+                                        {evacuee.assigned_area && evacuee.status !== "Returned" ? (
+                                            <div className="status-field-assigned">
+                                            <span>ASSIGNED</span>
+                                            </div>
+                                        ) : evacuee.status?.trim().toLowerCase() === "active" ? (
+                                            <div className="status-field-active">
+                                            <span>ACTIVE</span>
+                                            </div>
+                                        ) : evacuee.status?.trim().toLowerCase() === "returned" ? (
+                                            <div className="status-field-returned">
+                                            <span>RETURNED</span>
+                                            </div>
+                                        ) : (
+                                            <span>{evacuee.status || "Unavailable"}</span>
+                                        )}
+                                    </td>
                                     <td className='actions-cell'>
                                         <button 
                                             className={
-                                                evacuee.status === "Left" || evacuee.assigned_area
+                                                evacuee.status === "Returned" || evacuee.assigned_area
                                                     ? "disabled-button" 
                                                     : "mark-picked-button"
                                             } 
-                                            disabled={evacuee.status === "Left" || evacuee.assigned_area}
+                                            disabled={evacuee.status === "Returned" || evacuee.assigned_area}
                                             onClick={() => handleShowAssignArea(evacuee)}
                                         >
                                             {evacuee.assigned_area ? "Assigned" : "Assign"}
                                         </button>
 
                                         <button className={
-                                            evacuee.status === "Left"
+                                            evacuee.status === "Returned"
                                                 ? "disabled-button" 
                                                 : "dismiss-button"
                                         } 
                                         onClick={() => handleShowConfirmation(evacuee.id)}
-                                        disabled={evacuee.status === "Left"}
+                                        disabled={evacuee.status === "Returned"}
                                         >
                                             Dismiss
                                         </button>

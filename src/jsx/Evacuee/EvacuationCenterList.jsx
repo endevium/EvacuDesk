@@ -20,6 +20,7 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
     const [centers, setCenters] = useState([]);
     const [recommendedCenters, setRecommendedCenters] = useState([]);
     const [familyMembers, setFamilyMembers] = useState([]);
+    const [selectedPending, setSelectedPending] = useState(null);
     const [areas, setAreas] = useState([]);
     const [showAreas, setShowAreas] = useState(false);
     const [pendingCenters, setPendingCenters] = useState({});
@@ -128,9 +129,25 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
         }
     };
 
+    // Open Pending Evac Modal
+    const handleOpenPendingEvac = (reg) => {
+        const center = pendingCenters[reg.evacuation_center_id];
+        setSelectedPending(reg);                            
+        setSelectedCenter(center);                               
+        setShowPendingEvac(true);
+    };  
+
+    // Close Pending Evac Modal
+    const handleClosePendingEvac = () => {
+        setShowPendingEvac(false);
+        setSelectedCenter(null);
+        setSelectedPending(null);
+    };
+
     const handleCloseEvacInfo = () => {
         setShowEvacInfo(false);
         setSelectedCenter(null);
+        setNeedPickup("");
     };
 
     const handleOpenCurrentEvac = () => {
@@ -142,11 +159,6 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
 
     const handleCloseCurrentEvac = () => {
         setShowCurrentEvac(false);
-        setSelectedCenter(null);
-    };
-
-    const handleClosePendingEvac = () => {
-        setShowPendingEvac(false);
         setSelectedCenter(null);
     };
 
@@ -228,32 +240,32 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
         }
     };
 
-    const handleLeaveEvacuation = async () => {
+    const handleCancelRegistration = async (id) => {
         try {
             const evacueeId = localStorage.getItem("evacueeId");
             const token = localStorage.getItem("evacueeToken");
             if (!evacueeId) throw new Error("Evacuee ID not found.");
 
             const response = await fetch(
-                `http://localhost:3000/evacuation-center-occupant/status/${currentEvac._id}`,
+                `http://localhost:3000/evacuation-registration/delete/${id}`,
                 {
-                    method: "PATCH",
+                    method: "DELETE",
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${token}`,
-                    },
-                    body: JSON.stringify({ status: "Left" }),
+                    }
                 }
             );
 
             const data = await response.json();
-            if (!response.ok) throw new Error(data.error || "Failed to update status");
+            if (!response.ok) throw new Error(data.message || "Failed to cancel registration");
 
-            showResponseMessage("You have successfully left the evacuation center.", "success");
+            showResponseMessage("Registration successfully cancelled", "success");
             
-            showTimeout.current = setTimeout(() => {
-                handleCloseCurrentEvac();
-            }, 4000);
+            handleCloseCurrentEvac();
+            handleClosePendingEvac();
+            setSelectedCenter(null);
+            setSelectedPending(null);
         } catch (error) {
             console.error("Error leaving evacuation:", error);
             showResponseMessage(error.message, "error");
@@ -314,37 +326,39 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
 
         const fetchPending = async () => {
             try {
-                const evacueeId = localStorage.getItem("evacueeId");
-                if (!evacueeId) return;
-        
-                const res = await fetch(`http://localhost:3000/evacuation-registration/pending/evacuee/${evacueeId}`);
-                if (!res.ok) {
-                    setPendingEvacuation([]);
-                    return;
-                }
-        
-                const data = await res.json();
-                setPendingEvacuation(data);
-        
-                const centersMap = {};
-                for (const reg of data) {
-                    if (!reg.evacuation_center_id) continue;
-                    try {
-                        const centerRes = await fetch(`http://localhost:3000/evacuation-center/${reg.evacuation_center_id}`);
-                        if (centerRes.ok) {
-                            const center = await centerRes.json();
-                            centersMap[reg.evacuation_center_id] = center;
-                        }
-                    } catch (err) {
-                        console.warn(`Failed to fetch center ${reg.evacuation_center_id}:`, err);
-                    }
-                }
-                setPendingCenters(centersMap);
-            } catch (error) {
-                console.error("Error fetching pending:", error);
+              const evacueeId = localStorage.getItem("evacueeId");
+              if (!evacueeId) return;
+          
+              const res = await fetch(`http://localhost:3000/evacuation-registration/pending/evacuee/${evacueeId}`);
+              if (!res.ok) {
                 setPendingEvacuation([]);
+                return;
+              }
+          
+              const data = await res.json();
+              setPendingEvacuation(data);
+          
+              const centersMap = {};
+              for (const reg of data) {
+                if (!reg.evacuation_center_id) continue;
+                try {
+                  const centerRes = await fetch(`http://localhost:3000/evacuation-center/${reg.evacuation_center_id}`);
+                  if (centerRes.ok) {
+                    const center = await centerRes.json();
+                    centersMap[reg.evacuation_center_id] = center;
+                  }
+                } catch (err) {
+                  console.warn(`Failed to fetch center ${reg.evacuation_center_id}:`, err);
+                }
+              }
+              setPendingCenters(centersMap);
+          
+            } catch (error) {
+              console.error("Error fetching pending:", error);
+              setPendingEvacuation([]);
             }
-        };
+          };          
+          
 
         const fetchAll = () => {
             fetchCenters();
@@ -354,7 +368,7 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
     
         fetchAll();
     
-        const interval = setInterval(fetchAll, 15000);
+        const interval = setInterval(fetchAll, 5000);
         return () => clearInterval(interval);
     }, []);
 
@@ -474,38 +488,43 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
 
     const renderPendingRegistrations = () => (
         <div>
-            <h2>Pending Registrations</h2>
-            <div className='current-center-root'>
-                {pendingEvac.length > 0 ? (
-                    pendingEvac.map(reg => {
-                        const center = pendingCenters[reg.evacuation_center_id];
-                        if (!center) return null;
-                        return (
-                            <div className='evacuation-center-card' key={reg._id}>
-                                <div className='evacuation-center-image'>
-                                    <img 
-                                        src={getImageUrl(center)} 
-                                        alt='Evac center' 
-                                        onError={(e) => { e.target.src = evacCenter; }}
-                                    />
-                                </div>
-                                <div className='evacuation-center-details'>
-                                    <h2>{center.name}</h2>
-                                    <p>{center.street}, {center.barangay}, {center.city}, {center.province}</p>
-                                </div>
-                                <br />
-                                <div className='view-button'>
-                                    <button disabled>Pending</button>
-                                </div>
-                            </div>
-                        );
-                    })
-                ) : (
-                    <p className='no-current-evac'>You currently do not have any pending registrations.</p>
-                )}
-            </div>
+          <h2>Pending Registrations</h2>
+          <div className='current-center-root'>
+            {pendingEvac.length > 0 ? (
+              pendingEvac.map(reg => {
+                const center = pendingCenters[reg.evacuation_center_id]; // ✅ use pendingCenters map
+                if (!center) return null;
+                return (
+                  <div className='evacuation-center-card' key={reg._id}>
+                    <div className='evacuation-center-image'>
+                      <img 
+                        src={getImageUrl(center)} 
+                        alt='Evac center' 
+                        onError={(e) => { e.target.src = evacCenter; }}
+                      />
+                    </div>
+                    <div className='evacuation-center-details'>
+                      <h2>{center.name}</h2>
+                      <p>{center.street}, {center.barangay}, {center.city}, {center.province}</p>
+                      <p>Status: Pending</p>
+                    </div>
+                    <br />
+                    <div className='view-button'>
+                      <button onClick={() => handleOpenPendingEvac(reg)}>View</button>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <p className='no-current-evac'>
+                You currently do not have any pending registrations.
+              </p>
+            )}
+          </div>
         </div>
     );
+      
+      
 
     const renderAvailableCenters = () => (
         <div>
@@ -631,6 +650,7 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
                             type="radio"
                             name="needPickup"
                             value="Yes"
+                            checked={needPickup === "Yes"}
                             onChange={() => setNeedPickup("Yes")}
                         />
                         Yes
@@ -640,6 +660,7 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
                             type="radio"
                             name="needPickup"
                             value="No"
+                            checked={needPickup === "No"}
                             onChange={() => setNeedPickup("No")}
                         />
                         No
@@ -657,6 +678,44 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
             </div>
         </>
     );
+
+    const renderPendingEvacModal = () => renderCenterModal(showPendingEvac, handleClosePendingEvac,
+        <>
+            <div className='info'>
+                <div className='evac-img'>
+                    <img 
+                        src={getImageUrl(selectedCenter)} 
+                        alt={selectedCenter?.name || 'Evacuation Center'} 
+                        onError={(e) => e.target.src = evacCenter}
+                    />
+                </div>
+                <div className='evac-text'>
+                    <h2>{selectedCenter?.name}</h2>
+                    <p>Address: {selectedCenter?.street}, {selectedCenter?.barangay}, {selectedCenter?.city}, {selectedCenter?.province}</p>
+                    <p>Contact No.: {selectedCenter?.staff_contact_number}</p>
+                    
+                    {selectedPending && (
+                        <>
+                            <p>Registration Date: {new Date(selectedPending.createdAt).toLocaleDateString()}</p>
+                            <p>Number of Family Members: {selectedPending.number_of_family_members}</p>
+                            <p>Infants: {selectedPending.infants}</p>
+                            <p>Children: {selectedPending.childrens}</p>
+                            <p>Teens: {selectedPending.teens}</p>
+                            <p>Adults: {selectedPending.adults}</p>
+                            <p>Seniors: {selectedPending.seniors}</p>
+                            <p>PWD: {selectedPending.pwd}</p>
+                            <p>Need Pickup: {selectedPending.for_pickup}</p>
+                        </>
+                    )}
+                </div>
+            </div>
+    
+            <div className='buttons'>
+                <button className='cancel-button' onClick={handleClosePendingEvac}>Close</button>
+                <button className='close-button' onClick={() => handleCancelRegistration(selectedPending._id)}>Cancel</button>
+            </div>
+        </>
+    );    
 
     const renderCurrentEvacModal = () => renderCenterModal(showCurrentEvac, handleCloseCurrentEvac,
         <>
@@ -685,7 +744,7 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
                             <p>Adults: {currentEvac.adults}</p>
                             <p>Seniors: {currentEvac.seniors}</p>
                             <p>PWD: {currentEvac.pwd}</p>
-                            <p>Assigned Area: {currentEvac.assigned_area}</p>
+                            <p>Assigned Area: {currentEvac.assigned_area?.area_name || "N/A"}</p>
                         </>
                     )}
                     
@@ -836,6 +895,8 @@ function EvacuationCenterList({ currentEvac, currentCenter }) {
             {renderCurrentEvacModal()}
             {renderAddFamilyModal()}
             {renderViewAreasModel()}
+            {renderPendingEvacModal()}
+
         </>
     );
 }

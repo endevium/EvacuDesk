@@ -13,7 +13,7 @@
     padding: 25px;
     display: flex;
     flex-direction: column;
-    height: 620px;
+    height: 570px;
     overflow-y: auto;
 }
 
@@ -76,7 +76,6 @@
     border: 0;
     font-size: 13px;
     margin-left: auto;
-    padding-right: 1.2%;
     border-radius: 15px;
     width: 150px;
     height:45px;
@@ -118,6 +117,7 @@
     display: flex;
     flex-direction: row;
     margin-left: auto;
+    margin-right: 105px;
     gap: 15px;
 }
 
@@ -129,7 +129,7 @@
 
 .ec .ec-body .page-content {
     background-color: #f7f7f7;
-    width: 93%;
+    width: 81%;
     height: 840px;
     border-radius: 20px;
     margin-top: 15px;
@@ -233,11 +233,7 @@
     white-space: nowrap;
 }
 
-.page-content-manage-evacuees .evacuees-table th:nth-child(8),
-.page-content-manage-evacuees .evacuees-table td:nth-child(8) {
-    width: 94.5%;
-    white-space: nowrap;
-}
+
 
 .page-content-manage-evacuees .evacuees-table .actions-cell {
     display: flex;
@@ -708,7 +704,7 @@
 /* MANAGE REQUESTS */
 
 .ec .ec-body-root .ec-body .page-content-manage-requests {
-    width: 95%;
+    width: 85%;
     height: 460px;
     border-radius: 20px;
     padding: 5px;

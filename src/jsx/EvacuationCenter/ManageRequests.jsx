@@ -30,6 +30,14 @@ function ManageRequests() {
         }
     });
 
+    const [foodPacks, setFoodPacks] = useState(0);
+    const [waterPacks, setWaterPacks] = useState(0);
+    const [hygienePacks, setHygienePacks] = useState(0);
+    const [medicinePacks, setMedicinePacks] = useState(0);
+    const [clothingPacks, setClothingPacks] = useState(0);
+    const [beddingPacks, setBeddingPacks] = useState(0);
+    const [infantPacks, setInfantPacks] = useState(0);
+    
     const showTimeout = useRef(null);
     const exitTimeout = useRef(null);
 
@@ -83,6 +91,39 @@ function ManageRequests() {
           }));
         }
     };
+
+    useEffect(() => {
+        const fetchStocks = async () => {
+            try {
+                const res = await fetch(
+                    `http://localhost:3000/stock/${evacuationCenterId}`,
+                    {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+
+                const data = await res.json();
+                
+                setFoodPacks(data.stocks.FoodPack);
+                setWaterPacks(data.stocks.WaterPack);
+                setHygienePacks(data.stocks.HygienePack);
+                setMedicinePacks(data.stocks.MedicinePack);
+                setClothingPacks(data.stocks.ClothingPack);
+                setBeddingPacks(data.stocks.BeddingPack);
+                setInfantPacks(data.stocks.InfantPack);
+            } catch (err) {
+                console.error("Error fetching dashboard data:", err);
+            }
+        };
+
+        fetchStocks();
+        const interval = setInterval(fetchStocks, 5000);
+        return () => clearInterval(interval);
+    }, [evacuationCenterId]);
 
     useEffect(() => {
         const fetchDistributions = async () => {
@@ -190,7 +231,7 @@ function ManageRequests() {
             const data = await res.json();
 
             if (!res.ok) {
-                throw new Error(data.error || "Failed to distribute");
+                throw new Error(data.message || "Failed to distribute");
             }
       
             setResponseMessage("Distributed successfully!");
@@ -333,8 +374,8 @@ function ManageRequests() {
                             <input
                                 type="number"
                                 name="FoodPack"
-                                placeholder="0"
-                                min="0"
+                                placeholder={`Remaining Stock: ${foodPacks}`}
+                                min="1"
                                 value={newDistribution.stocks.FoodPack}
                                 onChange={handleInputChange}
                                 required
@@ -344,8 +385,8 @@ function ManageRequests() {
                             <input
                                 type="number"
                                 name="WaterPack"
-                                placeholder="0"
-                                min="0"
+                                placeholder={`Remaining Stock: ${waterPacks}`}
+                                min="1"
                                 value={newDistribution.stocks.WaterPack}
                                 onChange={handleInputChange}
                                 required
@@ -355,8 +396,8 @@ function ManageRequests() {
                             <input
                                 type="number"
                                 name="HygienePack"
-                                placeholder="0"
-                                min="0"
+                                placeholder={`Remaining Stock: ${hygienePacks}`}
+                                min="1"
                                 value={newDistribution.stocks.HygienePack}
                                 onChange={handleInputChange}
                                 required
@@ -366,8 +407,8 @@ function ManageRequests() {
                             <input
                                 type="number"
                                 name="MedicinePack"
-                                placeholder="0"
-                                min="0"
+                                placeholder={`Remaining Stock: ${medicinePacks}`}
+                                min="1"
                                 value={newDistribution.stocks.MedicinePack}
                                 onChange={handleInputChange}
                                 required
@@ -377,8 +418,8 @@ function ManageRequests() {
                             <input
                                 type="number"
                                 name="ClothingPack"
-                                placeholder="0"
-                                min="0"
+                                placeholder={`Remaining Stock: ${clothingPacks}`}
+                                min="1"
                                 value={newDistribution.stocks.ClothingPack}
                                 onChange={handleInputChange}
                                 required
@@ -388,8 +429,8 @@ function ManageRequests() {
                             <input
                                 type="number"
                                 name="BeddingPack"
-                                placeholder="0"
-                                min="0"
+                                placeholder={`Remaining Stock: ${beddingPacks}`}
+                                min="1"
                                 value={newDistribution.stocks.BeddingPack}
                                 onChange={handleInputChange}
                                 required
@@ -399,8 +440,8 @@ function ManageRequests() {
                             <input
                                 type="number"
                                 name="InfantPack"
-                                placeholder="0"
-                                min="0"
+                                placeholder={`Remaining Stock: ${infantPacks}`}
+                                min="1"
                                 value={newDistribution.stocks.InfantPack}
                                 onChange={handleInputChange}
                                 required

@@ -117,9 +117,11 @@ function EvacueeHome() {
                 <div className='page-label-text'>
                     <p>Home</p>
                 </div>
-                <button className="request-button" onClick={handleGenerateReport}>
-                    Generate Report
-                </button>
+                <div className='page-buttons'>
+                    <button className="request-button" onClick={handleGenerateReport}>
+                        Generate Report
+                    </button>
+                </div>    
             </div>
             <div className='page-content'>
                 <h2>General Overview</h2>

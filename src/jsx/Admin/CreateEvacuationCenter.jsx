@@ -1,5 +1,6 @@
 import '../../css/admin.css';
 import { useEffect, useState, useRef} from 'react';
+import { jsPDF } from 'jspdf';
 
 import evacuationCenterActive from '../../assets/evacuation-center-active.png';
 import evacCenter from '../../assets/evac-center-placeholder.png';
@@ -194,6 +195,110 @@ function CreateEvacuationCenter() {
         setShowEvacCenter(true);
     }
     const handleCloseSelectedCenter = () => setShowEvacCenter(false);
+
+    const generateEvacueeListReport = async (evacuationCenterId) => {
+        try {
+            const token = localStorage.getItem("adminToken");
+        
+            // Fetch evacuees from backend
+            const res = await fetch(`http://localhost:3000/evacuation-center-occupant/center/${evacuationCenterId}`, {
+                method: "GET",
+                headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+                },
+            });
+        
+            if (!res.ok) throw new Error("Failed to fetch evacuees");
+            const data = await res.json();
+            const evacuees = data?.occupants || [];
+        
+            if (evacuees.length === 0) {
+                setResponseMessage("No evacuees to generate report.");
+                setResponseType("error");
+                setShowResponse(true);
+
+                showTimeout.current = setTimeout(() => {
+                    setExitAnim(true);
+                    exitTimeout.current = setTimeout(() => {
+                        setShowResponse(false);
+                        setExitAnim(false);
+                    }, 400);
+                }, 4000);
+                return;
+            }
+        
+            const doc = new jsPDF();
+        
+            doc.setFontSize(18);
+            doc.text("EvacuDesk: Evacuees List", 14, 22);
+        
+            doc.setFontSize(12);
+            doc.text(`Evacuation Center: ${selectedCenter.name}`, 14, 30);
+            doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 36);
+        
+            doc.setLineWidth(0.5);
+            doc.line(14, 40, 196, 40);
+        
+            const tableColumn = [
+                "No.", 
+                "Name", 
+                "Sex", 
+                "Age", 
+                "Family", 
+                "Status", 
+                "Assigned Area", 
+                "Approval Date"
+            ];
+        
+            const tableRows = evacuees.map((occ, index) => {
+                const evacuee = occ.evacuee || {};
+                const fullName = `${evacuee.first_name || ""} ${evacuee.last_name || ""}`;
+                const age = evacuee.birthdate
+                ? Math.floor((new Date() - new Date(evacuee.birthdate)) / (365.25 * 24 * 60 * 60 * 1000))
+                : "N/A";
+                return [
+                index + 1,
+                fullName,
+                evacuee.sex || "N/A",
+                age,
+                occ.number_of_family_members || 0,
+                occ.status || "N/A",
+                occ.assigned_area || "N/A",
+                new Date(occ.date_joined).toISOString().split("T")[0],
+                ];
+            });
+        
+            // Draw table
+            if (doc.autoTable) {
+                doc.autoTable({
+                startY: 45,
+                head: [tableColumn],
+                body: tableRows,
+                theme: "grid",
+                headStyles: { fillColor: [69, 173, 127] },
+                styles: { fontSize: 10 },
+                });
+            } else {
+                let y = 45;
+                doc.setFontSize(10);
+                doc.text(tableColumn.join(" | "), 14, y);
+                y += 6;
+                tableRows.forEach(row => {
+                doc.text(row.join(" | "), 14, y);
+                y += 6;
+                });
+            }
+        
+            doc.save(`Evacuees_List_${selectedCenter.name}_${new Date().toISOString().split("T")[0]}.pdf`);
+            } catch (error) {
+            console.error("Error generating evacuee list report:", error);
+            setResponseMessage(error.message);
+            setResponseType("error");
+            setShowResponse(true);
+            }
+    };
+      
 
     return(
         <>  
@@ -502,6 +607,19 @@ function CreateEvacuationCenter() {
                                 <p>Contact No.: {selectedCenter.staff_contact_number}</p>
                                 <p>
                                     Capacity: {selectedCenter.taken_slots}/{selectedCenter.capacity}
+                                </p>
+                                <p onClick={() => generateEvacueeListReport(selectedCenter._id)}>
+                                    Evacuee List:{" "}
+                                    <a
+                                        onClick={() => generateEvacueeListReport(selectedCenter._id)}
+                                        style={{ 
+                                        color: "#007bff", 
+                                        textDecoration: "underline", 
+                                        cursor: "pointer" 
+                                        }}
+                                    >
+                                        Click to Download
+                                    </a>
                                 </p>
                             </div>
                         </div>

@@ -13,7 +13,7 @@
     padding: 25px;
     display: flex;
     flex-direction: column;
-    height: 620px;
+    height: 570px;
     overflow-y: auto;
 }
 
@@ -36,6 +36,14 @@
     margin-right: 10px;
 }
 
+.evacuee .evacuee-body .page-label .page-buttons {
+    display: flex;
+    flex-direction: row;
+    margin-left: auto;
+    margin-right: 105px;
+    gap: 15px;
+}
+
 .evacuee .evacuee-body .page-label .page-icon img {
     width: 25px;
     height: 45px;
@@ -51,7 +59,7 @@
 
 .evacuee .evacuee-body .page-content {
     background-color: #f7f7f7;
-    width: 93%;
+    width: 81%;
     height: 500px;
     border-radius: 20px;
     margin-top: 15px;
@@ -461,6 +469,11 @@
     background-color: white;
     border: 1px #224539 solid;
     color:#224539;
+}
+
+.evacuation-center-info .evacuation-center-info-body .buttons .close-button {
+    background-color:#224539;
+    color:white;
 }
 
 .evacuation-center-info .evacuation-center-info-body .buttons .register-button {
@@ -1029,8 +1042,8 @@
 
 /* EVACUEE ANNOUNCEMENTS */
 .page-content-announcements {
-    width: 98%;
-    height: 510px;
+    width: 90%;
+    height: 450px;
     border-radius: 20px;
     padding: 5px;
     margin-top: 10px;
@@ -1148,6 +1161,22 @@
 .announcement-info .announcement-info-body .close-container img {
     height: 40px;
     width: 40px;
+}
+
+.announcement-info .announcement-info-body .close-container{
+    height: 35px;
+    padding-bottom: 5px;
+}
+
+.announcement-info .announcement-info-body .close-container button {
+    border: 0;
+    background-color: white;
+    cursor: pointer;
+}
+
+.announcement-info .announcement-info-body .close-container img {
+    height: 35px;
+    width: 35px;
 }
 
 .announcement-info .announcement-info-body .announcement-image {

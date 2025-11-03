@@ -75,6 +75,8 @@ function EvacuationCenterSettings() {
         };
 
         fetchEvacuationCenterData();
+        const interval = setInterval(fetchEvacuationCenterData, 5000);
+        return () => clearInterval(interval);
     }, []);
 
     const handleChange = (e) => {

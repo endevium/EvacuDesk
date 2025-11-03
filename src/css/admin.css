@@ -53,7 +53,7 @@
 
 .create-evac-center .create-evac-center-body {
     background: rgba(255, 255, 255);
-    width: 380px;
+    width: 410px;
     height: 600px;
     border: 1px #c0c0c0 solid;
     border-radius: 25px;
@@ -441,11 +441,13 @@ input[type="tel"] {
 
 
 .inventory-requests {
+    width: 98%;
     height: 250px;
     overflow-y: auto;
 }
 
 .stock-requests {
+    width: 98%;
     height: 250px;
     overflow-y: auto;
 }

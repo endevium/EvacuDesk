@@ -22,6 +22,7 @@ function EvacueeSettings() {
 
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
+    const [gender, setGender] = useState("");
     const [email, setEmail] = useState("");
     const [phoneNumber, setPhoneNumber] = useState("");
     const [streetNumber, setStreetNumber] = useState("");
@@ -69,6 +70,7 @@ function EvacueeSettings() {
                 const data = await response.json();
                 setFirstName(data.first_name);
                 setLastName(data.last_name);
+                setGender(data.sex);
                 setEmail(data.email_address);
                 setPhoneNumber(data.phone_number);
                 setStreetNumber(data.street_number);
@@ -86,6 +88,8 @@ function EvacueeSettings() {
         };
 
         fetchEvacueeData();
+        const interval = setInterval(fetchEvacueeData, 5000);
+        return () => clearInterval(interval);
     }, []);
 
     const handleChange = (e) => {
@@ -420,7 +424,7 @@ function EvacueeSettings() {
                             <img src={profilePicture} alt="User Avatar" />
                             <div className="profile-details">
                             <h4>{`${firstName} ${lastName}`}</h4>
-                            <p>Male</p>
+                            <p>{gender}</p>
                             <div className="profile-actions">
                                 <button type="button" className="upload-btn" onClick={handleUploadClick}>
                                 Upload

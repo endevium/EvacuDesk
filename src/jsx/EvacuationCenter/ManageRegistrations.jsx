@@ -32,7 +32,6 @@ function ManageRegistrations() {
         ALL: 'all',
         PICKUP: 'pickup',
         PENDING: 'pending',
-        REJECTED: 'declined',
     };
 
     const showTimeout = useRef(null);
@@ -278,11 +277,14 @@ function ManageRegistrations() {
         }
     }
 
-    const filteredEvacuees = evacuees.filter(evacuee => {
+    const filteredEvacuees = evacuees
+    .filter(evacuee => evacuee.status?.toLowerCase() !== "rejected")
+    .filter(evacuee => {
         if (activeFilter === 'all') return true;
-        if (activeFilter === 'pickup') return evacuee.for_pickup === 'Yes' && evacuee.pickup_status == 'Awaiting Pickup' && evacuee.status !== 'Rejected';
-        if (activeFilter === 'pending') return evacuee.status === 'Pending';
-        if (activeFilter === 'declined') return evacuee.status === 'Rejected';
+        if (activeFilter === 'pickup')
+        return evacuee.for_pickup === 'Yes' && evacuee.pickup_status === 'Awaiting Pickup';
+        if (activeFilter === 'pending')
+        return evacuee.status === 'Pending';
         return true;
     });
 

@@ -51,7 +51,8 @@ function AdminNotifications() {
                             <div key={notification._id}className='notification-card'>
                                 <div className='notification-text'>
                                     <h2>{notification.title}</h2>
-                                    <p>{notification.body}</p>
+                                    <p>{new Date(notification.createdAt).toLocaleString()}</p>
+                                    <p> {notification.body}</p>
                                 </div>
                             </div>
                         ))

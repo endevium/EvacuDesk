@@ -14,6 +14,7 @@ import waterPacks from '../../assets/water-packs.png'
 import hygienePacks from '../../assets/hygiene-packs.png'
 import medicinePacks from '../../assets/medicine-packs.png'
 import clothingPacks from '../../assets/clothing-packs.png'
+import beddingPacks from '../../assets/bedding.png'
 import infantPacks from '../../assets/infant-packs.png'
 
 
@@ -110,9 +111,11 @@ function EvacuationCenterHome() {
                 <div className='page-label-text'>
                     <p>Home</p>
                 </div>
-                <button className="create-report-button" onClick={handleGenerateReport}>
-                    Generate Report
-                </button>
+                <div className='page-buttons'>
+                    <button className="create-report-button" onClick={handleGenerateReport}>
+                        Generate Report
+                    </button>
+                </div>        
             </div>
             <div className='page-content'>
                 <h2>Available Stocks</h2>
@@ -160,7 +163,7 @@ function EvacuationCenterHome() {
                     <div className="dashboard-mini-card">
                         <div className="dashboard-mini-icon">
                         <h2>Bedding Packs</h2>
-                        <img src={clothingPacks} />
+                        <img src={beddingPacks} />
                         </div>
                         <p>{dashboardData?.Stocks?.BeddingPack ?? 0}</p>
                     </div>

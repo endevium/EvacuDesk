@@ -103,7 +103,12 @@ function AdminInventory() {
                 );
 
                 const data = await response.json();
-                setStockRequests(Array.isArray(data) ? data : []);
+
+                setStockRequests(
+                    Array.isArray(data)
+                        ? data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // 🔹 Sort latest first
+                        : []
+                );
             } catch (error) {
                 console.error("Error fetching distributions:", error);
             }
@@ -154,6 +159,23 @@ function AdminInventory() {
         const totalStocks = Object.values(stocks).reduce((sum, val) => sum + (isNaN(val) ? 0 : val), 0);
         if (totalStocks <= 0) {
             setResponseMessage("Please enter at least one stock quantity.");
+            setResponseType("error");
+            setShowResponse(true);
+
+            showTimeout.current = setTimeout(() => {
+                setExitAnim(true);
+                exitTimeout.current = setTimeout(() => {
+                    setShowResponse(false);
+                    setExitAnim(false);
+                }, 400);
+            }, 3000);
+
+            return;
+        }
+
+        const exceedsLimit = Object.entries(stocks).find(([key, val]) => val > 999999);
+        if (exceedsLimit) {
+            setResponseMessage(`Quantity cannot exceed 999,999.`);
             setResponseType("error");
             setShowResponse(true);
 
@@ -577,6 +599,7 @@ function AdminInventory() {
                                 name="FoodPack"
                                 placeholder="0"
                                 min="0"
+                                max="999999"
                                 value={newStockRequest.FoodPack}
                                 onChange={handleInputChange}
                                 required
@@ -588,6 +611,7 @@ function AdminInventory() {
                                 name="WaterPack"
                                 placeholder="0"
                                 min="0"
+                                max="999999"
                                 value={newStockRequest.WaterPack}
                                 onChange={handleInputChange}
                                 required
@@ -599,6 +623,7 @@ function AdminInventory() {
                                 name="HygienePack"
                                 placeholder="0"
                                 min="0"
+                                max="999999"
                                 value={newStockRequest.HygienePack}
                                 onChange={handleInputChange}
                                 required
@@ -610,6 +635,7 @@ function AdminInventory() {
                                 name="MedicinePack"
                                 placeholder="0"
                                 min="0"
+                                max="999999"
                                 value={newStockRequest.MedicinePack}
                                 onChange={handleInputChange}
                                 required
@@ -621,6 +647,7 @@ function AdminInventory() {
                                 name="ClothingPack"
                                 placeholder="0"
                                 min="0"
+                                max="999999"
                                 value={newStockRequest.ClothingPack}
                                 onChange={handleInputChange}
                                 required
@@ -632,6 +659,7 @@ function AdminInventory() {
                                 name="BeddingPack"
                                 placeholder="0"
                                 min="0"
+                                max="999999"
                                 value={newStockRequest.BeddingPack}
                                 onChange={handleInputChange}
                                 required
@@ -643,6 +671,7 @@ function AdminInventory() {
                                 name="InfantPack"
                                 placeholder="0"
                                 min="0"
+                                max="999999"
                                 value={newStockRequest.InfantPack}
                                 onChange={handleInputChange}
                                 required

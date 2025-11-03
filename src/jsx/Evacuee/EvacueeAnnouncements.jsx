@@ -1,3 +1,4 @@
+import '../../css/evacuee.css'
 import { useEffect, useState, useRef } from 'react';
 import announcementsActive from '../../assets/announcements-active.png';
 import evacCenter from '../../assets/evac-center-placeholder.png';
@@ -13,6 +14,7 @@ function EvacueeAnnouncements({
     const [bulletins, setBulletins] = useState([]);
     const [selectedBulletin, setSelectedBulletin] = useState(null);
     const [loading, setLoading] = useState(true);
+    const token = localStorage.getItem("evacueeToken");
   
     useEffect(() => {
       // Use the same logic as EvacueeRequest to get evacuation center ID
@@ -33,7 +35,7 @@ function EvacueeAnnouncements({
         setLoading(true);
         try {
           // Use the center ID instead of center name in the API call
-          const res = await fetch(`http://localhost:3000/bulletin/center-name?center_name=${evacuationCenter}`, {
+          const res = await fetch(`http://localhost:3000/bulletin/center/${evacuationCenter}`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`
@@ -44,7 +46,7 @@ function EvacueeAnnouncements({
             setBulletins([]);
             return;
           }
-  
+          
           const data = await res.json();
           setBulletins(data);
         } catch (error) {
@@ -57,7 +59,7 @@ function EvacueeAnnouncements({
   
       fetchBulletins();
 
-      const interval = setInterval(fetchBulletins, 30000);
+      const interval = setInterval(fetchBulletins, 5000);
       return () => clearInterval(interval);
     }, [evacuationCenter]);
 

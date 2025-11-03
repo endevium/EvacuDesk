@@ -11,6 +11,7 @@ import waterPacks from '../../assets/water-packs.png'
 import hygienePacks from '../../assets/hygiene-packs.png'
 import medicinePacks from '../../assets/medicine-packs.png'
 import clothingPacks from '../../assets/clothing-packs.png'
+import beddingPacks from '../../assets/bedding.png'
 import infantPacks from '../../assets/infant-packs.png'
 
 function ManageInventory() {
@@ -137,6 +138,24 @@ function ManageInventory() {
             InfantPack: Number(newStockRequest.InfantPack),
         };
 
+        const MAX_STOCK_LIMIT = 1000;
+        for (const [key, value] of Object.entries(requestPayload)) {
+            if (key !== "evacuation_center_id" && value > MAX_STOCK_LIMIT) {
+                setResponseMessage(`${key.replace(/Pack/, " Pack")} exceeds maximum allowed quantity (${MAX_STOCK_LIMIT}).`);
+                setResponseType("error");
+                setShowResponse(true);
+
+                showTimeout.current = setTimeout(() => {
+                    setExitAnim(true);
+                    exitTimeout.current = setTimeout(() => {
+                        setShowResponse(false);
+                        setExitAnim(false);
+                    }, 400);
+                }, 3000);
+                return;
+            }
+        }
+
         try {
             const res = await fetch(`http://localhost:3000/stock-request/`, {
                 method: "POST",
@@ -261,7 +280,7 @@ function ManageInventory() {
                     <div className="dashboard-mini-card">
                         <div className="dashboard-mini-icon">
                         <h2>Bedding Packs</h2>
-                        <img src={clothingPacks} />
+                        <img src={beddingPacks} />
                         </div>
                         <p>{stocks?.stocks?.BeddingPack ?? 0}</p>
                     </div>

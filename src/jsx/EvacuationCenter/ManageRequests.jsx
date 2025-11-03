@@ -140,7 +140,11 @@ function ManageRequests() {
                 );
 
                 const data = await response.json();
-                setDistributions(Array.isArray(data) ? data : []);
+                const sortedData = Array.isArray(data)
+                ? data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                : [];
+
+                setDistributions(sortedData);
             } catch (error) {
                 console.error("Error fetching distributions:", error);
             }

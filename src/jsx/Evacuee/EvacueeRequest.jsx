@@ -38,18 +38,26 @@ function EvacueeRequest() {
                         },
                     }
                 );
-
+    
                 const data = await response.json();
-                setDistributions(Array.isArray(data) ? data : []);
+    
+                if (Array.isArray(data)) {
+                    const sortedData = [...data].sort(
+                        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+                    );
+                    setDistributions(sortedData);
+                } else {
+                    setDistributions([]);
+                }
             } catch (error) {
                 console.error("Error fetching distributions:", error);
             }
         };
-
+    
         fetchDistributions();
         const interval = setInterval(fetchDistributions, 5000);
         return () => clearInterval(interval);
-    }, [evacueeId, token]);
+    }, [evacueeId, token]);    
 
     return(
         <>  
@@ -87,21 +95,21 @@ function EvacueeRequest() {
                                 </td>
                                 </tr>
                             ) : (
-                                distributions.map((distribution, index) => (
-                                <tr key={distribution._id} className="summary-row">
+                                [...distributions]
+                                .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                                .map((distribution, index) => (
+                                    <tr key={distribution._id} className="summary-row">
                                     <td style={{ textAlign: "center" }}>{index + 1}</td>
                                     <td>{new Date(distribution.createdAt).toLocaleDateString()}</td>
-                                    <td>
-                                    {distribution.evacuation_center_id?.name}
-                                    </td>
-                                    <td>{distribution.stocks?.FoodPack}</td>
-                                    <td>{distribution.stocks?.WaterPack}</td>
-                                    <td>{distribution.stocks?.HygienePack}</td>
-                                    <td>{distribution.stocks?.MedicinePack}</td>
-                                    <td>{distribution.stocks?.ClothingPack}</td>
-                                    <td>{distribution.stocks?.BeddingPack}</td>
-                                    <td>{distribution.stocks?.InfantPack}</td>
-                                </tr>
+                                    <td>{distribution.evacuation_center_id?.name || "N/A"}</td>
+                                    <td>{distribution.stocks?.FoodPack ?? 0}</td>
+                                    <td>{distribution.stocks?.WaterPack ?? 0}</td>
+                                    <td>{distribution.stocks?.HygienePack ?? 0}</td>
+                                    <td>{distribution.stocks?.MedicinePack ?? 0}</td>
+                                    <td>{distribution.stocks?.ClothingPack ?? 0}</td>
+                                    <td>{distribution.stocks?.BeddingPack ?? 0}</td>
+                                    <td>{distribution.stocks?.InfantPack ?? 0}</td>
+                                    </tr>
                                 ))
                             )}
                         </tbody>

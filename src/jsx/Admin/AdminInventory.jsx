@@ -11,6 +11,7 @@ import waterPacks from '../../assets/water-packs.png'
 import hygienePacks from '../../assets/hygiene-packs.png'
 import medicinePacks from '../../assets/medicine-packs.png'
 import clothingPacks from '../../assets/clothing-packs.png'
+import beddingPacks from '../../assets/bedding.png'
 import infantPacks from '../../assets/infant-packs.png'
 
 function AdminInventory() {
@@ -20,11 +21,38 @@ function AdminInventory() {
     const [showResponse, setShowResponse] = useState(false);
     const [responseMessage, setResponseMessage] = useState("");
     const [showCreateRequest, setShowCreateRequest] = useState(false);
+    const [showAddStock, setShowAddStock] = useState(false);
+    const [showSubtractStock, setShowSubtractStock] = useState(false);
+    const [selectedCenter, setSelectedCenter] = useState(null);
     const [responseType, setResponseType] = useState("");
     const [exitAnim, setExitAnim] = useState(false);
     const token = localStorage.getItem("adminToken");
     const [newStockRequest, setNewStockRequest] = useState({
         action: "restock",
+        FoodPack: '',
+        WaterPack: '',
+        HygienePack: '',
+        MedicinePack: '',
+        ClothingPack: '',
+        BeddingPack: '',
+        InfantPack: '',
+    });
+
+    const [addStockData, setAddStockData] = useState({
+        evacuation_center_id: '',
+        action: "add",
+        FoodPack: '',
+        WaterPack: '',
+        HygienePack: '',
+        MedicinePack: '',
+        ClothingPack: '',
+        BeddingPack: '',
+        InfantPack: '',
+    });
+
+    const [subtractStockData, setSubtractStockData] = useState({
+        evacuation_center_id: '',
+        action: "subtract",
         FoodPack: '',
         WaterPack: '',
         HygienePack: '',
@@ -41,6 +69,24 @@ function AdminInventory() {
         const { name, value } = e.target;
       
         setNewStockRequest((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    const handleAddStockChange = (e) => {
+        const { name, value } = e.target;
+      
+        setAddStockData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    const handleSubtractStockChange = (e) => {
+        const { name, value } = e.target;
+      
+        setSubtractStockData((prev) => ({
             ...prev,
             [name]: value,
         }));
@@ -70,6 +116,70 @@ function AdminInventory() {
             BeddingPack: '',
             InfantPack: '',
         })
+    };
+
+    const handleShowAddStock = (center) => {
+        setSelectedCenter(center);
+        setAddStockData({
+            evacuation_center_id: center.evacuation_center_id?._id || center._id,
+            action: "add",
+            FoodPack: '',
+            WaterPack: '',
+            HygienePack: '',
+            MedicinePack: '',
+            ClothingPack: '',
+            BeddingPack: '',
+            InfantPack: '',
+        });
+        setShowAddStock(true);
+    };
+
+    const handleCloseAddStock = () => {
+        setShowAddStock(false);
+        setSelectedCenter(null);
+        setAddStockData({
+            evacuation_center_id: '',
+            action: "add",
+            FoodPack: '',
+            WaterPack: '',
+            HygienePack: '',
+            MedicinePack: '',
+            ClothingPack: '',
+            BeddingPack: '',
+            InfantPack: '',
+        });
+    };
+
+    const handleShowSubtractStock = (center) => {
+        setSelectedCenter(center);
+        setSubtractStockData({
+            evacuation_center_id: center.evacuation_center_id?._id || center._id,
+            action: "subtract",
+            FoodPack: '',
+            WaterPack: '',
+            HygienePack: '',
+            MedicinePack: '',
+            ClothingPack: '',
+            BeddingPack: '',
+            InfantPack: '',
+        });
+        setShowSubtractStock(true);
+    };
+
+    const handleCloseSubtractStock = () => {
+        setShowSubtractStock(false);
+        setSelectedCenter(null);
+        setSubtractStockData({
+            evacuation_center_id: '',
+            action: "subtract",
+            FoodPack: '',
+            WaterPack: '',
+            HygienePack: '',
+            MedicinePack: '',
+            ClothingPack: '',
+            BeddingPack: '',
+            InfantPack: '',
+        });
     };
 
     useEffect(() => {
@@ -103,12 +213,7 @@ function AdminInventory() {
                 );
 
                 const data = await response.json();
-
-                setStockRequests(
-                    Array.isArray(data)
-                        ? data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // 🔹 Sort latest first
-                        : []
-                );
+                setStockRequests(Array.isArray(data) ? data : []);
             } catch (error) {
                 console.error("Error fetching distributions:", error);
             }
@@ -173,23 +278,6 @@ function AdminInventory() {
             return;
         }
 
-        const exceedsLimit = Object.entries(stocks).find(([key, val]) => val > 999999);
-        if (exceedsLimit) {
-            setResponseMessage(`Quantity cannot exceed 999,999.`);
-            setResponseType("error");
-            setShowResponse(true);
-
-            showTimeout.current = setTimeout(() => {
-                setExitAnim(true);
-                exitTimeout.current = setTimeout(() => {
-                    setShowResponse(false);
-                    setExitAnim(false);
-                }, 400);
-            }, 3000);
-
-            return;
-        }
-
         try {
             const requestPayload = {
                 action: "restock",
@@ -228,6 +316,162 @@ function AdminInventory() {
             handleCloseCreateRequest();
         } catch (error) {
             setResponseMessage(error.message || "Error restocking");
+            setResponseType("error");
+            setShowResponse(true);
+    
+            showTimeout.current = setTimeout(() => {
+                setExitAnim(true);
+                exitTimeout.current = setTimeout(() => {
+                    setShowResponse(false);
+                    setExitAnim(false);
+                }, 400);
+            }, 3000);
+        }
+    }
+
+    const addStockToCenter = async () => {
+        const stocks = {
+            FoodPack: Number(addStockData.FoodPack),
+            WaterPack: Number(addStockData.WaterPack),
+            HygienePack: Number(addStockData.HygienePack),
+            MedicinePack: Number(addStockData.MedicinePack),
+            ClothingPack: Number(addStockData.ClothingPack),
+            BeddingPack: Number(addStockData.BeddingPack),
+            InfantPack: Number(addStockData.InfantPack),
+        };
+
+        const totalStocks = Object.values(stocks).reduce((sum, val) => sum + (isNaN(val) ? 0 : val), 0);
+        if (totalStocks <= 0) {
+            setResponseMessage("Please enter at least one stock quantity.");
+            setResponseType("error");
+            setShowResponse(true);
+
+            showTimeout.current = setTimeout(() => {
+                setExitAnim(true);
+                exitTimeout.current = setTimeout(() => {
+                    setShowResponse(false);
+                    setExitAnim(false);
+                }, 400);
+            }, 3000);
+
+            return;
+        }
+
+        try {
+            const requestPayload = {
+                evacuation_center_id: addStockData.evacuation_center_id,
+                action: "add",
+                ...stocks
+            };
+
+            const res = await fetch(`http://localhost:3000/stock/update`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify(requestPayload)
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || "Failed to add stock");
+            }
+      
+            setResponseMessage("Stock added to evacuation center successfully!");
+            setResponseType("success");
+            setShowResponse(true);
+      
+            showTimeout.current = setTimeout(() => {
+                setExitAnim(true);
+                exitTimeout.current = setTimeout(() => {
+                    setShowResponse(false);
+                    setExitAnim(false);
+                }, 400);
+            }, 3000);
+
+            handleCloseAddStock();
+        } catch (error) {
+            setResponseMessage(error.message || "Error adding stock");
+            setResponseType("error");
+            setShowResponse(true);
+    
+            showTimeout.current = setTimeout(() => {
+                setExitAnim(true);
+                exitTimeout.current = setTimeout(() => {
+                    setShowResponse(false);
+                    setExitAnim(false);
+                }, 400);
+            }, 3000);
+        }
+    }
+
+    const subtractStockFromCenter = async () => {
+        const stocks = {
+            FoodPack: Number(subtractStockData.FoodPack),
+            WaterPack: Number(subtractStockData.WaterPack),
+            HygienePack: Number(subtractStockData.HygienePack),
+            MedicinePack: Number(subtractStockData.MedicinePack),
+            ClothingPack: Number(subtractStockData.ClothingPack),
+            BeddingPack: Number(subtractStockData.BeddingPack),
+            InfantPack: Number(subtractStockData.InfantPack),
+        };
+
+        const totalStocks = Object.values(stocks).reduce((sum, val) => sum + (isNaN(val) ? 0 : val), 0);
+        if (totalStocks <= 0) {
+            setResponseMessage("Please enter at least one stock quantity.");
+            setResponseType("error");
+            setShowResponse(true);
+
+            showTimeout.current = setTimeout(() => {
+                setExitAnim(true);
+                exitTimeout.current = setTimeout(() => {
+                    setShowResponse(false);
+                    setExitAnim(false);
+                }, 400);
+            }, 3000);
+
+            return;
+        }
+
+        try {
+            const requestPayload = {
+                evacuation_center_id: subtractStockData.evacuation_center_id,
+                action: "subtract",
+                ...stocks
+            };
+
+            const res = await fetch(`http://localhost:3000/stock/update`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify(requestPayload)
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || "Failed to subtract stock");
+            }
+      
+            setResponseMessage("Stock subtracted from evacuation center successfully!");
+            setResponseType("success");
+            setShowResponse(true);
+      
+            showTimeout.current = setTimeout(() => {
+                setExitAnim(true);
+                exitTimeout.current = setTimeout(() => {
+                    setShowResponse(false);
+                    setExitAnim(false);
+                }, 400);
+            }, 3000);
+
+            handleCloseSubtractStock();
+        } catch (error) {
+            setResponseMessage(error.message || "Error subtracting stock");
             setResponseType("error");
             setShowResponse(true);
     
@@ -439,7 +683,7 @@ function AdminInventory() {
                     <div className="dashboard-mini-card">
                         <div className="dashboard-mini-icon">
                         <h2>Bedding Packs</h2>
-                        <img src={clothingPacks} />
+                        <img src={beddingPacks} />
                         </div>
                         <p>{adminStocks?.stocks?.BeddingPack ?? 0}</p>
                     </div>
@@ -469,6 +713,7 @@ function AdminInventory() {
                                     <th>Clothing</th>
                                     <th>Bedding</th>
                                     <th>Infant</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -489,7 +734,21 @@ function AdminInventory() {
                                         <td>{center.stocks?.MedicinePack}</td>
                                         <td>{center.stocks?.ClothingPack}</td>
                                         <td>{center.stocks?.BeddingPack}</td>
-                                        <td>{center.stocks?.InfantPack}</td>               
+                                        <td>{center.stocks?.InfantPack}</td>
+                                        <td className='actions-cell'>
+                                            <button 
+                                                className="mark-picked-button"
+                                                onClick={() => handleShowAddStock(center)}
+                                            >
+                                                Add Stock
+                                            </button>
+                                            <button 
+                                                className="dismiss-button"
+                                                onClick={() => handleShowSubtractStock(center)}
+                                            >
+                                                Subtract Stock
+                                            </button>
+                                        </td>               
                                     </tr>
                                     ))
                                 )}
@@ -580,7 +839,7 @@ function AdminInventory() {
                 </div>
             </div>
 
-
+            {/* Restock Modal (Existing) */}
             {showCreateRequest && (
                 <div className="request">
                     <div className="request-body">
@@ -590,7 +849,7 @@ function AdminInventory() {
                         </button>
                         </div>
                         <div className="create-request">
-                            <h2>Add Stocks</h2>
+                            <h2>Add Stocks to Admin Inventory</h2>
                             <form >
                             <div className="input-fields">
                             <label>Food Pack</label>
@@ -599,7 +858,6 @@ function AdminInventory() {
                                 name="FoodPack"
                                 placeholder="0"
                                 min="0"
-                                max="999999"
                                 value={newStockRequest.FoodPack}
                                 onChange={handleInputChange}
                                 required
@@ -611,7 +869,6 @@ function AdminInventory() {
                                 name="WaterPack"
                                 placeholder="0"
                                 min="0"
-                                max="999999"
                                 value={newStockRequest.WaterPack}
                                 onChange={handleInputChange}
                                 required
@@ -623,7 +880,6 @@ function AdminInventory() {
                                 name="HygienePack"
                                 placeholder="0"
                                 min="0"
-                                max="999999"
                                 value={newStockRequest.HygienePack}
                                 onChange={handleInputChange}
                                 required
@@ -635,7 +891,6 @@ function AdminInventory() {
                                 name="MedicinePack"
                                 placeholder="0"
                                 min="0"
-                                max="999999"
                                 value={newStockRequest.MedicinePack}
                                 onChange={handleInputChange}
                                 required
@@ -647,7 +902,6 @@ function AdminInventory() {
                                 name="ClothingPack"
                                 placeholder="0"
                                 min="0"
-                                max="999999"
                                 value={newStockRequest.ClothingPack}
                                 onChange={handleInputChange}
                                 required
@@ -659,7 +913,6 @@ function AdminInventory() {
                                 name="BeddingPack"
                                 placeholder="0"
                                 min="0"
-                                max="999999"
                                 value={newStockRequest.BeddingPack}
                                 onChange={handleInputChange}
                                 required
@@ -671,7 +924,6 @@ function AdminInventory() {
                                 name="InfantPack"
                                 placeholder="0"
                                 min="0"
-                                max="999999"
                                 value={newStockRequest.InfantPack}
                                 onChange={handleInputChange}
                                 required
@@ -702,6 +954,257 @@ function AdminInventory() {
                                 </button>
                                 <button type="submit" className="submit-btn" onClick={() => createRequest()}>
                                 Submit
+                                </button>
+                            </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Add Stock Modal */}
+            {showAddStock && (
+                <div className="request">
+                    <div className="request-body">
+                        <div className="close-container">
+                        <button onClick={() => handleCloseAddStock()}>
+                            <img src={close} alt="close" />
+                        </button>
+                        </div>
+                        <div className="create-request">
+                            <h2>Add Stock to {selectedCenter?.evacuation_center_id?.name}</h2>
+                            <form >
+                            <div className="input-fields">
+                            <label>Food Pack</label>
+                            <input
+                                type="number"
+                                name="FoodPack"
+                                placeholder="0"
+                                min="0"
+                                value={addStockData.FoodPack}
+                                onChange={handleAddStockChange}
+                                required
+                            />
+            
+                            <label>Water Pack</label>
+                            <input
+                                type="number"
+                                name="WaterPack"
+                                placeholder="0"
+                                min="0"
+                                value={addStockData.WaterPack}
+                                onChange={handleAddStockChange}
+                                required
+                            />
+
+                            <label>Hygiene Pack</label>
+                            <input
+                                type="number"
+                                name="HygienePack"
+                                placeholder="0"
+                                min="0"
+                                value={addStockData.HygienePack}
+                                onChange={handleAddStockChange}
+                                required
+                            />
+
+                            <label>Medicine Pack</label>
+                            <input
+                                type="number"
+                                name="MedicinePack"
+                                placeholder="0"
+                                min="0"
+                                value={addStockData.MedicinePack}
+                                onChange={handleAddStockChange}
+                                required
+                            />
+
+                            <label>Clothing Pack</label>
+                            <input
+                                type="number"
+                                name="ClothingPack"
+                                placeholder="0"
+                                min="0"
+                                value={addStockData.ClothingPack}
+                                onChange={handleAddStockChange}
+                                required
+                            />
+
+                            <label>Bedding Pack</label>
+                            <input
+                                type="number"
+                                name="BeddingPack"
+                                placeholder="0"
+                                min="0"
+                                value={addStockData.BeddingPack}
+                                onChange={handleAddStockChange}
+                                required
+                            />
+
+                            <label>Infant Pack</label>
+                            <input
+                                type="number"
+                                name="InfantPack"
+                                placeholder="0"
+                                min="0"
+                                value={addStockData.InfantPack}
+                                onChange={handleAddStockChange}
+                                required
+                            />
+            
+                            </div>      
+                            </form>
+                        </div>
+
+                        <div className="buttons">
+                                <button
+                                type="reset"
+                                className="reset-btn"
+                                onClick={() =>
+                                    setAddStockData({
+                                        evacuation_center_id: addStockData.evacuation_center_id,
+                                        action: "add",
+                                        FoodPack: '',
+                                        WaterPack: '',
+                                        HygienePack: '',
+                                        MedicinePack: '',
+                                        ClothingPack: '',
+                                        BeddingPack: '',
+                                        InfantPack: '',
+                                    })
+                                }
+                                >
+                                Clear
+                                </button>
+                                <button type="submit" className="submit-btn" onClick={() => addStockToCenter()}>
+                                Add Stock
+                                </button>
+                            </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Subtract Stock Modal */}
+            {showSubtractStock && (
+                <div className="request">
+                    <div className="request-body">
+                        <div className="close-container">
+                        <button onClick={() => handleCloseSubtractStock()}>
+                            <img src={close} alt="close" />
+                        </button>
+                        </div>
+                        <div className="create-request">
+                            <h2>Subtract Stock from {selectedCenter?.evacuation_center_id?.name}</h2>
+                            <form >
+                            <div className="input-fields">
+                            <label>Food Pack</label>
+                            <input
+                                type="number"
+                                name="FoodPack"
+                                placeholder="0"
+                                min="0"
+                                max={selectedCenter?.stocks?.FoodPack || 0}
+                                value={subtractStockData.FoodPack}
+                                onChange={handleSubtractStockChange}
+                                required
+                            />
+            
+                            <label>Water Pack</label>
+                            <input
+                                type="number"
+                                name="WaterPack"
+                                placeholder="0"
+                                min="0"
+                                max={selectedCenter?.stocks?.WaterPack || 0}
+                                value={subtractStockData.WaterPack}
+                                onChange={handleSubtractStockChange}
+                                required
+                            />
+
+                            <label>Hygiene Pack</label>
+                            <input
+                                type="number"
+                                name="HygienePack"
+                                placeholder="0"
+                                min="0"
+                                max={selectedCenter?.stocks?.HygienePack || 0}
+                                value={subtractStockData.HygienePack}
+                                onChange={handleSubtractStockChange}
+                                required
+                            />
+
+                            <label>Medicine Pack</label>
+                            <input
+                                type="number"
+                                name="MedicinePack"
+                                placeholder="0"
+                                min="0"
+                                max={selectedCenter?.stocks?.MedicinePack || 0}
+                                value={subtractStockData.MedicinePack}
+                                onChange={handleSubtractStockChange}
+                                required
+                            />
+
+                            <label>Clothing Pack</label>
+                            <input
+                                type="number"
+                                name="ClothingPack"
+                                placeholder="0"
+                                min="0"
+                                max={selectedCenter?.stocks?.ClothingPack || 0}
+                                value={subtractStockData.ClothingPack}
+                                onChange={handleSubtractStockChange}
+                                required
+                            />
+
+                            <label>Bedding Pack</label>
+                            <input
+                                type="number"
+                                name="BeddingPack"
+                                placeholder="0"
+                                min="0"
+                                max={selectedCenter?.stocks?.BeddingPack || 0}
+                                value={subtractStockData.BeddingPack}
+                                onChange={handleSubtractStockChange}
+                                required
+                            />
+
+                            <label>Infant Pack</label>
+                            <input
+                                type="number"
+                                name="InfantPack"
+                                placeholder="0"
+                                min="0"
+                                max={selectedCenter?.stocks?.InfantPack || 0}
+                                value={subtractStockData.InfantPack}
+                                onChange={handleSubtractStockChange}
+                                required
+                            />
+            
+                            </div>      
+                            </form>
+                        </div>
+
+                        <div className="buttons">
+                                <button
+                                type="reset"
+                                className="reset-btn"
+                                onClick={() =>
+                                    setSubtractStockData({
+                                        evacuation_center_id: subtractStockData.evacuation_center_id,
+                                        action: "subtract",
+                                        FoodPack: '',
+                                        WaterPack: '',
+                                        HygienePack: '',
+                                        MedicinePack: '',
+                                        ClothingPack: '',
+                                        BeddingPack: '',
+                                        InfantPack: '',
+                                    })
+                                }
+                                >
+                                Clear
+                                </button>
+                                <button type="submit" className="submit-btn" onClick={() => subtractStockFromCenter()}>
+                                Subtract Stock
                                 </button>
                             </div>
                     </div>

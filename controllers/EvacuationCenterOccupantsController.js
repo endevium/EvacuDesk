@@ -9,7 +9,8 @@ const asyncHandler = require('../utils/asyncHandler');
 exports.getAllOccupants = asyncHandler(async (req, res) => {
   const occupants = await EvacuationCenterOccupants.find()
     // .populate("evacuation_center_id")
-    .populate("evacuee_id");
+    .populate("evacuee_id")
+    .populate("assigned_area", "area_name");
   res.json(occupants);
 });
 
@@ -49,6 +50,7 @@ exports.getOccupantsByCenterId = asyncHandler(async (req, res) => {
 exports.getOccupantById = asyncHandler(async (req, res) => {
   const occupant = await EvacuationCenterOccupants.findById(req.params.id)
   //   .populate("evacuation_center_id", "name address capacity")
+  .populate("assigned_area", "area_name")
 
   if (!occupant) return res.status(404).json({ error: "Occupant not found" });
 
@@ -60,6 +62,7 @@ exports.getActiveOccupants = asyncHandler(async (req, res) => {
   const activeOccupants = await EvacuationCenterOccupants.find({ status: "Active" })
     .populate("evacuee_id")
     .populate("evacuation_center_id")
+    .populate("assigned_area", "area_name")
     .lean();
 
   if (!activeOccupants || activeOccupants.length === 0) {
@@ -101,6 +104,7 @@ exports.getActiveOccupantById = asyncHandler(async (req, res) => {
   })
     .populate("evacuee_id")
     .populate("evacuation_center_id")
+    .populate("assigned_area", "area_name")
     .lean();
 
   if (!occupant) {

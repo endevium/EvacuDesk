@@ -7,23 +7,43 @@ const CenterArea = require("../models/CenterAreaModel");
 const { createNotification } = require("./NotificationController");
 const asyncHandler = require("../utils/asyncHandler");
 
-function priorityAlgorithm({ pwd = 0, pregnant = 0, infants = 0, seniors = 0, childrens = 0, adults = 0, teens = 0 }) {
+function priorityAlgorithm({
+  pwd = 0,
+  pregnant = 0,
+  infants = 0,
+  seniors = 0,
+  childrens = 0,
+  adults = 0,
+  teens = 0
+}) {
   // base scoring per category
-  const baseScore = (pwd * 3) + (infants * 4) + (pregnant * 3) + (seniors * 2) + (childrens * 2) + (teens * 1) + (adults * 1);
+  let baseScore =
+    (pwd * 3) +
+    (infants * 4) +
+    (pregnant * 3) +
+    (seniors * 2.5) +
+    (childrens * 2) +
+    (teens * 1) +
+    (adults * 1);
+
   // total members
   const totalMembers = pwd + pregnant + infants + seniors + childrens + adults + teens;
 
   let priorityScore = baseScore;
-  // priority multiplier each member for above average family size
+
+  // family size adjustment
   if (totalMembers > 5) {
     priorityScore *= 1 + ((totalMembers - 5) * 0.05);
-  }
-  // score boost for small family size
-  else if (totalMembers < 3) {
-    priorityScore *= 1.1; 
+  } else if (totalMembers < 3) {
+    priorityScore *= 1.1;
   }
 
-  // final decision
+  // No adults 
+  if (adults === 0 && totalMembers > 0) {
+    priorityScore *= 1.5; 
+  }
+
+  // final priority level (1–5)
   if (priorityScore <= 2) return 1;
   if (priorityScore <= 5) return 2;
   if (priorityScore <= 8) return 3;
@@ -366,4 +386,28 @@ exports.updatePickupStatus = asyncHandler(async (req, res) => {
   await registration.save();
 
   res.status(200).json({ message: "Pickup status updated successfully" });
+});
+
+
+exports.deletePendingRegistrationById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  console.log(id);
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid registration ID." });
+  }
+
+  const registration = await EvacuationRegistration.findById(id);
+
+  if (!registration) {
+    return res.status(404).json({ message: "Registration not found." });
+  }
+
+  if (registration.status !== "Pending") {
+    return res.status(400).json({ message: "Only pending registrations can be deleted." });
+  }
+
+  await EvacuationRegistration.findByIdAndDelete(id);
+
+  res.status(200).json({ message: "Pending registration deleted successfully." });
 });

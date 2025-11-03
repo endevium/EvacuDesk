@@ -43,7 +43,8 @@ exports.createStockRequest = asyncHandler(async (req, res) => {
 // get all stock requests
 exports.getAllStockRequests = asyncHandler(async (req, res) => {
     const requests = await StockRequest.find()
-        .populate('evacuation_center_id', '-password -email_address');
+        .populate('evacuation_center_id', '-password -email_address')
+        .sort({ createdAt: -1 });
     res.status(200).json(requests);
 });
 
@@ -55,8 +56,8 @@ exports.getStockRequestsByCenter = asyncHandler(async (req, res) => {
     if (!centerExist) return res.status(400).json({ message: 'Evacuation center not found' });
 
     const requests = await StockRequest.find({ evacuation_center_id: id })
-        .populate('evacuation_center_id', '-password -email_address');
-
+        .populate('evacuation_center_id', '-password -email_address')
+        .sort({ createdAt: -1 }); 
     res.status(200).json(requests);
 });
 

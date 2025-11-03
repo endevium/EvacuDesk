@@ -18,8 +18,12 @@ exports.createCenterArea = asyncHandler(async (req, res) => {
     return res.status(404).json({ error: "Evacuation center not found." });
   }
 
+  const existingAreas = await CenterArea.find({ evacuation_center_id });
+  const totalUsedCapacity = existingAreas.reduce((sum, a) => sum + (a.capacity || 0), 0);
+
   let finalAreaName;
   let areaData = { evacuation_center_id, occupants: [] };
+  let newAreaCapacity = 0;
 
   switch(area_type) {
     case "Room":
@@ -28,26 +32,28 @@ exports.createCenterArea = asyncHandler(async (req, res) => {
       }
 
       finalAreaName = area_name;
+      newAreaCapacity = capacity;
       areaData.capacity = capacity;
       break;
 
     case "Tent":
-    const lastArea = await CenterArea.findOne({ evacuation_center_id, area_type: "Tent" }).sort({ createdAt: -1 });
-    let nextNumber = 1;
-    if (lastArea && lastArea.area_name) {
-      const match = lastArea.area_name.match(/\d+/);
-      if (match) nextNumber = parseInt(match[0]) + 1;
-    }
-    finalAreaName = `Tent ${nextNumber}`;
+      const lastArea = await CenterArea.findOne({ evacuation_center_id, area_type: "Tent" }).sort({ createdAt: -1 });
+      let nextNumber = 1;
+      if (lastArea && lastArea.area_name) {
+        const match = lastArea.area_name.match(/\d+/);
+        if (match) nextNumber = parseInt(match[0]) + 1;
+      }
+      finalAreaName = `Tent ${nextNumber}`;
 
-    if (!size || !["Small","Medium","Large"].includes(size)) {
-      return res.status(400).json({ error: "Tent size must be Small, Medium, or Large" });
-    }
-    areaData.size = size;
+      if (!size || !["Small", "Medium", "Large"].includes(size)) {
+        return res.status(400).json({ error: "Tent size must be Small, Medium, or Large" });
+      }
+      areaData.size = size;
 
-    const tentCapacities = { Small: 3, Medium: 5, Large: 8 };
-    areaData.capacity = tentCapacities[size];
-    break;
+      const tentCapacities = { Small: 3, Medium: 5, Large: 8 };
+      newAreaCapacity = tentCapacities[size];
+      areaData.capacity = newAreaCapacity;
+      break;
 
     case "Zone":
       const zoneOptions = ["Bleachers", "Stage", "Gym Floor"];
@@ -57,11 +63,19 @@ exports.createCenterArea = asyncHandler(async (req, res) => {
       if (!capacity) return res.status(400).json({ error: "Missing required fields." });
 
       finalAreaName = area_name;
+      newAreaCapacity = capacity;
       areaData.capacity = capacity;
       break;
 
     default:
       return res.status(400).json({ error: "Invalid request" });
+  }
+
+  if (totalUsedCapacity + newAreaCapacity > evacCenter.capacity) {
+    const remainingCapacity = evacCenter.capacity - totalUsedCapacity;
+    return res.status(400).json({
+      error: `Cannot create this area. It exceeds the evacuation center capacity. Only ${remainingCapacity} space(s) remaining.`,
+    });
   }
 
   areaData.area_name = finalAreaName;

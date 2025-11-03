@@ -14,6 +14,8 @@ function EvacueeAnnouncements({
     const [selectedBulletin, setSelectedBulletin] = useState(null);
     const [loading, setLoading] = useState(true);
   
+    const token = localStorage.getItem("evacueeToken"); 
+
     useEffect(() => {
       // Use the same logic as EvacueeRequest to get evacuation center ID
       if (currentEvac && currentEvac.evacuation_center_id) {
@@ -32,11 +34,11 @@ function EvacueeAnnouncements({
       const fetchBulletins = async () => {
         setLoading(true);
         try {
-          // Use the center ID instead of center name in the API call
-          const res = await fetch(`http://localhost:3000/bulletin/center-name?center_name=${evacuationCenter}`, {
+          const res = await fetch(`http://localhost:3000/bulletin/center/${evacuationCenter}`, {
             method: "GET",
             headers: {
-                "Authorization": `Bearer ${token}`
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
             }
           });
   
@@ -59,7 +61,7 @@ function EvacueeAnnouncements({
 
       const interval = setInterval(fetchBulletins, 30000);
       return () => clearInterval(interval);
-    }, [evacuationCenter]);
+    }, [evacuationCenter, token]);
 
     const handleGoToCenters = () => {
         setActiveMenu('evacuation-center');

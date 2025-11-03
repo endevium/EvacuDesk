@@ -1,6 +1,7 @@
 const Stock = require('../models/StocksModel');
 const asyncHandler = require('../utils/asyncHandler');
 const mongoose = require('mongoose');
+const Notification = require('../models/NotificationModel'); // ✅ correct
 
 // create initial stock record
 const createStockRecord = async ({ source, evacuation_center_id }) => {
@@ -135,6 +136,22 @@ exports.updateStock = asyncHandler(async (req, res) => {
 
   await adminStock.save();
   await centerStock.save();
+
+  // admin restock evac center (notif for evac center)
+  if (action === 'add') {
+    const itemsAdded = Object.entries(rest)
+      .map(([item, qty]) => `${qty} ${item}`)
+      .join(', ');
+
+    const notification = new Notification({
+      recipient_role: 'EvacuationCenter',          
+      recipient_id: evacuation_center_id,          
+      title: 'Stock Added by Admin',          
+      body: `Admin has added the following stocks to your center: ${itemsAdded}`, 
+    });
+    await notification.save();
+  }
+
   res.status(200).json({ message: 'Stocks updated successfully' });
 });
 

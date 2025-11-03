@@ -140,22 +140,17 @@ exports.addOccupantToArea = asyncHandler(async (req, res) => {
     return res.status(404).json({ error: "Center area not found." });
   }
 
-  // area occupied
-  if (area.status === "Occupied") {
-    return res.status(400).json({ error: "This area is already occupied." });
-  }
-
-  // check existing area assignment
+  // check if evacuee already assigned to any area in this center
   const alreadyAssigned = await CenterArea.findOne({
     evacuation_center_id: area.evacuation_center_id,
-    'occupants.evacuee_id': evacuee_id
+    "occupants.evacuee_id": evacuee_id
   });
 
   if (alreadyAssigned) {
     return res.status(400).json({ error: "This evacuee is already assigned to another area in this center." });
   }
 
-  // verify occupant exists
+  // verify evacuee is an active occupant
   const activeOccupant = await EvacuationCenterOccupants.findOne({
     evacuee_id,
     evacuation_center_id: area.evacuation_center_id,
@@ -166,22 +161,31 @@ exports.addOccupantToArea = asyncHandler(async (req, res) => {
     return res.status(400).json({ error: "This evacuee is not an active occupant in this evacuation center." });
   }
 
-  const number_of_family_members = activeOccupant.number_of_family_members;
+  const familySize = activeOccupant.number_of_family_members;
 
-  area.occupants.push({ evacuee_id, number_of_family_members });
-
-  // update occupied slot
-  area.occupied_slot = area.occupants.reduce((sum, occ) => sum + occ.number_of_family_members, 0);
-
-  // update status based on capacity
+  // calculate current occupancy BEFORE adding
   const currentOccupancy = area.occupants.reduce(
-    (sum, occ) => sum + occ.number_of_family_members,
+    (sum, occ) => sum + (occ.number_of_family_members || 0),
     0
   );
 
-  if (currentOccupancy >= area.capacity) {
+  // calculate remaining capacity
+  const remainingCapacity = area.capacity - currentOccupancy;
+
+  // block adding if cannot fit
+  if (familySize > remainingCapacity) {
+    return res.status(400).json({
+      error: `Cannot assign this family. Only ${remainingCapacity} space(s) left in this area.`
+    });
+  }
+
+  area.occupants.push({ evacuee_id, number_of_family_members: familySize });
+  area.occupied_slot = currentOccupancy + familySize;
+
+  // update area status
+  if (area.occupied_slot >= area.capacity) {
     area.status = "Occupied";
-  } else if (currentOccupancy > 0) {
+  } else if (area.occupied_slot > 0) {
     area.status = "Occupied";
   } else {
     area.status = "Unoccupied";
@@ -189,14 +193,15 @@ exports.addOccupantToArea = asyncHandler(async (req, res) => {
 
   await area.save();
 
-  // update occupant assigned area
+  // link evacuee to this area
   await EvacuationCenterOccupants.findOneAndUpdate(
     { evacuee_id, evacuation_center_id: area.evacuation_center_id },
     { assigned_area: area._id }
   );
 
-  res.json({ message: "Family has been assigned to the area." });
+  res.json({ message: "Family assigned to the area successfully." });
 });
+
 
 // remove occupant from area
 exports.removeOccupantFromArea = asyncHandler(async (req, res) => {

@@ -7,9 +7,10 @@ const { Admin, AdminAndEvacuationCenter, AllUsers } = require("../middlewares/au
 router.get("/", ...AllUsers, BulletinController.getAllBulletins);
 router.get("/center-name", ...AllUsers, BulletinController.getBulletinsByCenter);
 router.get("/:id", ...AllUsers, BulletinController.getBulletinById);
-
 router.post("/", ...AdminAndEvacuationCenter, upload.single("image"), BulletinController.createBulletin);
 router.patch("/:id", ...AdminAndEvacuationCenter, upload.single("image"), BulletinController.updateBulletin);
 router.delete("/:id", ...Admin, BulletinController.deleteBulletin);
+router.get("/center/:centerId", ...AllUsers, BulletinController.getBulletinsByCenterId);
+
 
 module.exports = router;

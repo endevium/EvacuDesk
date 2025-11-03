@@ -89,6 +89,19 @@ exports.registerEvacuee = asyncHandler(async (req, res) => {
   // total fam mem 
   const number_of_family_members = pwd + seniors + pregnant + infants + childrens + teens + adults;
 
+  // taken slots and family number in registration comparison
+  const totalRegisteredMembers = await EvacuationRegistration.aggregate([
+    { $match: { evacuation_center_id: center._id, status: { $in: ["Pending", "Active"] } } },
+    { $group: { _id: null, total: { $sum: "$number_of_family_members" } } }
+  ]);
+
+  const currentMembers = totalRegisteredMembers[0]?.total || 0;
+
+  if (currentMembers + number_of_family_members > center.capacity) {
+    res.status(400);
+    throw new Error(`Cannot register. This center has reached its capacity.`);
+  }
+
   const priority_level = priorityAlgorithm({ pwd, pregnant, infants, seniors, childrens, teens, adults });
 
   await EvacuationRegistration.create({
@@ -234,6 +247,25 @@ exports.updateRegistrationStatus = asyncHandler(async (req, res) => {
   if (["Approved", "Rejected"].includes(registration.status)) {
     res.status(400);
     throw new Error(`Cannot update registration. It has already been ${registration.status}.`);
+  }
+
+  // capacity check before approving
+  if (status === "Approved") {
+    const center = await EvacuationCenter.findById(registration.evacuation_center_id);
+    if (!center) {
+      res.status(404);
+      throw new Error("Evacuation center not found.");
+    }
+
+    const availableSlots = center.capacity - center.taken_slots;
+    const familyCount = registration.number_of_family_members;
+
+    if (familyCount > availableSlots) {
+      res.status(400);
+      throw new Error(
+        `Cannot approve registration. Only ${availableSlots} slot(s) left in this evacuation center.`
+      );
+    }
   }
 
   registration.status = status;

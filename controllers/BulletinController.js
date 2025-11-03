@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const { createNotification } = require('../controllers/NotificationController');
 const asyncHandler = require("../utils/asyncHandler");
+const EvacuationCenter = require("../models/EvacuationCenterModel")
 
 // create bulletin    
 exports.createBulletin = asyncHandler(async (req, res) => {
@@ -62,10 +63,6 @@ exports.getBulletinsByCenter = asyncHandler(async (req, res) => {
     evacuation_center_name: { $regex: escapeRegex(centerName.trim()), $options: "i" }
   }).sort({ createdAt: -1 });
   
-  if (!bulletins.length) {
-    return res.status(404).json({ message: "No bulletins found for this center" });
-  }
-
   res.json(bulletins);
 });
 
@@ -113,4 +110,25 @@ exports.deleteBulletin = asyncHandler(async (req, res) => {
   }
 
   res.json({ message: "Bulletin news deleted successfully" });
+});
+
+
+// get bulletinn by center id
+exports.getBulletinsByCenterId = asyncHandler(async (req, res) => {
+  const { centerId } = req.params;
+
+  if (!centerId) {
+    return res.status(400).json({ error: "Evacuation center ID is required" });
+  }
+
+  const center = await EvacuationCenter.findById(centerId);
+  if (!center) {
+    return res.status(404).json({ error: "Evacuation center not found" });
+  }
+
+  const bulletins = await Bulletin.find({
+    evacuation_center_name: { $regex: new RegExp(center.name, "i") }
+  }).sort({ createdAt: -1 });
+
+  return res.json(bulletins);
 });

@@ -20,19 +20,19 @@ exports.createEvacuationCenter = asyncHandler(async (req, res) => {
 
   const { email_address, password } = req.body;
 
-  // // email
-  // const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  // if (!email_address || !emailRegex.test(email_address)) {
-  //   return res.status(400).json({ error: "Please provide a valid email address" });
-  // }
+  // email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email_address || !emailRegex.test(email_address)) {
+    return res.status(400).json({ error: "Please provide a valid email address" });
+  }
 
-  // // password 
-  // const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-  // if (!password || !passwordRegex.test(password)) {
-  //   return res.status(400).json({ 
-  //     error: "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character" 
-  //   });
-  // }
+  // password
+  const passwordRegex = /^(?=.*[A-Za-z])[A-Za-z\d@$!%*?&]{8,}$/;
+  if (!password || !passwordRegex.test(password)) {
+    return res.status(400).json({ 
+      error: "Password must be at least 8 characters long with valid symbols" 
+    });
+  }
 
   // existing center name
   const existingCenterName = await EvacuationCenter.findOne({
@@ -51,10 +51,10 @@ exports.createEvacuationCenter = asyncHandler(async (req, res) => {
     return res.status(400).json({ error: "The email already exists. Use a different email." });
   }
 
-  // // common password
-  // if (await isPasswordPwned(password)) {
-  //   return res.status(400).json({ error: "This password has appeared in a data breach. Please choose a stronger password."});
-  // }
+  // common password
+  if (await isPasswordPwned(password)) {
+    return res.status(400).json({ error: "This password has appeared in a data breach. Please choose a stronger password."});
+  }
 
   const hashedPassword = await bcrypt.hash(req.body.password, 10);
 

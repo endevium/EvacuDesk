@@ -47,13 +47,27 @@ exports.signupEvacuee = asyncHandler(async (req, res) => {
 
   const { email_address, password, first_name, last_name } = req.body;
 
-  // const nameRegex = /^[a-zA-Z\s]{2,15}$/;
-  // if (!first_name || !nameRegex.test(first_name.trim())) {
-  //   return res.status(400).json({ error: "First name too short or contains special characters" });
-  // }
-  // if (!last_name || !nameRegex.test(last_name.trim())) {
-  //   return res.status(400).json({ error: "Last name too short or contains special characters" });
-  // }
+  const nameRegex = /^[A-Za-z\s]{2,}$/;
+  if (!first_name || !nameRegex.test(first_name.trim())) {
+    return res.status(400).json({ error: "First name too short or contains special characters" });
+  }
+  if (!last_name || !nameRegex.test(last_name.trim())) {
+    return res.status(400).json({ error: "Last name too short or contains special characters" });
+  }
+
+  // email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email_address || !emailRegex.test(email_address)) {
+    return res.status(400).json({ error: "Please provide a valid email address" });
+  }
+
+  // password
+  const passwordRegex = /^(?=.*[A-Za-z])[A-Za-z\d@$!%*?&]{8,}$/;
+  if (!password || !passwordRegex.test(password)) {
+    return res.status(400).json({ 
+      error: "Password must be at least 8 characters long with valid symbols" 
+    });
+  }
 
   // email exists
   const [existingEvacuee, existingCenter] = await Promise.all([
@@ -74,10 +88,10 @@ exports.signupEvacuee = asyncHandler(async (req, res) => {
     fs.writeFileSync(profileUploadPath, profileFile.buffer);
   }
 
-  // // common password check
-  // if (await isPasswordPwned(password)) {
-  //   return res.status(400).json({ error: "This password has appeared in a data breach. Please choose a stronger password." });
-  // }
+  // common password check
+  if (await isPasswordPwned(password)) {
+    return res.status(400).json({ error: "This password has appeared in a data breach. Please choose a stronger password." });
+  }
 
   const hashedPassword = await bcrypt.hash(password, 10);
 

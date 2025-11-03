@@ -82,8 +82,21 @@ const getEvacueeNotifications = asyncHandler(async (req, res) => {
   res.json({ count: notifications.length, notifications });
 });
 
+// get notifications for an Evacuee
+const getAdminNotifications = asyncHandler(async (req, res) => {
+
+  const notifications = await Notification.find(
+      // { recipient_id: id },
+      { recipient_role: "Admin" }
+    
+  ).sort({ createdAt: -1 });
+
+  res.json({ count: notifications.length, notifications });
+});
+
 module.exports = { 
   createNotification,
   getEvacuationCenterNotifications,
-  getEvacueeNotifications
+  getEvacueeNotifications,
+  getAdminNotifications
 };

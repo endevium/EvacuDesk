@@ -4,6 +4,7 @@ const EvacuationCenter = require('../models/EvacuationCenterModel');
 const asyncHandler = require('../utils/asyncHandler');
 const Stock = require('../models/StocksModel');
 const EvacuationCenterOccupants = require('../models/EvacuationCenterOccupantsModel');
+const { createNotification } = require("./NotificationController");
 
 exports.distributeSupplies = asyncHandler(async (req, res) => {
     const { evacuee_id, stocks } = req.body;

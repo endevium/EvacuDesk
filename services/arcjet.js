@@ -13,20 +13,20 @@ const aj = arcjet({
       riskThreshold: 50    
     }),
 
-    // // bot detection
-    // detectBot({
-    //   mode: "LIVE",
-    //   allow: ["CATEGORY:SEARCH_ENGINE"], 
-    //   blockSpoofed: true            
-    // }),
+    // bot detection
+    detectBot({
+      mode: "LIVE",
+      allow: ["CATEGORY:SEARCH_ENGINE"], 
+      blockSpoofed: true            
+    }),
 
-    // // rate limit rule
-    // tokenBucket({
-    //   mode: "LIVE",
-    //   refillRate: 5,
-    //   interval: 10, 
-    //   capacity: 10 
-    // })
+    // rate limit rule
+    tokenBucket({
+      mode: "LIVE",
+      refillRate: 5,
+      interval: 10,   
+      capacity: 10 
+    })
   ],
 });
 
